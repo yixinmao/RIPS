@@ -6,9 +6,12 @@ Input:
 
 Step 0. Create RVIC (parameter run) input files
 #========= only need to be run once for each flow direction file ============#
-	Run './scripts/create_RVIC_input.scr' (Need to change the parameter section)
+	Run './scripts/create_RVIC_input.scr' (Need to change the parameter section in the code)
 	Note: 
 		This creates the two fake param files (route and domain) RVIC needs
 		This script only needs to be run once for each big direction file (the generated param files can be put under 'input')
 
+Step 1. Run RVIC (parameter run)
+	Run './scripts/run_RVIC_param.scr'  (Need to change the parameter section in the code)
+	(This script runs RVIC (parameter part) to generate complete watershed mask)
 

@@ -4,7 +4,11 @@ This dir contains info for finding all upstream grid cells of a given outlet.
 	create_RVIC_input.scr: create fake parameter files that RVIC (parameter run) needs
 
 [input]
-	PNW/PNW.fdir: flow direction ascii file of PNW (Lohmann routing model required format)
+	config_parameters_template.cfg: RVIC param run config file template
+	UH_RASM_hourly.csv: an UH box file (input to RVIC)
+	[PNW]:
+		PNW.fdir: flow direction ascii file of PNW (Lohmann routing model required format)
+		[Yakima_Mabtom]/outlet_location_yakima_mabtom.csv: outlet file (RVIC input)
 
 [output]
 	[PNW]:
@@ -14,3 +18,6 @@ This dir contains info for finding all upstream grid cells of a given outlet.
 		PNW.rvic_route_param_fake.nc
 			created by 'create_RVIC_input.scr'
 			fake RVIC route param file
+		[Yakima_Mabtom]:
+			Yakima_Mabtom.rvic_param.cfg: config file for RVIC run
+			Yakima_Mabtom.basin_mask.nc: resulted basin mask file (nc)
