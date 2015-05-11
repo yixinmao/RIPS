@@ -1,0 +1,49 @@
+#!/bin/bash
+
+#====================================================#
+# Parameter setting
+#====================================================#
+#=== input flow direction file (ascii) ===#
+flowdir_asc_file=/raid2/ymao/VIC_RBM_east/VIC_RBM/preprocess/find_basin_grid_cells/input/PNW/PNW.fdir
+
+#=== output directory ===#
+output_dir=/raid2/ymao/VIC_RBM_east/VIC_RBM/preprocess/find_basin_grid_cells/output/PNW
+output_prefix=PNW  # prefix of the output files
+
+#====================================================#
+# Create RVIC routing param file (nc)
+#====================================================#
+gdal_translate -of netcdf $flowdir_asc_file $output_dir/$output_prefix.rvic_route_param_fake.nc # create nc file
+ncrename -v Band1,Flow_Direction $output_dir/$output_prefix.rvic_route_param_fake.nc  # rename flow direction variable
+#=== add Basin_ID and Flow_Distance varialbes (fake values, all 1 !!!) ===#
+cdo mulc,0 $output_dir/$output_prefix.rvic_route_param_fake.nc $output_dir/$output_prefix.rvic_param_temp_0.nc
+cdo addc,1 $output_dir/$output_prefix.rvic_param_temp_0.nc $output_dir/$output_prefix.rvic_param_temp_1.nc
+cdo ifthen $output_dir/$output_prefix.rvic_route_param_fake.nc $output_dir/$output_prefix.rvic_param_temp_1.nc $output_dir/$output_prefix.rvic_param_temp_1_masked.nc
+# add Basin_ID variable
+ncrename -v Flow_Direction,Basin_ID $output_dir/$output_prefix.rvic_param_temp_1_masked.nc
+ncks -A $output_dir/$output_prefix.rvic_param_temp_1_masked.nc $output_dir/$output_prefix.rvic_route_param_fake.nc
+# add Flow_Distance variable
+ncrename -v Basin_ID,Flow_Distance $output_dir/$output_prefix.rvic_param_temp_1_masked.nc
+ncks -A $output_dir/$output_prefix.rvic_param_temp_1_masked.nc $output_dir/$output_prefix.rvic_route_param_fake.nc
+
+#====================================================#
+# Create RVIC domain file (nc)
+#====================================================#
+# create domain file
+cp $output_dir/$output_prefix.rvic_param_temp_1_masked.nc $output_dir/$output_prefix.rvic_domain_fake.nc
+# change the variable to mask variable (all 1)
+ncrename -v Flow_Distance,mask $output_dir/$output_prefix.rvic_domain_fake.nc
+# add frac variable (all 1)
+ncrename -v Flow_Distance,frac $output_dir/$output_prefix.rvic_param_temp_1_masked.nc
+ncks -A $output_dir/$output_prefix.rvic_param_temp_1_masked.nc $output_dir/$output_prefix.rvic_domain_fake.nc
+# add area variable (fake area, all 1)
+ncrename -v frac,area $output_dir/$output_prefix.rvic_param_temp_1_masked.nc
+ncks -A $output_dir/$output_prefix.rvic_param_temp_1_masked.nc $output_dir/$output_prefix.rvic_domain_fake.nc
+
+#====================================================#
+# Clean up
+#====================================================#
+rm $output_dir/$output_prefix.rvic_param_temp_0.nc
+rm $output_dir/$output_prefix.rvic_param_temp_1.nc
+rm $output_dir/$output_prefix.rvic_param_temp_1_masked.nc
+

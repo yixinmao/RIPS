@@ -1,0 +1,16 @@
+This dir contains info for finding all upstream grid cells of a given outlet.
+
+[scripts]
+	create_RVIC_input.scr: create fake parameter files that RVIC (parameter run) needs
+
+[input]
+	PNW/PNW.fdir: flow direction ascii file of PNW (Lohmann routing model required format)
+
+[output]
+	[PNW]:
+		PNW.rvic_domain_fake.nc:
+			created by 'create_RVIC_input.scr'
+			fake RVIC domain file
+		PNW.rvic_route_param_fake.nc
+			created by 'create_RVIC_input.scr'
+			fake RVIC route param file

@@ -1,0 +1,14 @@
+Steps for finding all upstream grid cells of a given outlet:
+
+Input: 
+	1) ascii flow direction file bigger than the whole watershed (Lohmann routing format)
+	2) outlet lat and lon (RVIC input format)
+
+Step 0. Create RVIC (parameter run) input files
+#========= only need to be run once for each flow direction file ============#
+	Run './scripts/create_RVIC_input.scr' (Need to change the parameter section)
+	Note: 
+		This creates the two fake param files (route and domain) RVIC needs
+		This script only needs to be run once for each big direction file (the generated param files can be put under 'input')
+
+
