@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# This script creates fake parameter files that RVIC (parameter run) needs
+# Input:
+#	ascii flow direction file
+# Output:
+#	RVIC route param file
+#	RVIC domain file
+
 #====================================================#
 # Parameter setting
 #====================================================#
@@ -39,6 +46,7 @@ ncks -A $output_dir/$output_prefix.rvic_param_temp_1_masked.nc $output_dir/$outp
 # add area variable (fake area, all 1)
 ncrename -v frac,area $output_dir/$output_prefix.rvic_param_temp_1_masked.nc
 ncks -A $output_dir/$output_prefix.rvic_param_temp_1_masked.nc $output_dir/$output_prefix.rvic_domain_fake.nc
+ncatted -a units,area,c,c,"m2" $output_dir/$output_prefix.rvic_domain_fake.nc # add units attribute
 
 #====================================================#
 # Clean up
