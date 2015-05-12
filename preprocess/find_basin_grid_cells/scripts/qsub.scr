@@ -1,0 +1,10 @@
+#!/bin/bash
+#
+#$ -cwd
+#$ -j y
+#$ -S /bin/csh
+#$ -q default.q
+
+./run_RVIC_param.scr
+
+

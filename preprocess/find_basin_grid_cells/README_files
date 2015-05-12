@@ -2,6 +2,8 @@ This dir contains info for finding all upstream grid cells of a given outlet.
 
 [scripts]
 	create_RVIC_input.scr: create fake parameter files that RVIC (parameter run) needs
+	create_grid_cell_list.py: create a list of lat lon that are within the basin
+	my_functions.py: called by 'create_grid_cell_list.py'
 
 [input]
 	config_parameters_template.cfg: RVIC param run config file template

@@ -15,3 +15,7 @@ Step 1. Run RVIC (parameter run)
 	Run './scripts/run_RVIC_param.scr'  (Need to change the parameter section in the code)
 	(This script runs RVIC (parameter part) to generate complete watershed mask)
 
+Step 2. Generate a list of VIC grid cells to be run within the basin
+	Run './scripts/create_grid_cell_list.py'  (Need to change the parameter section in the code)
+	(This script outputs a list of lat lon that are within the basin)
+
