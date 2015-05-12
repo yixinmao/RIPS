@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# This script deletes the date columns in the VIC energy output files (this is requirement of the modified routing model in RBM)
+# It is a post-process for VIC run
+
+#===========================================
+# Parameter setting
+#===========================================
+#=== input ===#
+vic_output_dir=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/vic/from_2860  # VIC output directory
+energy_output_prefix=energy  # prefix of VIC energy output files (files have 6 header lines)
+
+#=== params ===#
+ncol_date=3  # number of date columns in the file (3 if daily output; 4 if subdaily output)
+
+#===========================================
+# Delete date lines in the energy output files
+#===========================================
+#=== save header lines in a temp file (and delete the date column indices) ===#
+f=`ls $vic_output_dir/${energy_output_prefix}_* | head -n 1`;  # pick up any file
+head -n 5 $f > $vic_output_dir/energy.header.temp;
+head -n 6 $f | tail -n 1 | awk -v n=$ncol_date '{ {for(i=2;i<=(2+n-1); i++) $i="";} print $0}' >> $vic_output_dir/energy.header.temp;  # delete the date column indices in the 6th line
+#=== delete the date columns in the data ===#
+for f in $vic_output_dir/${energy_output_prefix}_*; do
+# loop over all files with the prefix in the dirctory
+	cp $f $f.orig; # make a back up
+	tail -n +7 $f | awk -v n=$ncol_date '{ {for(i=1;i<=n; i++) $i="";} print $0}' > $vic_output_dir/temp;  # delete the date columns
+	cat $vic_output_dir/energy.header.temp $vic_output_dir/temp > $vic_output_dir/temp2 # append header lines
+	mv $vic_output_dir/temp2 $f;
+	echo `basename $f`;
+	rm $vic_output_dir/temp;
+done
+
+#===========================================
+# Clean up
+#===========================================
+rm $vic_output_dir/energy.header.temp;
+
+

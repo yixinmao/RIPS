@@ -1,0 +1,14 @@
+This file contains the steps to run VIC and VIC_RBM.
+
+#==============================================
+# 1. Given an outlet, find upstream grid cells (complete watershed)
+#==============================================
+Run scripts under './preprocess/find_basin_grid_cells/'.
+Follow detailed steps in './preprocess/find_basin_grid_cells/README_steps'
+
+#==============================================
+# 2. Set up and run VIC
+#==============================================
+Follow detailed steps in './model_run/README_run_vic_steps'
+Set up VIC run; post-process VIC output to RBM required format
+

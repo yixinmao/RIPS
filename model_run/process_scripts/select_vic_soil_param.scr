@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# This script select grid cells needed to be run from a big VIC soil param file, and create a smaller soil param file
+# It is a pre-process for VIC run
+
+#===========================================
+# Parameter setting
+#===========================================
+#=== input ===#
+soil_param_orig=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/param/vic/vic_params.soil.precal.bpa.20140924.txt # original big VIC soil param file
+grid_list=/raid2/ymao/VIC_RBM_east/VIC_RBM/preprocess/find_basin_grid_cells/output/PNW/Yakima_Mabtom/Yakima_Mabtom.latlon_list  # list of grid cells needed to be run. format: [lat] [lon]
+
+#=== output ===#
+output_soil_file=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/param/vic/Yakima_Mabtom/Yakima_Mabtom.vic_params.soil
+
+#===========================================
+# Select and write smaller soil param file
+#===========================================
+cat $grid_list | \
+while read CMD; do 
+	f=$CMD;  # f is a line of the list file, i.e., f=[lat] [lon]
+	grep "$f" $soil_param_orig; # grep the grid cell from the original soil file
+done > $output_soil_file
+
+#===========================================
+# Check if soil param of all grids exist
+#===========================================
+n_grid=`wc $grid_list | awk '{print $1}'`  # number of grid cells in the list
+n_soil=`grep "^1" $output_soil_file | wc | awk '{print $1}'`  # number of lines in the smaller soil file STARTING WITH 1 (i.e. active grid cells)
+
+if [ $n_grid != $n_soil ]; then
+	echo 'Warning: number of active cells in the output soil file is NOT equal to the number in the list!!!'
+fi
+
+
