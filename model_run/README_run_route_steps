@@ -1,0 +1,10 @@
+Steps for running the modified routing model:
+
+#=================================================
+# (1) Prepare routing param files
+#=================================================
+1. Run './process/route_modified/create_flowdir_smaller_asc.scr' 
+	(Need to change the parameter section in the code)
+	* create flow direction file required by the modified routing model
+	* copy the flow direction file to the route param directory
+
