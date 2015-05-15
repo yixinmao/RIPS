@@ -14,7 +14,12 @@ Steps for running the modified routing model:
 	* Currently, each Mohseni parameter is set to spatially constant
 	* Param files are the same size as flow direction file (input to the modified routing mode)
 
+3. Create topology file
+	Run command: 'perl ./process/route_RBM/build_network_beta.pl <input_flow_dir_file> <output_Topology_file>'
+	where '<input_flow_dir_file>': flow direction ascii file (input format to RBM);
+		'<output_Topology_file>': output topology file
+	e.g., 'perl ./process/route_RBM/build_network_beta.pl ./process/route_RBM/output/Yakima_Mabtom/Yakima_Mabtom.fdir ./process/route_RBM/output/Yakima_Mabtom.Topology'
 
-#2. Create topology file
-#	Run command: perl ./process/route_RBM/
+
+
 
