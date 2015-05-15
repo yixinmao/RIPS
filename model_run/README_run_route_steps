@@ -1,7 +1,7 @@
 Steps for running the modified routing model:
 
 #=================================================
-# (1) Prepare routing param files
+# (1) Prepare routing/RBM param and config files
 #=================================================
 1. Run './process/route_RBM/create_flowdir_smaller_asc.scr' 
 	(Need to change the parameter section in the code)
@@ -19,6 +19,15 @@ Steps for running the modified routing model:
 	where '<input_flow_dir_file>': flow direction ascii file (input format to RBM);
 		'<output_Topology_file>': output topology file
 	e.g., 'perl ./process/route_RBM/build_network_beta.pl ./process/route_RBM/output/Yakima_Mabtom/Yakima_Mabtom.fdir ./process/route_RBM/output/Yakima_Mabtom.Topology'
+
+4. Prepare a control file (for generating RBM config file & routing station file)
+	Run './process/route_RBM/create_param_prepare_control_file.scr' (Need to change parameter section in the code)
+	This generates a control file for generating RBM config file & routing station file
+
+5. Generate RBM config file & routing station file
+	Run './process/route_RBM/generate_RBMconfig_routeStation.scr' (Need to change parameter section in the code)
+	This generates RBM config file ('*_Network') & routing station files (input to the modified routing model)
+
 
 
 
