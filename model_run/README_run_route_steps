@@ -3,8 +3,18 @@ Steps for running the modified routing model:
 #=================================================
 # (1) Prepare routing param files
 #=================================================
-1. Run './process/route_modified/create_flowdir_smaller_asc.scr' 
+1. Run './process/route_RBM/create_flowdir_smaller_asc.scr' 
 	(Need to change the parameter section in the code)
 	* create flow direction file required by the modified routing model
 	* copy the flow direction file to the route param directory
+
+2. Prepare Mohseni param files
+	Run './process/route_RBM/create_Mohseni_files.scr' (Need to change the parameter section in the code)
+	* This creates Mohseni param files needed for preparing RBM input
+	* Currently, each Mohseni parameter is set to spatially constant
+	* Param files are the same size as flow direction file (input to the modified routing mode)
+
+
+#2. Create topology file
+#	Run command: perl ./process/route_RBM/
 

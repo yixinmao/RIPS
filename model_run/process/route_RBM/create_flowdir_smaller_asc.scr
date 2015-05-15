@@ -1,0 +1,65 @@
+#!/bin/bash
+
+set -e
+
+# This script generates a smaller flow direction ascii file that meets the RBM modified routing model input requirement:
+#	Only contains one complete watershed
+#	Only has one outlet; the outlet cell is 9
+#	All the other grid cells are negative values
+
+#==================================================
+# Parameter setting
+#==================================================
+#=== input ===#
+flowir_asc_orig=/raid2/ymao/VIC_RBM_east/VIC_RBM/preprocess/find_basin_grid_cells/input/PNW/PNW.fdir  # original big flow directin file, ascii format
+basin_mask_nc=/raid2/ymao/VIC_RBM_east/VIC_RBM/preprocess/find_basin_grid_cells/output/PNW/Yakima_Mabtom/Yakima_Mabtom.basin_mask.nc  # basin mask nc file, should be generated from the big flow direction file and thus has the same size
+outlet_file=/raid2/ymao/VIC_RBM_east/VIC_RBM/preprocess/find_basin_grid_cells/input/PNW/Yakima_Mabtom/outlet_location_yakima_mabtom.csv  # Must only have two lines!
+
+#=== output ===#
+output_dir=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/process/route_RBM/output/Yakima_Mabtom
+output_prefix=Yakima_Mabtom  # prefix of output files
+route_param_dir=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/param/route_modified/Yakima_Mabtom  # routing model param file directory. The final flow dir file will be copied into this directory
+
+#==================================================
+# Generate smaller basin flow direction file
+#==================================================
+#=== Generate basin flow direction netCDF file ===#
+gdal_translate -of netcdf $flowir_asc_orig $output_dir/$output_prefix.fdir.orig.temp.nc  # convert the big flow direction file into netcdf format
+cdo ifthen $basin_mask_nc $output_dir/$output_prefix.fdir.orig.temp.nc $output_dir/$output_prefix.fdir.smaller.temp.nc  # mask out the basin from the big flow direction file
+cdo setmissval,-1 $output_dir/$output_prefix.fdir.smaller.temp.nc $output_dir/$output_prefix.fdir.smaller.temp2.nc  # set missing value in the new flow dir file to -1
+minmax_latlon=`echo "import my_functions; lon_min,lon_max,lat_min,lat_max=my_functions.get_nonmiss_domain_nc('$output_dir/$output_prefix.fdir.smaller.temp2.nc', 'Band1', 'lon', 'lat'); print lon_min-0.2,lon_max+0.2,lat_min-0.2,lat_max+0.2" | python` # find smaller latlon domain (have 0.2 deg tolerance)
+lon_min=$(echo $minmax_latlon | cut -f1 -d' ')
+lon_max=$(echo $minmax_latlon | cut -f2 -d' ')
+lat_min=$(echo $minmax_latlon | cut -f3 -d' ')
+lat_max=$(echo $minmax_latlon | cut -f4 -d' ')
+ncks -O -d lat,$lat_min,$lat_max -d lon,$lon_min,$lon_max $output_dir/$output_prefix.fdir.smaller.temp2.nc $output_dir/$output_prefix.fdir.smaller.crop.temp.nc  # crop a smaller box (have 1 deg tolerance)
+
+#=== Change outlet grid cell to 9 ===#
+# Read outlet latlon from RVIC outlet param file 
+# (assume there is only one non-commented station)
+outlet_lon=`grep -v "^#" $outlet_file | head -n 2 | tail -n 1 | awk -F',' '{print $2}'`
+outlet_lat=`grep -v "^#" $outlet_file | head -n 2 | tail -n 1 | awk -F',' '{print $3}'`
+# Determine the index of the outlet latlon
+outlet_latlon_ind=`echo "import my_functions; lon=my_functions.read_nc('$output_dir/$output_prefix.fdir.smaller.crop.temp.nc', 'lon'); lat=my_functions.read_nc('$output_dir/$output_prefix.fdir.smaller.crop.temp.nc', 'lat'); lon_ind = my_functions.find_value_index(lon, $outlet_lon); lat_ind = my_functions.find_value_index(lat, $outlet_lat); print lon_ind,lat_ind" | python`  # find outlet latlon index (starts from 0)
+outlet_lon_ind=$(echo $outlet_latlon_ind | cut -f1 -d' ')
+outlet_lat_ind=$(echo $outlet_latlon_ind | cut -f2 -d' ')
+# change outlet grid cell to 9
+scr=`echo "ncap2 -O -s 'Band1($outlet_lat_ind,$outlet_lon_ind)=9' $output_dir/$output_prefix.fdir.smaller.crop.temp.nc $output_dir/$output_prefix.fdir.nc"`; eval $scr;
+
+#=== Convert to ascii file ===#
+gdal_translate -of AAIGrid $output_dir/$output_prefix.fdir.nc $output_dir/$output_prefix.fdir  # convert to ascii file
+
+#==================================================
+# Clean up
+#==================================================
+rm $output_dir/$output_prefix.fdir.orig.temp.nc
+rm $output_dir/$output_prefix.fdir.smaller.temp.nc
+rm $output_dir/$output_prefix.fdir.smaller.temp2.nc
+rm $output_dir/$output_prefix.fdir.smaller.crop.temp.nc
+
+
+#==================================================
+# Copy flow direction file to routing param directory
+#==================================================
+cp $output_dir/$output_prefix.fdir $route_param_dir
+
