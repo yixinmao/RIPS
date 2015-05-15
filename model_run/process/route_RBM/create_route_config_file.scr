@@ -1,0 +1,76 @@
+#!/bin/bash
+
+set -e
+
+# This script generates the config file for the modified routing model
+
+#===================================================
+# Parameter setting
+#===================================================
+basin_code=Yakima_Mabtom
+run_code=Yakima_Mabtom_1990_1995
+
+#=== base directories ===#
+route_param_basedir=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/param/route_modified/Yakima_Mabtom  # base directory of routing model parameters
+vic_output_basedir=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/vic/from_2860  # base directory of VIC output
+
+#=== template ===#
+route_config_template=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/control/route_modified/route.config.template  # template config file for the modified routing model
+
+#=== variables in the config file ===#
+# input
+FDIR_FILE=$route_param_basedir/$basin_code.fdir  # flow direction file
+VELOCITY=2.0  # velocity param
+DIFFUSION=800  # diffusion param
+XMASK=12500  # XMASK (channel length in each grid cell)
+FRAC=1.0  # fraction
+LEOPOLS_COEFF1=0.34
+LEOPOLS_COEFF2=0.341
+LEOPOLS_COEFF3=1.22
+LEOPOLS_COEFF4=0.557
+STATION_FILE=$route_param_basedir/$basin_code.Rout.Cells.init  # station file
+VIC_OUTPUT_FLOW=$vic_output_basedir/flow_  # VIC flow output
+VIC_OUTPUT_ENERGY=$vic_output_basedir/energy_  # VIC energy output
+PRECISION=5  # precision of grid cells ((=2 for 1/2 deg,=3 for 1/4 deg,etc)
+# output
+OUTPUT_FLOW_FILE=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/route_modified/$run_code.DA_flow  # file name of routing flow output (i.e., this file will be the output from the routing model run)
+OUTPUT_ENERGY_FILE=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/route_modified/$run_code.DA_energy  # file name of routing energy output (i.e., this file will be the output from the routing model run)
+START_YYYY=1990 # model start date (YYYY MM DD)
+START_MM=01 # model start date (YYYY MM DD)
+START_DD=31 # model start date (YYYY MM DD)
+END_YYYY=1990 # model end date (YYYY MM DD)
+END_MM=01 # model end date (YYYY MM DD)
+END_DD=31 # model end date (YYYY MM DD)
+UH_ALL=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/param/route_modified/UH_ALL  # UH file
+UH_S_DIR=$route_param_basedir/uh_s  # directory for uh_s files
+
+#=== output new config file ===#
+config_new=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/control/route_modified/$run_code.route.config
+
+#===================================================
+# Generate new param control file
+#===================================================
+cp $route_config_template $config_new  # create new param control file
+sed -i s/\<FDIR_FILE\>/${FDIR_FILE//\//\\/}/g $config_new
+sed -i s/\<VELOCITY\>/${VELOCITY//\//\\/}/g $config_new
+sed -i s/\<DIFFUSION\>/${DIFFUSION//\//\\/}/g $config_new
+sed -i s/\<XMASK\>/${XMASK//\//\\/}/g $config_new
+sed -i s/\<FRAC\>/${FRAC//\//\\/}/g $config_new
+sed -i s/\<LEOPOLS_COEFF1\>/${LEOPOLS_COEFF1//\//\\/}/g $config_new
+sed -i s/\<LEOPOLS_COEFF2\>/${LEOPOLS_COEFF2//\//\\/}/g $config_new
+sed -i s/\<LEOPOLS_COEFF3\>/${LEOPOLS_COEFF3//\//\\/}/g $config_new
+sed -i s/\<LEOPOLS_COEFF4\>/${LEOPOLS_COEFF4//\//\\/}/g $config_new
+sed -i s/\<STATION_FILE\>/${STATION_FILE//\//\\/}/g $config_new
+sed -i s/\<VIC_OUTPUT_FLOW\>/${VIC_OUTPUT_FLOW//\//\\/}/g $config_new
+sed -i s/\<VIC_OUTPUT_ENERGY\>/${VIC_OUTPUT_ENERGY//\//\\/}/g $config_new
+sed -i s/\<PRECISION\>/${PRECISION//\//\\/}/g $config_new
+sed -i s/\<OUTPUT_FLOW_FILE\>/${OUTPUT_FLOW_FILE//\//\\/}/g $config_new
+sed -i s/\<OUTPUT_ENERGY_FILE\>/${OUTPUT_ENERGY_FILE//\//\\/}/g $config_new
+sed -i s/\<START_DATE\>/${START_DATE//\//\\/}/g $config_new
+sed -i s/\<END_DATE\>/${END_DATE//\//\\/}/g $config_new
+sed -i s/\<UH_ALL\>/${UH_ALL//\//\\/}/g $config_new
+sed -i s/\<UH_S_DIR\>/${UH_S_DIR//\//\\/}/g $config_new
+
+
+
+

@@ -28,6 +28,8 @@ Steps for running the modified routing model:
 	Run './process/route_RBM/generate_RBMconfig_routeStation.scr' (Need to change parameter section in the code)
 	This generates RBM config file ('*_Network') & routing station files (input to the modified routing model)
 
+6. Generate routing model config file
+	Run './process/route_RBM/create_route_config_file.scr' (Need to change parameter section in the code)
 
 
 
