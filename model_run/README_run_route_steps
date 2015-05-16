@@ -31,6 +31,12 @@ Steps for running the modified routing model:
 6. Generate routing model config file
 	Run './process/route_RBM/create_route_config_file.scr' (Need to change parameter section in the code)
 
+#=================================================
+# (2) Run routing model
+#=================================================
+7. Run routing model
+	Run command: /raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/source/route_modified/rout <route_config_file>
+
 
 
 

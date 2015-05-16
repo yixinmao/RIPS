@@ -42,7 +42,7 @@ END_YYYY=1990 # model end date (YYYY MM DD)
 END_MM=01 # model end date (YYYY MM DD)
 END_DD=31 # model end date (YYYY MM DD)
 UH_ALL=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/param/route_modified/UH_ALL  # UH file
-UH_S_DIR=$route_param_basedir/uh_s  # directory for uh_s files
+UH_S_DIR=$route_param_basedir/uh_s/  # directory for uh_s files
 
 #=== output new config file ===#
 config_new=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/control/route_modified/$run_code.route.config
@@ -66,8 +66,12 @@ sed -i s/\<VIC_OUTPUT_ENERGY\>/${VIC_OUTPUT_ENERGY//\//\\/}/g $config_new
 sed -i s/\<PRECISION\>/${PRECISION//\//\\/}/g $config_new
 sed -i s/\<OUTPUT_FLOW_FILE\>/${OUTPUT_FLOW_FILE//\//\\/}/g $config_new
 sed -i s/\<OUTPUT_ENERGY_FILE\>/${OUTPUT_ENERGY_FILE//\//\\/}/g $config_new
-sed -i s/\<START_DATE\>/${START_DATE//\//\\/}/g $config_new
-sed -i s/\<END_DATE\>/${END_DATE//\//\\/}/g $config_new
+sed -i s/\<START_YYYY\>/${START_YYYY//\//\\/}/g $config_new
+sed -i s/\<START_MM\>/${START_MM//\//\\/}/g $config_new
+sed -i s/\<START_DD\>/${START_DD//\//\\/}/g $config_new
+sed -i s/\<END_YYYY\>/${END_YYYY//\//\\/}/g $config_new
+sed -i s/\<END_MM\>/${END_MM//\//\\/}/g $config_new
+sed -i s/\<END_DD\>/${END_DD//\//\\/}/g $config_new
 sed -i s/\<UH_ALL\>/${UH_ALL//\//\\/}/g $config_new
 sed -i s/\<UH_S_DIR\>/${UH_S_DIR//\//\\/}/g $config_new
 

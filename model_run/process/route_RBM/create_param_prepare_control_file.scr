@@ -8,7 +8,7 @@ set -e
 # Parameter setting
 #===================================================
 basin_code=Yakima_Mabtom
-run_code=Yakima_Mabtom
+run_code=Yakima_Mabtom_1990_1995
 
 #=== template ===#
 param_control_template=./input/RBM_param_prep.Control.template  # template control file for preparing RBM input
@@ -39,9 +39,6 @@ sed -i s/\<NETWORK_FILE\>/${NETWORK_FILE//\//\\/}/g $param_control_new
 sed -i s/\<OUTPUT_FLOW_FILE\>/${OUTPUT_FLOW_FILE//\//\\/}/g $param_control_new
 sed -i s/\<OUTPUT_ENERGY_FILE\>/${OUTPUT_ENERGY_FILE//\//\\/}/g $param_control_new
 sed -i s/\<MOHSENI_FILE\>/${MOHSENI_FILE//\//\\/}/g $param_control_new
-
-
-
 
 
 
