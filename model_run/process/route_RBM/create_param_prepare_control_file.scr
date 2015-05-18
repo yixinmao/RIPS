@@ -16,7 +16,7 @@ param_control_template=./input/RBM_param_prep.Control.template  # template contr
 #=== variables in the control file ===#
 # Input
 START_DATE=19900101  # model starting date [YYYYMMDD]
-END_DATE=19900131  # model ending date  [YYYYMMDD]
+END_DATE=19951231  # model ending date  [YYYYMMDD]
 TOPOLOGY_FILE=./output/Yakima_Mabtom/$basin_code.Topology  # topology file [input]
 MOHSENI_FILE=./output/Yakima_Mabtom/$basin_code.Mohseni  # the basename of Mohseni parameter files; suffix - .alpha, .beta, .gamma, .mu and .timelag - will be appended to the end of the file name
 
@@ -33,7 +33,7 @@ param_control_new=./output/Yakima_Mabtom/$run_code.Control
 #===================================================
 cp $param_control_template $param_control_new  # create new param control file
 sed -i s/\<START_DATE\>/$START_DATE/g $param_control_new
-sed -i s/\<END_DATE\>/$START_DATE/g $param_control_new
+sed -i s/\<END_DATE\>/$END_DATE/g $param_control_new
 sed -i s/\<TOPOLOGY_FILE\>/${TOPOLOGY_FILE//\//\\/}/g $param_control_new
 sed -i s/\<NETWORK_FILE\>/${NETWORK_FILE//\//\\/}/g $param_control_new
 sed -i s/\<OUTPUT_FLOW_FILE\>/${OUTPUT_FLOW_FILE//\//\\/}/g $param_control_new
