@@ -1,4 +1,4 @@
-Steps for running the modified routing model:
+Steps for running the modified routing model & RBM:
 
 #=================================================
 # (1) Prepare routing/RBM param and config files
@@ -36,6 +36,16 @@ Steps for running the modified routing model:
 #=================================================
 7. Run routing model
 	Run command: /raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/source/route_modified/rout <route_config_file>
+
+8. After running once, copy the <route_config_file> and change the station file in it to *.Rout.Cells (instead of *.Rout.Cells.init)
+
+#=================================================
+# (3) Run RBM model
+#=================================================
+9. Run RBM model
+	Run command: /raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/source/RBM/rbm10_VIC <rmb_config_file> <rbm_output_file>
+	<rbm_config_file>: RBM config file (the file ended with '_Network'; but here, '_Network' is ommited (will be appended by the model))
+	<rbm_output_file>: output directory and file name ('.Spat' and '.Temp' will be appended to the file name)
 
 
 
