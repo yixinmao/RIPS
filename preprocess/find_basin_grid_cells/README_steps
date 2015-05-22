@@ -1,4 +1,11 @@
+#===========================================================================
+Can directly make control files (by !! COPYing !! file under ./control and modify parameter section) for all steps.
+#===========================================================================
+
+
+#===========================================================================
 Steps for finding all upstream grid cells of a given outlet:
+#===========================================================================
 
 Input: 
 	1) ascii flow direction file bigger than the whole watershed (Lohmann routing format)

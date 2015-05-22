@@ -1,0 +1,72 @@
+#!/bin/bash
+
+set -e
+
+# This control file runs the whole process of finding a complete upstream watershed. The control file runs:
+#	../scripts/create_RVIC_input.scr - create RVIC (parameter run) input files
+#	../scripts/run_RVIC_param.scr - run RVIC
+#	../scripts/create_grid_cell_list.py - generate a list of VIC grid cells to be run within the basin
+# See ../READM_steps for detail
+
+#=========================================================
+# Parameter setting
+#=========================================================
+#=== Input ===#
+#--- original big flow direction file (1-8 format, 9 is outlets) ---#
+flowdir_orig_asc=../input/Wu_0.125/DRT_8th_FDR_globe.1to8.asc
+#--- RVIC config file template ---#
+RVIC_config_template_file=../input/config_parameters_template.cfg
+#--- RVIC UH box parameter file ---#
+RVIC_UH_box=../input/UH_RASM_hourly.csv
+#--- RVIC outlet csv file ---#
+RVIC_outlet_csv=../input/Wu_0.125/Tennessee/outlet_location_Tennessee.csv
+
+#=== Output ===#
+#--- Output directory for data for the big orig. direction file area ---#
+# output to be put under this directory:
+output_dir_big_area=../output/global_Wu_8th
+#--- Big orig. direction file area code ---#
+orig_area_code=global_Wu_8th
+#--- extracted basin code ---#
+basin_code=Tennessee
+#--- Output directory for data for the extracted basin ---#
+# output dir will contain: 
+#    config file for this run; 
+#    nc watershed mask (RVIC output will also be saved under this dir, but will eventually be cleaned up and only save watershed mask under this directory
+output_dir_basin=$output_dir_big_area/$basin_code
+#--- number of decimal points in the output latlon list ---#
+latlon_precision=4
+
+#=========================================================
+# Process
+#=========================================================
+##=== Step 0. Create RVIC (parameter run) input files ===#
+##!!!!!!!!!! only need to be run once for each flow direction file !!!!!!!!!!!#
+## Run '../scripts/create_RVIC_input.scr'
+#echo 'Step 0: running create_RVIC_input.scr ...'
+#../scripts/create_RVIC_input.scr $flowdir_orig_asc $output_dir_big_area $orig_area_code
+
+#=== Step 1. Run RVIC (parameter run) ===#
+# Run '../scripts/run_RVIC_param.scr'
+echo 'Step 1: running run_RVIC_param.scr ...'
+arg1=$RVIC_config_template_file
+arg2=$output_dir_big_area/$orig_area_code.rvic_route_param_fake.nc
+arg3=$output_dir_big_area/$orig_area_code.rvic_domain_fake.nc
+arg4=$RVIC_UH_box
+arg5=$RVIC_outlet_csv
+arg6=$basin_code
+arg7=$output_dir_basin
+arg8=$basin_code
+../scripts/run_RVIC_param.scr $arg1 $arg2 $arg3 $arg4 $arg5 $arg6 $arg7 $arg8
+
+#=== Step 2. Generate a list of VIC grid cells to be run within the basin ===#
+# Run '../scripts/create_grid_cell_list.py'
+echo 'Step 2: running create_grid_cell_list.py ...'
+arg1=$output_dir_basin/$basin_code.basin_mask.nc
+arg2=$output_dir_basin/$basin_code.latlon_list
+arg3=$latlon_precision
+../scripts/create_grid_cell_list.py $arg1 $arg2 $arg3
+
+
+
+

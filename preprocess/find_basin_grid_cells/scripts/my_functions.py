@@ -79,6 +79,40 @@ def get_nc_spatial(infile, varname, lonname, latname):
 #========================================================================
 #========================================================================
 
+def get_nonmiss_domain_nc(infile, varname, lonname, latname):
+	''' This function finds the smallest non-missing-data domain in a spatial nc data, based on one variable. (This is useful when a spatial netCDF file only contains a small area of data, and we want to get rid of most of the missing value area and shrink the domain the the data)
+
+	Input:
+		infile: input nc file path [str]
+		varname: variable name [str] (non-missing value will be recognized based on this variable)
+		lonname, latname: lon and lat variable names [str] (lat and lon can be 1-D or 2-D variables)
+	Return:
+		Four values - min/max of lat/lon [float]
+
+	Require:
+		read_nc
+		count_dimension
+		get_nc_spatial
+	'''
+
+	import numpy as np
+
+	# Read nc spatial data
+	var, lon_mesh, lat_mesh = get_nc_spatial(infile, varname, lonname, latname) # read spatial netCDF file
+	# Mask 2-D lat and lon 
+	lon_mesh_masked = np.ma.masked_where(np.ma.getmask(var)==True, lon_mesh)
+	lat_mesh_masked = np.ma.masked_where(np.ma.getmask(var)==True, lat_mesh)
+	# Find min and max values of lat and lon
+	lon_min = np.ma.min(lon_mesh_masked)
+	lon_max = np.ma.max(lon_mesh_masked)
+	lat_min = np.ma.min(lat_mesh_masked)
+	lat_max = np.ma.max(lat_mesh_masked)
+
+	return lon_min, lon_max, lat_min, lat_max
+
+#========================================================================
+#========================================================================
+
 def count_dimension(x):
 	''' This function returns the number of dimension of an np array
 
@@ -91,8 +125,17 @@ def count_dimension(x):
 
 	return np.shape(np.shape(x))[0]
 
+#==============================================================
+#==============================================================
 
+def find_value_index(value_array, value):
+	'''Find the index of a value in an array (index starts from 0)
+	Return:
+		The first index of the value
+	'''
 
+	import numpy as np
 
-
+	index = np.where(value_array==value)
+	return index[0][0]
 

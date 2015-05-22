@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # This script creates fake parameter files that RVIC (parameter run) needs
 # Input:
 #	ascii flow direction file
@@ -11,11 +13,11 @@
 # Parameter setting
 #====================================================#
 #=== input flow direction file (ascii) ===#
-flowdir_asc_file=/raid2/ymao/VIC_RBM_east/VIC_RBM/preprocess/find_basin_grid_cells/input/PNW/PNW.fdir
+flowdir_asc_file=$1 # /raid2/ymao/VIC_RBM_east/VIC_RBM/preprocess/find_basin_grid_cells/input/PNW/PNW.fdir
 
 #=== output directory ===#
-output_dir=/raid2/ymao/VIC_RBM_east/VIC_RBM/preprocess/find_basin_grid_cells/output/PNW
-output_prefix=PNW  # prefix of the output files
+output_dir=$2 # /raid2/ymao/VIC_RBM_east/VIC_RBM/preprocess/find_basin_grid_cells/output/PNW
+output_prefix=$3  # prefix of the output files
 
 #====================================================#
 # Create RVIC routing param file (nc)

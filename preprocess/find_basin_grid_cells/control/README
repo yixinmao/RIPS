@@ -1,0 +1,5 @@
+*(.init)
+	with '.init': First time processing the orig. big flow direction file
+	without '.init': Not first time processing the orig. big flow direction file; step 0 is skipped
+
+
