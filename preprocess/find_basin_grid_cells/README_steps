@@ -4,6 +4,10 @@ Input:
 	1) ascii flow direction file bigger than the whole watershed (Lohmann routing format)
 	2) outlet lat and lon (RVIC input format)
 
+Step -1. Convert flow direction file to 1 - 8 format
+#======== only need to do this if the orig. flow direction file is in arcGIS format ========#
+	Run './scripts/convert_flowdir_128_to_8.scr' (Need to change the parameter section in the code)
+
 Step 0. Create RVIC (parameter run) input files
 #========= only need to be run once for each flow direction file ============#
 	Run './scripts/create_RVIC_input.scr' (Need to change the parameter section in the code)

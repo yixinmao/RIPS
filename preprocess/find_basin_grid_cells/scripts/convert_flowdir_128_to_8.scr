@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# This script converts ascii flow direction of 1-128 format to 1-8 format
+
+#==================================================
+# Parameter setting
+#==================================================
+#=== input ===#
+flowdir_orig=/raid2/ymao/VIC_RBM_east/VIC_RBM/preprocess/find_basin_grid_cells/input/Wu_0.125/DRT_8th_FDR_globe.asc  # original 1-128 format flow direction file
+#=== output ===#
+output_dir=/raid2/ymao/VIC_RBM_east/VIC_RBM/preprocess/find_basin_grid_cells/input/Wu_0.125  # output directory
+output_flowdir_file=DRT_8th_FDR_globe.1to8.asc  # output 1-8 format flow direction file name
+
+#==================================================
+# Convert flow direction file format
+#==================================================
+# save header lines
+head -n 6 $flowdir_orig > $output_dir/header.temp
+# use python to change values
+echo \
+"import numpy as np 
+data=np.loadtxt('$flowdir_orig', skiprows=6)
+for i in range(np.shape(data)[0]): 
+	for j in range(np.shape(data)[1]): 
+		if data[i][j]==1:
+			data[i][j] = 3
+		elif data[i][j]==2:
+			data[i][j] = 4
+		elif data[i][j]==4:
+			data[i][j] = 5
+		elif data[i][j]==8:
+			data[i][j] = 6
+		elif data[i][j]==16:
+			data[i][j] = 7
+		elif data[i][j]==32:
+			data[i][j] = 8
+		elif data[i][j]==64:
+			data[i][j] = 1
+		elif data[i][j]==128:
+			data[i][j] = 2
+		elif data[i][j]==0:
+			data[i][j] = 9
+f = open('$output_dir/$output_flowdir_file.temp', 'w')
+for i in range(np.shape(data)[0]): 
+	for j in range(np.shape(data)[1]): 
+		f.write('%d ' %data[i][j])
+	f.write('\n')
+f.close()
+" \
+| python
+# append header lines back
+cat $output_dir/header.temp $output_dir/$output_flowdir_file.temp > $output_dir/$output_flowdir_file
+
+#==================================================
+# Clean up
+#==================================================
+rm $output_dir/header.temp
+rm $output_dir/$output_flowdir_file.temp
+
+
+
