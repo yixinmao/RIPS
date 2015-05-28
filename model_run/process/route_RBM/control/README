@@ -1,0 +1,11 @@
+Control files for running step 1-6 for preparing routing/RBM param and config files
+
+NOTE:
+
+1. Copy control file if make changes!!!
+
+2. The control scripts must be run in the upper level directory (i.e., .../model_run/process/route_RBM)
+
+3. After running the control script, check the files under [process_output_dir]/to_copy_[run_code], and copy them to the correct directories; make directory 'uh_s' under the route param directory
+
+
