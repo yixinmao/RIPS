@@ -1,8 +1,8 @@
-rbm_output_process.scr
+rbm_output_process.py
 # This script takes in the direct RBM output files, creates a subdirectory under the RBM output directory, and put RBM results of each stream segment (each stream node has 2 segments; confluence grid cells have multiple nodes, while non-confluence grid cells have one node).
 # Output file names: <lat>_<lon>_reach<reach#>_seg<seg#>
 #    where <lat>, <lon> are lat and lon of the grid cell;
 #          <reach#> is the reach number defined in RBM (this can be helpful when trying to look at confluence grid cells);
 #          <seg#> is the segment number (1 or 2)
-# The columns of each file: <year> <day of year> <streamflow (cfs)> <stream T (degC)>
+# The columns of each file: <year> <month> <day> <streamflow (cfs)> <stream T (degC)>
 

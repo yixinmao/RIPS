@@ -50,6 +50,15 @@ NOTE: now step 1 - 6 can be directly run by a control file
 		<rbm_config_file>: RBM config file (the file ended with '_Network'; but here, '_Network' is ommited (will be appended by the model))
 		<rbm_output_file>: output directory and file name ('.Spat' and '.Temp' will be appended to the file name)
 
+#=================================================
+# (3) Process RBM output
+#=================================================
+10. Prepare a file under the RBM output directory
+		first line: total number of all stream segments
+		second line: total number of days of the run
+
+11. Run './process/RBM_output_process/rbm_output_process.py' (Need to change the parameter section in the code)
+	This extract flow and stream T data at a certain grid cell
 
 
 
