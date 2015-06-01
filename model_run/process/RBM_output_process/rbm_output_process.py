@@ -28,7 +28,7 @@ precision = 4   # number of decimal points of grid cell
 nseg_nday_path = rbm_output_dir + '/' + run_code + '.nseg_nday'  # a text file; first line: total # all stream segments; second line: total # days of the run
 
 #=== output ===#
-output_dir = rbm_output_dir + '/' + run_code + '%.*f_%.*f' %(precision, lat_to_extract, precision, lon_to_extract)
+output_dir = rbm_output_dir + '/' + run_code + '/' + '%.*f_%.*f' %(precision, lat_to_extract, precision, lon_to_extract)
 
 #=========================================================
 # Extracting grid cell data
