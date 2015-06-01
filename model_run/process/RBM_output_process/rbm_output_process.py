@@ -7,8 +7,12 @@
 #          <seg#> is the segment number (1 or 2)
 # The columns of each file: <year> <month> <day> <streamflow (cfs)> <stream T (degC)>
 
+# The script takes two command line arguments: ./rbm_output_process.py lat lon
+
 import numpy as np
 import datetime as dt
+import os
+import sys
 
 #=======================================================
 # Parameter setting
@@ -16,15 +20,15 @@ import datetime as dt
 #=== input ===#
 # We assume that direct RBM output files are: $rbm_output_dir/$run_code.Temp/.Spat
 # A directory named $rbm_run_code will be made under the RBM output directory; formatted files will be under this directory
-run_code = 'Yakima_Mabtom_1990_1995'
-rbm_output_dir = '/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/RBM/Yakima_Mabtom'  # RBM output directory
-nseg_nday_path = 'Yakima_mabtom_1990_1995.nseg_nday'  # a text file; first line: total # all stream segments; second line: total # days of the run
-lat_to_extract = 46.40625  # grid cell to extract
-lon_to_extract = -120.40625
-precision = 5   # number of decimal points of grid cell
+run_code = 'Tennessee_1949_2010'
+rbm_output_dir = '/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/RBM/Maurer_8th/Tennessee'  # RBM output directory
+lat_to_extract = float(sys.argv[1])  # grid cell to extract
+lon_to_extract = float(sys.argv[2])
+precision = 4   # number of decimal points of grid cell
+nseg_nday_path = rbm_output_dir + '/' + run_code + '.nseg_nday'  # a text file; first line: total # all stream segments; second line: total # days of the run
 
 #=== output ===#
-output_dir = '/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/RBM/Yakima_Mabtom/Yakima_Mabtom_1990_1995'
+output_dir = rbm_output_dir + '/' + run_code + '%.*f_%.*f' %(precision, lat_to_extract, precision, lon_to_extract)
 
 #=========================================================
 # Extracting grid cell data
@@ -32,8 +36,8 @@ output_dir = '/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/RBM/Yakima_Mabto
 temp = rbm_output_dir + '/' + run_code + '.Temp'  # .Temp file
 spat = rbm_output_dir + '/' + run_code + '.Spat'  # .Spat file
 nseg_nday = np.loadtxt(nseg_nday_path)
-nseg = nseg_nday[0]  # total number of all segments
-nday = nseg_nday[1]  # total number of days
+nseg = int(nseg_nday[0])  # total number of all segments
+nday = int(nseg_nday[1])  # total number of days
 
 #=== identify which lines in .Spat are corresponding to the target grid cell ===#
 f = open(spat, 'r')
@@ -85,6 +89,11 @@ for i in data:  # convert to np.array
 #=========================================================
 # Save data to files
 #=========================================================
+#=== make directory ===%
+if not os.path.exists(output_dir):
+	os.makedirs(output_dir)
+
+#=== write data ===#
 for line_num in cell_info:
 	f = open('%s/%.*f_%.*f_reach%d_seg%d' %(output_dir, precision, lat_to_extract, precision, lon_to_extract, cell_info[line_num][0], cell_info[line_num][1]), 'w')
 	data_current = data[line_num]
