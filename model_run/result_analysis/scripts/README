@@ -1,0 +1,7 @@
+control_cmp_flow.py / control_cmp_streamT.py
+	read in information of interested loacations;
+	for each location, call 'cmp_flow.py' and 'cmp_streamT.py' to plot flow and stream T against USGS observations
+
+cmp_flow.py
+	plot flow data from RBM output and compare with USGS streamflow
+
