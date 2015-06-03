@@ -290,5 +290,40 @@ def plot_format(ax, xtick_location=None, xtick_labels=None):
 
 	return ax
 
+#==============================================================
+#==============================================================
 
+def calc_annual_cumsum_water_year(time, data):
+	'''This function calculates cumulative sum of data in each water year
+
+	Input:
+		time: corresponding datetime objects
+		data: an array of data
+
+	Return:
+		time: the same as input
+		data_cumsum: an array of annual (water year based) cumsum data; if there is missing data at a point, data_cumsum is np.nan after this point in this water year
+	'''
+
+	import numpy as np
+
+	# Check if data and time is of the same length
+	if len(data)!=len(time):
+		print 'Error: data and time are not of the same length!'
+		exit()
+
+	data_cumsum = np.empty(len(data))
+	for i in range(len(data)):
+		if i==0:  # if the first day of record
+			data_cumsum[0] = data[0]
+		elif time[i].month!=10 or time[i].day!=1:  # if not Oct 1st, the same water year
+			if (time[i]-time[i-1]).days>1:  # if the current day is not the next day of the previous day, i.e., if there is missing data here
+				print 'Warning: missing data exists!'
+				data_cumsum[i] = np.nan
+			else:  # if no missing data at this time step, calculate cumsum
+					data_cumsum[i] = data_cumsum[i-1] + data[i]
+		else:  # if the current day is Oct 1st, and i!=0, the next water year
+			data_cumsum[i] = data[i]
+
+	return time, data_cumsum
  

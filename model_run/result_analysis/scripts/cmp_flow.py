@@ -6,6 +6,7 @@ import numpy as np
 import datetime as dt
 import matplotlib.pyplot as plt
 import sys
+import pandas as pd
 import my_functions
 
 #========================================================
@@ -130,7 +131,23 @@ my_functions.plot_format(ax, xtick_location=range(1,13), xtick_labels=tick_label
 
 fig = plt.savefig('%s.flow.season.png' %output_plot_basename, format='png')
 
+#============== plot annual cumulative flow ===============#
+# calculate
+time, usgs_cum = my_functions.calc_annual_cumsum_water_year(s_usgs_to_plot.index, s_usgs_to_plot)
+s_usgs_cum = pd.Series(usgs_cum, index=time)
+time, rbm_cum = my_functions.calc_annual_cumsum_water_year(s_rbm_to_plot.index, s_rbm_to_plot)
+s_rbm_cum = pd.Series(rbm_cum, index=time)
+# plot
+fig = plt.figure()
+ax = plt.axes()
+plt.plot_date(s_usgs_cum.index, s_usgs_cum, 'b-', label='USGS gauge')
+plt.plot_date(s_rbm_cum.index, s_rbm_cum, 'r--', label='Lohmann route')
+plt.ylabel('Flow (cfs)', fontsize=16)
+plt.title('%s, %s\nAnnual cumulated' %(usgs_site_name, usgs_site_code), fontsize=16)
+plt.legend()
+my_functions.plot_date_format(ax, time_range=(plot_start_date, plot_end_date), locator=time_locator, time_format='%Y/%m')
 
+fig = plt.savefig('%s.flow.cumsum.png' %output_plot_basename, format='png')
 
-
+plt.show()
 
