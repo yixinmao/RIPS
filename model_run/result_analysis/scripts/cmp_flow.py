@@ -149,5 +149,4 @@ my_functions.plot_date_format(ax, time_range=(plot_start_date, plot_end_date), l
 
 fig = plt.savefig('%s.flow.cumsum.png' %output_plot_basename, format='png')
 
-plt.show()
 
