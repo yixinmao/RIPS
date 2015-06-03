@@ -57,6 +57,13 @@ else:  # if more than one data column needed, take average
 	df_usgs = my_functions.read_USGS_data(usgs_data_path, columns=usgs_streamT_col_split, names=names)  # read in data
 	s_usgs = df_usgs.mean(axis=1, skipna=False) # if either column is missing, return NaN
 
+# check if both datasets are not all missing values
+if s_rbm.notnull().sum()==0:  # if all missing
+	print 'All RBM output values are missing!'
+	exit()
+if s_usgs.notnull().sum()==0:  # if all missing
+	print 'All USGS data are missing!'
+	exit()
 
 #========================================================
 # Determine plot starting and ending date (always plot full water years)
