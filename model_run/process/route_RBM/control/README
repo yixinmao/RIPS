@@ -2,7 +2,9 @@ Control files for running step 1-6 for preparing routing/RBM param and config fi
 
 NOTE:
 
-1. Copy control file if make changes!!!
+0. Copy control file if make changes!!!
+
+1. Tennessee_Maurer_8th_1949_2010.control is an old version of control file. Don't copy this one!!!
 
 2. The control scripts must be run in the upper level directory (i.e., .../model_run/process/route_RBM)
 

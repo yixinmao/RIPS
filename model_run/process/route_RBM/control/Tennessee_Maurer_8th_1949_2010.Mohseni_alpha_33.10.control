@@ -14,10 +14,12 @@ set -e
 # Output associated with basin_code:
 #       flow direction file
 #       Mohseni parameters
-basin_code=Tennessee
+basin_code=Tennessee  # this relates to flowdir, but not Mohseni params
+basin_code_out=Tennessee_MohseniAlpha33.10  # if only changes Mohseni params but not flow directory, only changes $basin_code_out but not $basin_code
 # Output associated with run_code:
 #       Running start and end date
-run_code=${basin_code}_1949_2010
+run_code_route=Tennessee_1949_2010 # if only need to rerun RBM, then this code should be kept as before (the same code as when running the routing model); if need to run both routing and RBM, then $run_code_route and $run_code_RBM can be set to same
+run_code_RBM=${basin_code_out}_1949_2010
 
 #=== Input ===#
 #--- orig. big flow direction ascii file (1-8 format, 9 is outlets)---#
@@ -28,7 +30,7 @@ basin_mask_nc=/raid2/ymao/VIC_RBM_east/VIC_RBM/preprocess/find_basin_grid_cells/
 outlet_file=/raid2/ymao/VIC_RBM_east/VIC_RBM/preprocess/find_basin_grid_cells/input/Wu_0.125/Tennessee/outlet_location_Tennessee.csv
 #--- Mohseni parameters ---#
 # NOTE: if change Mohseni parameters, need to change basin code !!!!!
-alpha=23.10 # this is actually 'alpha-mu'
+alpha=33.10 # 23.10 # this is actually 'alpha-mu'
 beta=12.1
 gamma=0.25
 mu=0.5
@@ -58,8 +60,8 @@ UH_file=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/param/route_modified/UH_ALL
 
 #=== Output ===#
 #--- output directory for all output files of all process steps ---#
-process_output_dir=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/process/route_RBM/output/Maurer_8th/$basin_code
-#--- desired output directory for modified routing model output (nothing will be generated under this directory after running this control script, but this directory will be written in the routing model config file)
+process_output_dir=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/process/route_RBM/output/Maurer_8th/$basin_code_out
+#--- desired output directory for modified routing model output (nothing will be generated under this directory after running this control script, but this directory will be written in the routing model and RBM config file)
 route_model_output_dir=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/route_modified/$basin_code
 #--- routing parameter directory (nothing will be generated under this directory after running this control script, but this directory will be written in the routing model config file)
 route_param_dir=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/param/route_modified/Maurer_8th/$basin_code
@@ -67,6 +69,7 @@ route_param_dir=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/param/route_modified/
 #=========================================================
 # Process
 #=========================================================
+mkdir -p $process_output_dir
 
 #=== Step 1. Create smaller flow direction file in the format required by the modified routing model ===#
 # Run '../scripts/create_flowdir_smaller_asc.scr'
@@ -81,7 +84,7 @@ arg5=$basin_code
 #=== Step 2. Create Mohseni files ===#
 # Run './create_Mohseni_files.scr'
 echo "Step 2. Create Mohseni files..."
-arg1=$basin_code
+arg1=$basin_code_out
 arg2=$process_output_dir/$basin_code.fdir.nc
 arg8=$process_output_dir
 ./create_Mohseni_files.scr $arg1 $arg2 $alpha $beta $gamma $mu $timelag $arg8
@@ -95,21 +98,21 @@ perl ./build_network_beta.pl $process_output_dir/$basin_code.fdir $process_outpu
 # Run './create_param_prepare_control_file.scr'
 echo "Step 4. Prepare control file for generating RBM config file & routing station file..."
 arg1=$basin_code
-arg2=$run_code
+arg2=$run_code_RBM
 arg3=$param_control_template
 arg6=$process_output_dir/$basin_code.Topology
-arg7=$process_output_dir/$basin_code.Mohseni
-arg8=$process_output_dir/${run_code}_Network
-arg9=$route_model_output_dir/$run_code.DA_flow
-arg10=$route_model_output_dir/$run_code.DA_energy
-arg11=$process_output_dir/$run_code.Control
+arg7=$process_output_dir/$basin_code_out.Mohseni
+arg8=$process_output_dir/${run_code_RBM}_Network
+arg9=$route_model_output_dir/$run_code_route.DA_flow
+arg10=$route_model_output_dir/$run_code_route.DA_energy
+arg11=$process_output_dir/$run_code_RBM.Control
 ./create_param_prepare_control_file.scr $arg1 $arg2 $arg3 $START_DATE $END_DATE $arg6 $arg7 $arg8 $arg9 $arg10 $arg11
 
 #=== Step 5. Generate RBM config file & routing station file
 # Run './generate_RBMconfig_routeStation.scr'
 echo "Step 5. Generate RBM config file & routing station file..."
 arg1=$basin_code
-arg2=$run_code
+arg2=$run_code_RBM
 arg3=$process_output_dir
 arg4=$process_output_dir
 ./generate_RBMconfig_routeStation.scr $arg1 $arg2 $arg3 $arg4
@@ -118,7 +121,7 @@ arg4=$process_output_dir
 # Run './create_route_config_file.scr'
 echo "Step 6. Generate routing model config file..."
 arg1=$basin_code
-arg2=$run_code
+arg2=$run_code_route
 arg3=$route_param_dir
 arg4=$vic_output_dir
 arg5=$route_config_template
@@ -127,8 +130,8 @@ arg15=$route_param_dir/$basin_code.Rout.Cells.init
 arg16=$vic_output_dir/flow_
 arg17=$vic_output_dir/energy_
 arg18=$PRECISION
-arg19=$route_model_output_dir/$run_code.DA_flow
-arg20=$route_model_output_dir/$run_code.DA_energy
+arg19=$route_model_output_dir/$run_code_route.DA_flow
+arg20=$route_model_output_dir/$run_code_route.DA_energy
 arg21=${START_DATE:0:4}
 arg22=${START_DATE:4:2}
 arg23=${START_DATE:6:2}
@@ -137,19 +140,19 @@ arg25=${END_DATE:4:2}
 arg26=${END_DATE:6:2}
 arg27=$UH_file
 arg28=$route_param_dir/uh_s/
-arg29=$process_output_dir/$run_code.route.config
+arg29=$process_output_dir/$run_code_route.route.config
 ./create_route_config_file.scr $arg1 $arg2 $arg3 $arg4 $arg5 $arg6 $VELOCITY $DIFFUSION $XMASK $FRAC $LEOPOLS_COEFF1 $LEOPOLS_COEFF2 $LEOPOLS_COEFF3 $LEOPOLS_COEFF4 $arg15 $arg16 $arg17 $arg18 $arg19 $arg20 $arg21 $arg22 $arg23 $arg24 $arg25 $arg26 $arg27 $arg28 $arg29
 
 #==================================================================
-# Move final useful files to $process_output_dir/to_copy_$run_code
+# Move final useful files to $process_output_dir/to_copy_$run_code_RBM
 #==================================================================
 # Make a directory to put all the files need to be copied to real model run directories ===#
-mkdir -p $process_output_dir/to_copy_$run_code
+mkdir -p $process_output_dir/to_copy_$run_code_RBM
 
 # Move files
-mv $process_output_dir/$basin_code.fdir $process_output_dir/to_copy_$run_code/$basin_code.fdir
-mv $process_output_dir/${run_code}_Network $process_output_dir/to_copy_$run_code/${run_code}_Network
-mv $process_output_dir/$basin_code.Rout.Cells.init $process_output_dir/to_copy_$run_code/$basin_code.Rout.Cells.init
-mv $process_output_dir/$basin_code.Rout.Cells $process_output_dir/to_copy_$run_code/$basin_code.Rout.Cells
-mv $process_output_dir/$run_code.route.config $process_output_dir/to_copy_$run_code/$run_code.route.config
+mv $process_output_dir/$basin_code.fdir $process_output_dir/to_copy_$run_code_RBM/$basin_code.fdir
+mv $process_output_dir/${run_code_RBM}_Network $process_output_dir/to_copy_$run_code_RBM/${run_code_RBM}_Network
+mv $process_output_dir/$basin_code.Rout.Cells.init $process_output_dir/to_copy_$run_code_RBM/$basin_code.Rout.Cells.init
+mv $process_output_dir/$basin_code.Rout.Cells $process_output_dir/to_copy_$run_code_RBM/$basin_code.Rout.Cells
+mv $process_output_dir/$run_code_route.route.config $process_output_dir/to_copy_$run_code_RBM/$run_code_route.route.config
 
