@@ -1,0 +1,137 @@
+#######################################################################
+# This text file contains information used by the vicNl model to define
+# needed global variables and model parameters, as well as allowing the
+# user to control the features of the model to be used in the current 
+# model run.
+#
+# Model parameter or options name must be followed by TRUE/FALSE (TRUE
+# meaning the option is to be used), or the appropriate information.
+#
+# Lines proceeded by # are comments and are not processed by the model
+#
+# Modified:     Feb 22, 2005 by A S Akanda for VIC ver.4.0.5
+# Comments:     Global Parameter file for the Continental US
+#               Set up for daily water balance
+#               Uses snowbands
+#               Uses precip disaggregation
+#               Set to run on Plane
+#######################################################################
+
+#######################################################################
+# Define Global Parameters
+#######################################################################
+NLAYER          3       # number of layers
+TIME_STEP       24      # model time step: hours (24 for water balance)
+STARTYEAR	1990	# year model simulation starts
+STARTMONTH	1	# month model simulation starts
+STARTDAY	1 	# day model simulation starts
+STARTHOUR       00      # hour model simulation starts
+ENDYEAR 	1995
+ENDMONTH	12
+ENDDAY		31
+SKIPYEAR        0       # number of startup years to skip before output
+#see user_def.h flag if added
+#INIT_STATE	/raid9/oriana/bpa/met_dataset_runs/state_19491231/output/state_19491231
+#STATEYEAR       1949
+#STATEMONTH      12
+#STATEDAY        31
+#STATENAME	/raid9/oriana/bpa/met_dataset_runs/state_19491231/output/statefiles/state.IDNUM
+WIND_H          10.0    # height of wind speed measurement
+MEASURE_H       2.0     # height of humidity measurement
+NODES           10       # number of soil thermal nodes
+MAX_SNOW_TEMP   0.5     # maximum temperature at which snow can fall
+MIN_RAIN_TEMP   -0.5    # minimum temperature at which rain can fall
+
+#######################################################################
+# Define Global Parameters
+#######################################################################
+BASEFLOW        NIJSSEN2001
+FULL_ENERGY	FALSE	# calculate full energy balance
+FROZEN_SOIL	FALSE	# calculate frozen soils
+#DIST_PRCP	FALSE	# use distributed precipitation
+COMPRESS	FALSE	# compress input and output files when done
+#CORRPREC	FALSE	# correct precipitation for gauge undercatch
+GRID_DECIMAL	5	# number of decimals to use in gridded files
+PRT_SNOW_BAND   FALSE   # print snow variables
+#ARC_SOIL        FALSE   # read soil parameter from ARC/INFO ASCII grids
+GLACIER		FALSE
+SNOW_STEP	24       # timestep to solve snowbands (not 3 for dly)
+ROOT_ZONES	3	# number of root zones in veg parameter file
+BINARY_OUTPUT   FALSE   # default is ASCII, unless LDAS format
+BINARY_STATE_FILE FALSE # default is binary
+MIN_WIND_SPEED  0.1     # minimum allowable wind speed
+#PREC_EXPT	0.6	# fraction of grid cell receiving precip
+GRND_FLUX       FALSE    # true for full energy, false for water balance
+QUICK_FLUX      TRUE    # true uses Liang ('99), false uses finite diff
+NOFLUX          FALSE   # false uses const. T at damping depth
+COMPUTE_TREELINE FALSE     # false disables, otherwise give default type
+JULY_TAVG_SUPPLIED FALSE # July Tavg was added in last col of soil file
+AERO_RESIST_CANSNOW AR_406
+#######################################################################
+# Snow Band Description File
+#
+# SNOW_BAND defines both the number of snow bands available for each
+# grid cell, and the name of the snow band description file.
+#######################################################################
+SNOW_BAND	5	/raid2/jhamman/projects/BPA/data/inputdata/VIC/bpa_vic_params/vic_params.snow.precal.bpa.20140924.txt
+#######################################################################
+# Define (Meteorological) Forcing Files
+#######################################################################
+FORCING1	/raid9/oriana/bpa/forcings/2860_binary/data_	# Forcing file path and prefix, ending in "_"
+N_TYPES         4
+FORCE_TYPE     PREC    UNSIGNED        40
+FORCE_TYPE     TMAX    SIGNED          100
+FORCE_TYPE     TMIN    SIGNED          100
+FORCE_TYPE     WIND    SIGNED          100
+FORCE_FORMAT    BINARY
+FORCE_ENDIAN	LITTLE
+FORCE_DT	24	# Forcing time step length (hours)
+FORCEYEAR	1915	# Year of first forcing record
+FORCEMONTH	01	# Month of first forcing record
+FORCEDAY	01	# Day of first forcing record
+FORCEHOUR	00	# Hour of first forcing record
+#######################################################################
+# Parameter files
+#######################################################################
+SOIL            /raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/param/vic/Yakima_Mabtom/Yakima_Mabtom.vic_params.soil
+VEGPARAM        /home/oriana/bpa/params/vic/vic_params.veg.precal.bpa.20140924.txt
+#GLOBAL_LAI       TRUE
+VEGPARAM_LAI    TRUE
+LAI_SRC         LAI_FROM_VEGPARAM
+VEGLIB	        /home/oriana/bpa/params/vic/veglib.LDAS
+#######################################################################
+# Define Input and Output Data Files
+#######################################################################
+RESULT_DIR      /raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/vic/from_2860/
+OUT_STEP        24
+PRT_HEADER      TRUE  # TRUE for printing out header lines in the output files
+
+N_OUTFILES      2
+OUTFILE         flow  4
+OUTVAR          OUT_PREC
+OUTVAR          OUT_EVAP
+OUTVAR          OUT_RUNOFF
+OUTVAR          OUT_BASEFLOW
+
+OUTFILE         energy  7
+OUTVAR          OUT_AIR_TEMP
+OUTVAR          OUT_VP
+OUTVAR          OUT_SHORTWAVE
+OUTVAR          OUT_LONGWAVE
+OUTVAR          OUT_DENSITY
+OUTVAR          OUT_PRESSURE
+OUTVAR          OUT_WIND
+
+#######################################################################
+# Define Debugging Parameters - not used -- EDM
+#######################################################################
+#PRT_FLUX	FALSE	# print energy fluxes debugging files
+#PRT_BALANCE	FALSE	# print water balance debugging files
+#PRT_SOIL	FALSE	# print soil parameter debugging files
+#PRT_VEGE	FALSE	# print vegetation parameter debugging files
+#PRT_GLOBAL	FALSE	# print global parameter debugging files
+#PRT_ATMOS	FALSE	# print forcing data debugging files
+#PRT_SNOW	FALSE	# print snow debugging files
+#PRT_MOIST	FALSE	# print soil moisture debugging files
+#PRT_TEMP	FALSE	# print soil thermal debugging files
+#DEBUG_DIR	./OUT/	# debugging file output directory (default '.')

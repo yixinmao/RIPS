@@ -11,7 +11,7 @@ import my_functions
 #========================================================
 # Parameter setting
 #========================================================
-rbm_output_formatted_path = sys.argv[1] # '/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/RBM/Maurer_8th/Tennessee/Tennessee_1949_2010/35.0625_-85.6875_reach299_seg2'  # year; month; day; flow(cfs); T_stream(deg); 1 header line
+rbm_output_formatted_path = sys.argv[1] # '/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/RBM/Maurer_8th/Tennessee/Tennessee_1949_2010/35.0625_-85.6875_reach299_seg2'  # year; month; day; flow(cfs); T_stream(degC); T_headwater(degC); T_air(degC). 1 header line
 
 usgs_site_code = sys.argv[2] # '03571850'
 usgs_site_name = sys.argv[3] # 'Tennessee River at Lower Pittsburgh'
@@ -94,7 +94,7 @@ s_usgs_to_plot = my_functions.select_time_range(s_usgs, plot_start_date, plot_en
 fig = plt.figure()
 ax = plt.axes()
 plt.plot_date(s_usgs_to_plot.index, s_usgs_to_plot, 'b-', label='USGS gauge')
-plt.plot_date(s_rbm_to_plot.index, s_rbm_to_plot, 'r--', label='Lohmann route')
+plt.plot_date(s_rbm_to_plot.index, s_rbm_to_plot, 'r--', label='RBM')
 plt.ylabel('Stream T (degC)', fontsize=16)
 plt.title('%s, %s' %(usgs_site_name, usgs_site_code), fontsize=16)
 plt.legend()
@@ -102,42 +102,42 @@ my_functions.plot_date_format(ax, time_range=(plot_start_date, plot_end_date), l
 
 fig = plt.savefig('%s.streamT.daily.png' %output_plot_basename, format='png')
 
-#============== plot monthly data ===============#
-# calculate
-s_usgs_mon = my_functions.calc_monthly_data(s_usgs_to_plot)
-s_rbm_mon = my_functions.calc_monthly_data(s_rbm_to_plot)
-# plot
-fig = plt.figure()
-ax = plt.axes()
-plt.plot_date(s_usgs_mon.index, s_usgs_mon, 'b-', label='USGS gauge')
-plt.plot_date(s_rbm_mon.index, s_rbm_mon, 'r--', label='Lohmann route')
-plt.ylabel('Stream T (degC)', fontsize=16)
-plt.title('Monthly, %s, %s' %(usgs_site_name, usgs_site_code), fontsize=16)
-plt.legend()
-my_functions.plot_date_format(ax, time_range=(plot_start_date, plot_end_date), locator=time_locator, time_format='%Y/%m')
-
-fig = plt.savefig('%s.streamT.monthly.png' %output_plot_basename, format='png')
-
-#============== plot seasonal data ===============#
-# calculate
-s_usgs_seas = my_functions.calc_ts_stats_by_group(s_usgs_to_plot, 'month', 'mean') # index is 1-12 (month)
-s_rbm_seas = my_functions.calc_ts_stats_by_group(s_rbm_to_plot, 'month', 'mean') # index is 1-12 (month)
-# plot
-fig = plt.figure()
-ax = plt.axes()
-plt.plot_date(s_usgs_seas.index, s_usgs_seas, 'b-', label='USGS gauge')
-plt.plot_date(s_rbm_seas.index, s_rbm_seas, 'r--', label='Lohmann route')
-plt.ylabel('Stream T (degC)', fontsize=16)
-plt.title('%s, %s\nMonthly mean seasonality, water years %d - %d' %(usgs_site_name, usgs_site_code, plot_start_date.year+1, plot_end_date.year), fontsize=16)
-plt.legend()
-# formatting
-plt.xlim([1, 12])
-tick_labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Nov','Oct','Nov','Dec']
-my_functions.plot_format(ax, xtick_location=range(1,13), xtick_labels=tick_labels)
-
-fig = plt.savefig('%s.streamT.season.png' %output_plot_basename, format='png')
-
-
-
-
-
+##============== plot monthly data ===============#
+## calculate
+#s_usgs_mon = my_functions.calc_monthly_data(s_usgs_to_plot)
+#s_rbm_mon = my_functions.calc_monthly_data(s_rbm_to_plot)
+## plot
+#fig = plt.figure()
+#ax = plt.axes()
+#plt.plot_date(s_usgs_mon.index, s_usgs_mon, 'b-', label='USGS gauge')
+#plt.plot_date(s_rbm_mon.index, s_rbm_mon, 'r--', label='RBM')
+#plt.ylabel('Stream T (degC)', fontsize=16)
+#plt.title('Monthly, %s, %s' %(usgs_site_name, usgs_site_code), fontsize=16)
+#plt.legend()
+#my_functions.plot_date_format(ax, time_range=(plot_start_date, plot_end_date), locator=time_locator, time_format='%Y/%m')
+#
+#fig = plt.savefig('%s.streamT.monthly.png' %output_plot_basename, format='png')
+#
+##============== plot seasonal data ===============#
+## calculate
+#s_usgs_seas = my_functions.calc_ts_stats_by_group(s_usgs_to_plot, 'month', 'mean') # index is 1-12 (month)
+#s_rbm_seas = my_functions.calc_ts_stats_by_group(s_rbm_to_plot, 'month', 'mean') # index is 1-12 (month)
+## plot
+#fig = plt.figure()
+#ax = plt.axes()
+#plt.plot_date(s_usgs_seas.index, s_usgs_seas, 'b-', label='USGS gauge')
+#plt.plot_date(s_rbm_seas.index, s_rbm_seas, 'r--', label='RBM')
+#plt.ylabel('Stream T (degC)', fontsize=16)
+#plt.title('%s, %s\nMonthly mean seasonality, water years %d - %d' %(usgs_site_name, usgs_site_code, plot_start_date.year+1, plot_end_date.year), fontsize=16)
+#plt.legend()
+## formatting
+#plt.xlim([1, 12])
+#tick_labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Nov','Oct','Nov','Dec']
+#my_functions.plot_format(ax, xtick_location=range(1,13), xtick_labels=tick_labels)
+#
+#fig = plt.savefig('%s.streamT.season.png' %output_plot_basename, format='png')
+#
+#
+#
+#
+#
