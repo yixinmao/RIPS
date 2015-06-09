@@ -26,7 +26,7 @@ c     RCS ID STRING
       PARAMETER   (RERD  = 6371229.0)    !radius of earth in meters
 
       CHARACTER*20 LOC
-      CHARACTER*72 INPATH
+      CHARACTER*200 INPATH
 
       INTEGER DPREC, CLEN
 

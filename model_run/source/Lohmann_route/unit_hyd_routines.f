@@ -78,7 +78,7 @@ c     Solve for
       INTEGER N, I, J, K, L, T, II, JJ, TT, U
       REAL    SUM
 
-      CHARACTER*80 UH_STRING       !new, AW
+      CHARACTER*200 UH_STRING       !new, AW
       CHARACTER*5  NAME5
          
       IF (UH_STRING(1:4) .ne. 'NONE') THEN       ! read UH_S grid, not make it
