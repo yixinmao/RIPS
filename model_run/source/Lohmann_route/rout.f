@@ -30,7 +30,7 @@ c     nrow and ncol should be larger than the grid
 c     nyr should equal run length yrs+1
       INTEGER NROW, NCOL, DAYS, NYR
       PARAMETER (NROW = 250, NCOL = 250)
-      PARAMETER (NYR = 50)
+      PARAMETER (NYR = 200)
 
 c     no changes after here
       REAL    DT
@@ -207,7 +207,7 @@ C     Loop over required stations
  100  CONTINUE
       READ(10,*,END=110) 
      &     NR, NAME, PI, PJ, AREA
-      READ(10,'(A80)',END=110) UH_STRING   !new, AW:  uh_string
+      READ(10,'(A200)',END=110) UH_STRING   !new, AW:  uh_string
       IF (NR .EQ. 1) THEN
          WRITE(*,'(I2,2X,A,I4,I4,G12.6)') 
      &        NR, NAME, PI, PJ
