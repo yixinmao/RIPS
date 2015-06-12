@@ -265,17 +265,27 @@ def calc_monthly_data(data):
 #==============================================================
 #==============================================================
 
+def wateryear(calendar_date):
+	if calendar_date.month >= 10:
+		return calendar_date.year+1
+	return calendar_date.year
+
 def calc_ts_stats_by_group(data, by, stat):
 	'''This function calculates statistics of time series data grouped by year, month, etc
 
 	Input:
 		df: a [pd.DataFrame/Series] object, with index of time
-		by: string of group by, (select from 'year' or 'month')
+		by: string of group by, (select from 'year' or 'month' or 'WY')
 		stat: statistics to be calculated, (select from 'mean')
 		(e.g., if want to calculate monthly mean seasonality (12 values), by='month' and stat='mean')
 
 	Return:
 		A [dateframe/Series] object, with group as index (e.g. 1-12 for 'month')
+
+	Require:
+		wateryear
+		find_full_water_years_within_a_range(dt1, dt2)
+		select_time_range(data, start_datetime, end_datetime)
 	'''
 
 	import pandas as pd
@@ -286,6 +296,13 @@ def calc_ts_stats_by_group(data, by, stat):
 	elif by=='month':
 		if stat=='mean':
 			data_result = data.groupby(lambda x:x.month).mean()
+	elif by=='WY':  # group by water year
+		# first, secelect out full water years
+		start_date, end_date = find_full_water_years_within_a_range(data.index[0], data.index[-1])
+		data_WY = select_time_range(data, start_date, end_date)
+		# then, group by water year
+		if stat=='mean':
+			data_result = data_WY.groupby(lambda x:wateryear(x)).mean()
 
 	return data_result
 
@@ -526,6 +543,65 @@ def plot_seasonality_data(list_s_data, list_style, list_label, plot_start, plot_
 	fig = plot_time_series(False, list_s_seas, list_style, list_label, plot_start, plot_end, xlabel, ylabel, title, fontsize, legend_loc, xtick_location=xtick_location, xtick_labels=xtick_labels, add_info_text=add_info_text, model_info=model_info, stats=stats, show=show)
 
 	return fig
+
+#==============================================================
+#==============================================================
+
+def plot_WY_mean_data(list_s_data, list_style, list_label, plot_start, plot_end, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', time_locator=None, time_format='%Y/%m', add_info_text=False, model_info=None, stats=None, show=False):
+	''' This function plots annual mean (water year) data time series
+
+	Require:
+		plot_date_format
+		add_info_text_to_plot(fig, ax, model_info, stats)
+		plot_time_series
+	'''
+
+	# Check if list_s_data, list_style and list_label have the same length
+	if len(list_s_data) !=len(list_style) or len(list_s_data)!=len(list_label):
+		print 'Input list lengths are not the same!'
+		exit()
+
+	# Calculate WY mean data
+	list_s_WY = []   # list of new monthly mean data in pd.Series type 
+	for i in range(len(list_s_data)):
+		s_month = calc_monthly_data(list_s_data[i])
+		list_s_month.append(s_month)
+
+	# plot
+	fig = plot_time_series(True, list_s_month, list_style, list_label, plot_start, plot_end, xlabel, ylabel, title, fontsize, legend_loc, time_locator, time_format, add_info_text=add_info_text, model_info=model_info, stats=stats, show=show)
+
+	return fig
+
+#==============================================================
+#==============================================================
+
+def plot_WY_mean_data(list_s_data, list_style, list_label, plot_start, plot_end, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', time_locator=None, time_format='%Y/%m', add_info_text=False, model_info=None, stats=None, show=False):
+	''' This function plots water year annual mean data time series
+
+	Require:
+		plot_date_format
+		add_info_text_to_plot(fig, ax, model_info, stats)
+		plot_time_series
+		calc_ts_stats_by_group
+	'''
+
+	# Check if list_s_data, list_style and list_label have the same length
+	if len(list_s_data) !=len(list_style) or len(list_s_data)!=len(list_label):
+		print 'Input list lengths are not the same!'
+		exit()
+
+	# Calculate monthly mean data
+	list_s_WY = []   # list of new monthly mean data in pd.Series type 
+	for i in range(len(list_s_data)):
+		s_WY = calc_ts_stats_by_group(list_s_data[i], 'WY', 'mean')
+		list_s_WY.append(s_WY)
+
+	# plot
+	fig = plot_time_series(False, list_s_WY, list_style, list_label, plot_start, plot_end, xlabel, ylabel, title, fontsize, legend_loc, add_info_text=add_info_text, model_info=model_info, stats=stats, show=show)
+
+	return fig
+
+
 
 
 
