@@ -106,6 +106,23 @@ def convert_time_series_to_df(time, data, columns):
 #==============================================================
 #==============================================================
 
+def convert_time_series_to_Series(time, data):
+	'''This function converts datetime objects and data array to pandas Series object
+
+	Input:
+		time: a list of datetime objects, e.g. [dt.datetime(2011,1,1), dt.datetime(2011,1,3)]
+		data: a 1-D array of corresponding data
+
+	Return: a Series object
+	'''
+
+	import pandas as pd
+	s = pd.Series(data, index=time)
+	return s
+
+#==============================================================
+#==============================================================
+
 def select_time_range(data, start_datetime, end_datetime):
 	''' This function selects out the part of data within a time range
 
@@ -327,3 +344,188 @@ def calc_annual_cumsum_water_year(time, data):
 
 	return time, data_cumsum
  
+#==============================================================
+#==============================================================
+
+def add_info_text_to_plot(fig, ax, model_info, stats, fontsize=14):
+	''' This function adds info text to the bottom of a plot 
+		The text will include:
+			Author; 
+			Plotting date; 
+			Model info (taking from input [str]);
+			Stats (taking from input [str])
+'''
+
+	import matplotlib.pyplot as plt
+	import datetime as dt
+
+	# adjust figure to leave some space at the bottom
+	fig.subplots_adjust(bottom=0.3)
+
+	# determine text content
+	author = 'Yixin'
+	today = dt.date.today()
+	plot_date = today.strftime("%Y-%m-%d")
+	text_to_add = 'Author: %s\nDate plotted: %s\nModel info: %s\nStats: %s\n' %(author, plot_date, model_info, stats)
+
+	# add text
+	plt.text(0, -0.1, text_to_add, horizontalalignment='left',\
+			verticalalignment='top', transform=ax.transAxes, fontsize=fontsize)
+
+	return fig, ax
+
+#==============================================================
+#==============================================================
+
+def read_Lohmann_route_daily_output(path):
+	''' This function reads Lohmann routing model daily output
+
+	Input: daily output file path
+	Return: a pd.Series object with datetime as index and flow[cfs] as data
+
+	Required:
+		convert_YYYYMMDD_to_datetime(year, month, day)
+		convert_time_series_to_Series(time, data)
+	'''
+
+	import numpy as np
+
+	# load data
+	data = np.loadtxt(path)
+	# convert date to datetime
+	date = convert_YYYYMMDD_to_datetime(data[:,0], data[:,1], data[:,2])
+	# convert flow data to pd.Series
+	s = convert_time_series_to_Series(date, data[:,3])
+
+	return s
+
+#==============================================================
+#==============================================================
+
+def plot_time_series(plot_date, list_s_data, list_style, list_label, plot_start, plot_end, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', time_locator=None, time_format='%Y/%m', xtick_location=None, xtick_labels=None, add_info_text=False, model_info=None, stats=None, show=False):
+	''' This function plots daily data time series
+
+	Input:
+		plot_date: True for plot_date, False for plot regular time series
+		list_s_data: a list of pd.Series objects to be plotted
+		list_style: a list of plotting style (e.g., ['b-', 'r--']); must be the same size as 'list_s_data'
+		list_label: a list of plotting label (e.g., ['Scenario1', 'Scenario2']); must be the same size as 'list_s_data'
+		xlabel: [str]
+		ylabel: [str]
+		title: [str]
+		fontsize: for xlabe, ylabel and title [int]
+		legend_loc: [str]
+		plot_start, plot_end: if plot_date=True, [dt.datetime]; if plot_date=False, [float/int]
+		time_locator: time locator on the plot; 'year' for year; 'month' for month. e.g., ('month', 3) for plot one tick every 3 months [tuple]
+		time_format: [str]
+		xtick_location: a list of xtick locations [list of float/int]
+		xtick_labels: a list of xtick labels [list of str]; must be the same length as 'xtick_locations'
+		add_info_text: True for adding info text at the bottom of the plot
+		model_info, stats: descriptions added in the info text [str]
+		show: True for showing the plot
+
+	Require:
+		plot_date_format
+		add_info_text_to_plot(fig, ax, model_info, stats)
+		plot_format
+	'''
+
+	import matplotlib.pyplot as plt
+
+	# Check if list_s_data, list_style and list_label have the same length
+	if len(list_s_data) !=len(list_style) or len(list_s_data)!=len(list_label):
+		print 'Input list lengths are not the same!'
+		exit()
+
+	fig = plt.figure(figsize=(12,8))
+	ax = plt.axes()
+	for i in range(len(list_s_data)):
+		if plot_date==True:  # if plot date
+			plt.plot_date(list_s_data[i].index, list_s_data[i], list_style[i], label=list_label[i])
+		else:  # if plot regular time series
+			plt.plot(list_s_data[i].index, list_s_data[i], list_style[i], label=list_label[i])
+	if xlabel:
+		plt.xlabel(xlabel, fontsize=fontsize)
+	if ylabel:
+		plt.ylabel(ylabel, fontsize=fontsize)
+	if title:
+		plt.title(title, fontsize=fontsize)
+	# format plot
+	leg = plt.legend(loc=legend_loc, frameon=True)
+	leg.get_frame().set_alpha(0)
+	if plot_date==True:  # if plot date
+		plot_date_format(ax, time_range=(plot_start, plot_end), locator=time_locator, time_format='%Y/%m')
+	else:  # if plot regular time series
+		plt.xlim([plot_start, plot_end])
+		if xtick_location:
+			plot_format(ax, xtick_location=xtick_location, xtick_labels=xtick_labels)
+	# add info text
+	if add_info_text==True:
+		add_info_text_to_plot(fig, ax, model_info, stats)
+
+	if show==True:
+		plt.show()
+
+	return fig
+
+#==============================================================
+#==============================================================
+
+def plot_monthly_data(list_s_data, list_style, list_label, plot_start, plot_end, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', time_locator=None, time_format='%Y/%m', add_info_text=False, model_info=None, stats=None, show=False):
+	''' This function plots monthly mean data time series
+
+	Require:
+		plot_date_format
+		add_info_text_to_plot(fig, ax, model_info, stats)
+		plot_time_series
+		calc_monthly_data
+	'''
+
+	# Check if list_s_data, list_style and list_label have the same length
+	if len(list_s_data) !=len(list_style) or len(list_s_data)!=len(list_label):
+		print 'Input list lengths are not the same!'
+		exit()
+
+	# Calculate monthly mean data
+	list_s_month = []   # list of new monthly mean data in pd.Series type 
+	for i in range(len(list_s_data)):
+		s_month = calc_monthly_data(list_s_data[i])
+		list_s_month.append(s_month)
+
+	# plot
+	fig = plot_time_series(True, list_s_month, list_style, list_label, plot_start, plot_end, xlabel, ylabel, title, fontsize, legend_loc, time_locator, time_format, add_info_text=add_info_text, model_info=model_info, stats=stats, show=show)
+
+	return fig
+
+#==============================================================
+#==============================================================
+
+def plot_seasonality_data(list_s_data, list_style, list_label, plot_start, plot_end, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', xtick_location=None, xtick_labels=None, add_info_text=False, model_info=None, stats=None, show=False):
+	''' This function plots seasonality data time series (12 month's mean)
+
+	Require:
+		plot_date_format
+		add_info_text_to_plot(fig, ax, model_info, stats)
+		plot_time_series
+		calc_ts_stats_by_group
+		plot_format
+	'''
+
+	# Check if list_s_data, list_style and list_label have the same length
+	if len(list_s_data) !=len(list_style) or len(list_s_data)!=len(list_label):
+		print 'Input list lengths are not the same!'
+		exit()
+
+	# Calculate monthly mean data
+	list_s_seas = []   # list of new monthly mean data in pd.Series type 
+	for i in range(len(list_s_data)):
+		s_seas = calc_ts_stats_by_group(list_s_data[i], 'month', 'mean') # index is 1-12 (month)
+		list_s_seas.append(s_seas)
+
+	# plot
+	fig = plot_time_series(False, list_s_seas, list_style, list_label, plot_start, plot_end, xlabel, ylabel, title, fontsize, legend_loc, xtick_location=xtick_location, xtick_labels=xtick_labels, add_info_text=add_info_text, model_info=model_info, stats=stats, show=show)
+
+	return fig
+
+
+
