@@ -28,7 +28,7 @@ hist_route_path = args.hist_route_path # historical run. Lohmann routing output.
 future_route_paths = args.future_route_paths # future run. Lohmann routing output. year; month; day; flow(cfs); ['path1', 'path2']
 future_route_names = args.future_route_names # future run. year; month; day; flow(cfs); ['Scenario1', 'Scenario2']
 
-output_plot_basename = '../output/Tennessee_' + usgs_site_code # output plot path basename (suffix will be added to different plots)
+output_plot_basename = '../output/Tennessee.' + future_route_names[0].split(' ')[0] + '.' + usgs_site_code # output plot path basename (suffix will be added to different plots)
 
 #-------------------------------------------------
 
@@ -51,13 +51,13 @@ for i in range(nfuture):
 	list_future_labels.append(future_route_names[i]+', WY%d-%d' %(plot_future_start_date.year+1, plot_future_end_date.year))
 
 hist_style = 'k-'
-style_options = ['b--', 'r--', 'g--', 'm--', 'y--']
+style_options = ['g--', 'r--']
 list_style_future = []  # a list of plotting styles of future scenarios
 list_style_future_control = []  # a list of plotting styles of future scenarios in control period
 for i in range(nfuture):
 	list_style_future_control.append('b-')
 #	list_style_future.append(style_options[i])
-	list_style_future.append('r--')
+	list_style_future.append(style_options[i])
 
 #-------------------------------------------------
 
@@ -117,9 +117,9 @@ for i in range(nfuture):
 #fig.savefig('%s.future.flow.monthly.png' %output_plot_basename, format='png')
 
 #============== plot seasonality data ===============#
-fig = my_functions.plot_seasonality_data(list_s_data=[s_hist_to_plot]+list_s_future_control_to_plot+list_s_future_to_plot, \
-		list_style=[hist_style]+list_style_future_control+list_style_future, \
-		list_label=['historical, WY%d-%d' %(plot_hist_start_date.year+1, plot_hist_end_date.year)]+list_future_control_labels+list_future_labels, \
+fig = my_functions.plot_seasonality_data(list_s_data=[s_hist_to_plot]+[list_s_future_control_to_plot[0]]+list_s_future_to_plot, \
+		list_style=[hist_style]+[list_style_future_control[0]]+list_style_future, \
+		list_label=['historical, WY%d-%d' %(plot_hist_start_date.year+1, plot_hist_end_date.year)]+[list_future_control_labels[0]]+list_future_labels, \
 		plot_start=1, plot_end=12, \
 		ylabel='Flow (cfs)', \
 		title='Monthly mean seasinality, %s, %s' %(usgs_site_name, usgs_site_code), 
@@ -143,14 +143,15 @@ fig = plt.savefig('%s.future.flow.seas.png' %output_plot_basename, format='png')
 
 #============== plot period-average annual mean flow ===============#
 # calculate annual mean flow data (WY)
-list_s_WY_mean = my_functions.calc_WY_mean(list_s_data=[s_hist_to_plot]+list_s_future_control_to_plot+list_s_future_to_plot)
+list_s_WY_mean = my_functions.calc_WY_mean(list_s_data=[s_hist_to_plot]+[list_s_future_control_to_plot[0]]+list_s_future_to_plot)  # only plot one control result
 # plot
 fig = my_functions.plot_boxplot(list_data=list_s_WY_mean, \
-			list_xlabels=['historical, WY%d-%d' %(plot_hist_start_date.year+1, plot_hist_end_date.year)]+list_future_control_labels+list_future_labels, \
-			ylabel='Flow (cfs)', \
+			list_xlabels=['historical, WY%d-%d' %(plot_hist_start_date.year+1, plot_hist_end_date.year)]+[list_future_control_labels[0]]+list_future_labels, \
+			rotation=15, ylabel='Flow (cfs)', \
 			title='Average annual mean flow, %s, %s' %(usgs_site_name, usgs_site_code), \
 			fontsize=16, add_info_text=True, model_info=model_info, \
-			stats='Period average of annual mean flow (WY); \n          historical and control - average over WY%d-%d; \n          future projection - WY%d-%d' %(plot_hist_start_date.year+1, plot_hist_end_date.year, plot_future_start_date.year+1, plot_future_end_date.year))
+			stats='Period average of annual mean flow (WY); \n          historical and control - average over WY%d-%d; \n          future projection - WY%d-%d' %(plot_hist_start_date.year+1, plot_hist_end_date.year, plot_future_start_date.year+1, plot_future_end_date.year), \
+			bottom=0.35, text_location=-0.2)
 
 fig = plt.savefig('%s.future.flow.WY_mean_boxplot.png' %output_plot_basename, format='png')
 

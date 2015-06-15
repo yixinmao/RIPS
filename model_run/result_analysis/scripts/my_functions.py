@@ -438,20 +438,22 @@ def calc_annual_cumsum_water_year(time, data):
 #==============================================================
 #==============================================================
 
-def add_info_text_to_plot(fig, ax, model_info, stats, fontsize=14):
+def add_info_text_to_plot(fig, ax, model_info, stats, fontsize=14, bottom=0.3, text_location=-0.1):
 	''' This function adds info text to the bottom of a plot 
 		The text will include:
 			Author; 
 			Plotting date; 
 			Model info (taking from input [str]);
 			Stats (taking from input [str])
+			bottom: the extent of adjusting the original plot; the higher the 'bottom', the more space it would be left for the texts
+			text_location: the location of the text; the more negative, the lower the textG
 '''
 
 	import matplotlib.pyplot as plt
 	import datetime as dt
 
 	# adjust figure to leave some space at the bottom
-	fig.subplots_adjust(bottom=0.3)
+	fig.subplots_adjust(bottom=bottom)
 
 	# determine text content
 	author = 'Yixin'
@@ -460,7 +462,7 @@ def add_info_text_to_plot(fig, ax, model_info, stats, fontsize=14):
 	text_to_add = 'Author: %s\nDate plotted: %s\nModel info: %s\nStats: %s\n' %(author, plot_date, model_info, stats)
 
 	# add text
-	plt.text(0, -0.1, text_to_add, horizontalalignment='left',\
+	plt.text(0, text_location, text_to_add, horizontalalignment='left',\
 			verticalalignment='top', transform=ax.transAxes, fontsize=fontsize)
 
 	return fig, ax
@@ -667,12 +669,13 @@ def calc_WY_mean(list_s_data):
 #==============================================================
 #==============================================================
 
-def plot_boxplot(list_data, list_xlabels, xlabel=None, ylabel=None, title=None, fontsize=16, add_info_text=False, model_info=None, stats=None, show=False):
+def plot_boxplot(list_data, list_xlabels, xlabel=None, rotation=0, ylabel=None, title=None, fontsize=16, add_info_text=False, model_info=None, stats=None, bottom=0.3, text_location=-0.1, show=False):
 	''' This function plots a vertical boxplot
 
 	Input:
 		list_data: a list of data to be plotted; each element of the list is an array of data
 		list_xlabels: a list of xaxis labels correspondong to list_data; must be the same length of list_data
+		rotation: rotation angle (deg) of x labels
 	'''
 
 	import matplotlib.pyplot as plt
@@ -685,7 +688,7 @@ def plot_boxplot(list_data, list_xlabels, xlabel=None, ylabel=None, title=None, 
 	fig = plt.figure(figsize=(12,8))
 	ax = plt.axes()
 	plt.boxplot(list_data)
-	plt.xticks(range(1,len(list_data)+1), list_xlabels)
+	plt.xticks(range(1,len(list_data)+1), list_xlabels, rotation=rotation)
 	if xlabel:
 		plt.xlabel(xlabel, fontsize=fontsize)
 	if ylabel:
@@ -694,7 +697,7 @@ def plot_boxplot(list_data, list_xlabels, xlabel=None, ylabel=None, title=None, 
 		plt.title(title, fontsize=fontsize)
 	# add info text
 	if add_info_text==True:
-		add_info_text_to_plot(fig, ax, model_info, stats)
+		add_info_text_to_plot(fig, ax, model_info, stats, bottom=bottom, text_location=text_location)
 
 	if show==True:
 		plt.show()
