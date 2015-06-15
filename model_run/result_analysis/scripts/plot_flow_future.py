@@ -32,11 +32,11 @@ output_plot_basename = '../output/Tennessee_' + usgs_site_code # output plot pat
 
 #-------------------------------------------------
 
-plot_hist_start_date = dt.datetime(1950, 10, 1)  # start date shown on the plot for historical run (should be complete water years)
+plot_hist_start_date = dt.datetime(1969, 10, 1)  # start date shown on the plot for historical run (should be complete water years)
 plot_hist_end_date = dt.datetime(1999, 9, 30)  # end date shown on the plot for historical run
 
-plot_future_start_date = dt.datetime(1950, 10, 1)  # start date shown on the plot for future run (should be complete water years)
-plot_future_end_date = dt.datetime(2099, 9, 30)  # end date shown on the plot for future run
+plot_future_start_date = dt.datetime(1939, 10, 1)  # start date shown on the plot for future run (should be complete water years)
+plot_future_end_date = dt.datetime(2069, 9, 30)  # end date shown on the plot for future run
 
 time_locator = ('year', 20)  # time locator on the plot; 'year' for year; 'month' for month. e.g., ('month', 3) for plot one tick every 3 months
 
@@ -44,11 +44,24 @@ time_locator = ('year', 20)  # time locator on the plot; 'year' for year; 'month
 
 nfuture = len(future_route_paths)  # number of future scenarios
 
+list_future_control_labels = []
+list_future_labels = []
+for i in range(nfuture):
+	list_future_control_labels.append(future_route_names[i]+', WY%d-%d' %(plot_hist_start_date.year+1, plot_hist_end_date.year))
+	list_future_labels.append(future_route_names[i]+', WY%d-%d' %(plot_future_start_date.year+1, plot_future_end_date.year))
+
 hist_style = 'k-'
 style_options = ['b--', 'r--', 'g--', 'm--', 'y--']
 list_style_future = []  # a list of plotting styles of future scenarios
+list_style_future_control = []  # a list of plotting styles of future scenarios in control period
 for i in range(nfuture):
-	list_style_future.append(style_options[i])
+	list_style_future_control.append('b-')
+#	list_style_future.append(style_options[i])
+	list_style_future.append('r--')
+
+#-------------------------------------------------
+
+model_info = 'VIC runoff, historical -  1/8 deg, Maurer forcing, Andy Wood setup\n          VIC runoff, climate change scenarios - 1/8 deg, Reclamation archive (GCM forcing)\n          Route: Lohmann, Wu flowdir, Andy Wood setup'
 
 #========================================================
 # Load data
@@ -63,15 +76,20 @@ for i in range(nfuture):
 # Select data to be plotted
 #========================================================
 s_hist_to_plot = my_functions.select_time_range(s_hist, plot_hist_start_date, plot_hist_end_date)
+
 list_s_future_to_plot = []
 for i in range(nfuture):
 	s_future_to_plot = my_functions.select_time_range(list_s_future[i], plot_future_start_date, plot_future_end_date)
 	list_s_future_to_plot.append(s_future_to_plot)
 
+list_s_future_control_to_plot = []  # control period of future run
+for i in range(nfuture):
+	s_future_control_to_plot = my_functions.select_time_range(list_s_future[i], plot_hist_start_date, plot_hist_end_date)
+	list_s_future_control_to_plot.append(s_future_control_to_plot)
+
 #========================================================
 # plot
 #========================================================
-model_info = 'VIC runoff, historical -  1/8 deg, Maurer forcing, Andy Wood setup\n          VIC runoff, climate change scenarios - 1/8 deg, Reclamation archive (GCM forcing)\n          Route: Lohmann, Wu flowdir, Andy Wood setup'
 
 ##============== plot daily data ===============#
 #fig = my_functions.plot_time_series(plot_date=True, \
@@ -99,9 +117,9 @@ model_info = 'VIC runoff, historical -  1/8 deg, Maurer forcing, Andy Wood setup
 #fig.savefig('%s.future.flow.monthly.png' %output_plot_basename, format='png')
 
 #============== plot seasonality data ===============#
-fig = my_functions.plot_seasonality_data(list_s_data=[s_hist_to_plot]+list_s_future_to_plot, \
-		list_style=[hist_style]+list_style_future, \
-		list_label=['historical']+future_route_names, \
+fig = my_functions.plot_seasonality_data(list_s_data=[s_hist_to_plot]+list_s_future_control_to_plot+list_s_future_to_plot, \
+		list_style=[hist_style]+list_style_future_control+list_style_future, \
+		list_label=['historical, WY%d-%d' %(plot_hist_start_date.year+1, plot_hist_end_date.year)]+list_future_control_labels+list_future_labels, \
 		plot_start=1, plot_end=12, \
 		ylabel='Flow (cfs)', \
 		title='Monthly mean seasinality, %s, %s' %(usgs_site_name, usgs_site_code), 
@@ -112,16 +130,16 @@ fig = my_functions.plot_seasonality_data(list_s_data=[s_hist_to_plot]+list_s_fut
 
 fig = plt.savefig('%s.future.flow.seas.png' %output_plot_basename, format='png')
 
-#============== plot annual mean flow ===============#
-fig = my_functions.plot_WY_mean_data(list_s_data=[s_hist_to_plot]+list_s_future_to_plot, \
-		list_style=[hist_style]+list_style_future, \
-		list_label=['historical']+future_route_names, \
-		plot_start=plot_hist_start_date.year, plot_end=plot_future_end_date.year, \
-		ylabel='Flow (cfs)', title='Annual mean (WY), %s, %s' %(usgs_site_name, usgs_site_code), 
-		fontsize=16, legend_loc='upper left', \
-		add_info_text=True, model_info=model_info, stats='Annual mean (WY)')
-
-fig.savefig('%s.future.flow.WY.png' %output_plot_basename, format='png')
+##============== plot annual mean flow ===============#
+#fig = my_functions.plot_WY_mean_data(list_s_data=[s_hist_to_plot]+list_s_future_to_plot, \
+#		list_style=[hist_style]+list_style_future, \
+#		list_label=['historical']+future_route_names, \
+#		plot_start=plot_hist_start_date.year, plot_end=plot_future_end_date.year, \
+#		ylabel='Flow (cfs)', title='Annual mean (WY), %s, %s' %(usgs_site_name, usgs_site_code), 
+#		fontsize=16, legend_loc='upper left', \
+#		add_info_text=True, model_info=model_info, stats='Annual mean (WY)')
+#
+#fig.savefig('%s.future.flow.WY.png' %output_plot_basename, format='png')
 
 
 
