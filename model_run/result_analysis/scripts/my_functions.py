@@ -1,5 +1,79 @@
 #!/usr/local/anaconda/bin/python
 
+# -------------------------------------------------------------------- #
+def read_config(config_file, default_config=None):
+    """
+    Return a dictionary with subdictionaries of all configFile options/values
+    """
+
+    from netCDF4 import Dataset
+    try:
+        from cyordereddict import OrderedDict
+    except:
+        from collections import OrderedDict
+    try:
+        from configparser import SafeConfigParser
+    except:
+        from ConfigParser import SafeConfigParser
+    import configobj
+
+    config = SafeConfigParser()
+    config.optionxform = str
+    config.read(config_file)
+    sections = config.sections()
+    dict1 = OrderedDict()
+    for section in sections:
+        options = config.options(section)
+        dict2 = OrderedDict()
+        for option in options:
+            dict2[option] = config_type(config.get(section, option))
+        dict1[section] = dict2
+
+    if default_config is not None:
+        for name, section in dict1.items():
+            if name in default_config.keys():
+                for option, key in default_config[name].items():
+                    if option not in section.keys():
+                        dict1[name][option] = key
+
+    return dict1
+# -------------------------------------------------------------------- #
+
+# -------------------------------------------------------------------- #
+def config_type(value):
+    """
+    Parse the type of the configuration file option.
+    First see the value is a bool, then try float, finally return a string.
+    """
+    val_list = [x.strip() for x in value.split(',')]
+    if len(val_list) == 1:
+        value = val_list[0]
+        if value in ['true', 'True', 'TRUE', 'T']:
+            return True
+        elif value in ['false', 'False', 'FALSE', 'F']:
+            return False
+        elif value in ['none', 'None', 'NONE', '']:
+            return None
+        else:
+            try:
+                return int(value)
+            except:
+                pass
+            try:
+                return float(value)
+            except:
+                return value
+    else:
+        try:
+            return list(map(int, val_list))
+        except:
+            pass
+        try:
+            return list(map(float, val_list))
+        except:
+            return val_list
+# -------------------------------------------------------------------- #
+
 #==============================================================
 #==============================================================
 
@@ -548,34 +622,6 @@ def plot_seasonality_data(list_s_data, list_style, list_label, plot_start, plot_
 #==============================================================
 
 def plot_WY_mean_data(list_s_data, list_style, list_label, plot_start, plot_end, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', time_locator=None, time_format='%Y/%m', add_info_text=False, model_info=None, stats=None, show=False):
-	''' This function plots annual mean (water year) data time series
-
-	Require:
-		plot_date_format
-		add_info_text_to_plot(fig, ax, model_info, stats)
-		plot_time_series
-	'''
-
-	# Check if list_s_data, list_style and list_label have the same length
-	if len(list_s_data) !=len(list_style) or len(list_s_data)!=len(list_label):
-		print 'Input list lengths are not the same!'
-		exit()
-
-	# Calculate WY mean data
-	list_s_WY = []   # list of new monthly mean data in pd.Series type 
-	for i in range(len(list_s_data)):
-		s_month = calc_monthly_data(list_s_data[i])
-		list_s_month.append(s_month)
-
-	# plot
-	fig = plot_time_series(True, list_s_month, list_style, list_label, plot_start, plot_end, xlabel, ylabel, title, fontsize, legend_loc, time_locator, time_format, add_info_text=add_info_text, model_info=model_info, stats=stats, show=show)
-
-	return fig
-
-#==============================================================
-#==============================================================
-
-def plot_WY_mean_data(list_s_data, list_style, list_label, plot_start, plot_end, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', time_locator=None, time_format='%Y/%m', add_info_text=False, model_info=None, stats=None, show=False):
 	''' This function plots water year annual mean data time series
 
 	Require:
@@ -600,6 +646,64 @@ def plot_WY_mean_data(list_s_data, list_style, list_label, plot_start, plot_end,
 	fig = plot_time_series(False, list_s_WY, list_style, list_label, plot_start, plot_end, xlabel, ylabel, title, fontsize, legend_loc, add_info_text=add_info_text, model_info=model_info, stats=stats, show=show)
 
 	return fig
+
+#==============================================================
+#==============================================================
+
+def calc_WY_mean(list_s_data):
+	''' This function calculates mean annual data (water year) 
+	
+	Require:
+		calc_ts_stats_by_group
+	'''
+
+	list_s_WY = []   # list of new monthly mean data in pd.Series type 
+	for i in range(len(list_s_data)):
+		s_WY = calc_ts_stats_by_group(list_s_data[i], 'WY', 'mean')
+		list_s_WY.append(s_WY)
+
+	return list_s_WY
+
+#==============================================================
+#==============================================================
+
+def plot_boxplot(list_data, list_xlabels, xlabel=None, ylabel=None, title=None, fontsize=16, add_info_text=False, model_info=None, stats=None, show=False):
+	''' This function plots a vertical boxplot
+
+	Input:
+		list_data: a list of data to be plotted; each element of the list is an array of data
+		list_xlabels: a list of xaxis labels correspondong to list_data; must be the same length of list_data
+	'''
+
+	import matplotlib.pyplot as plt
+
+	# Check if list_data and list_xaxis have the same length
+	if len(list_data) !=len(list_xlabels):
+		print 'Input list lengths are not the same!'
+		exit()
+
+	fig = plt.figure(figsize=(12,8))
+	ax = plt.axes()
+	plt.boxplot(list_data)
+	plt.xticks(range(1,len(list_data)+1), list_xlabels)
+	if xlabel:
+		plt.xlabel(xlabel, fontsize=fontsize)
+	if ylabel:
+		plt.ylabel(ylabel, fontsize=fontsize)
+	if title:
+		plt.title(title, fontsize=fontsize)
+	# add info text
+	if add_info_text==True:
+		add_info_text_to_plot(fig, ax, model_info, stats)
+
+	if show==True:
+		plt.show()
+
+	return fig
+
+
+
+
 
 
 

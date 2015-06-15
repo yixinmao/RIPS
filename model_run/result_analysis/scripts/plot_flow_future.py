@@ -126,7 +126,7 @@ fig = my_functions.plot_seasonality_data(list_s_data=[s_hist_to_plot]+list_s_fut
 		fontsize=16, legend_loc=None, \
 		xtick_location=range(1,13), \
 		xtick_labels=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Nov','Oct','Nov','Dec'], \
-		add_info_text=True, model_info=model_info, stats='Monthly mean; historical - WY%d-%d; climate change scenario - WY%d-%d' %(plot_hist_start_date.year+1, plot_hist_end_date.year, plot_future_start_date.year+1, plot_future_end_date.year))
+		add_info_text=True, model_info=model_info, stats='Monthly mean; historical - WY%d-%d; cfuture projection - WY%d-%d' %(plot_hist_start_date.year+1, plot_hist_end_date.year, plot_future_start_date.year+1, plot_future_end_date.year))
 
 fig = plt.savefig('%s.future.flow.seas.png' %output_plot_basename, format='png')
 
@@ -140,6 +140,20 @@ fig = plt.savefig('%s.future.flow.seas.png' %output_plot_basename, format='png')
 #		add_info_text=True, model_info=model_info, stats='Annual mean (WY)')
 #
 #fig.savefig('%s.future.flow.WY.png' %output_plot_basename, format='png')
+
+#============== plot period-average annual mean flow ===============#
+# calculate annual mean flow data (WY)
+list_s_WY_mean = my_functions.calc_WY_mean(list_s_data=[s_hist_to_plot]+list_s_future_control_to_plot+list_s_future_to_plot)
+# plot
+fig = my_functions.plot_boxplot(list_data=list_s_WY_mean, \
+			list_xlabels=['historical, WY%d-%d' %(plot_hist_start_date.year+1, plot_hist_end_date.year)]+list_future_control_labels+list_future_labels, \
+			ylabel='Flow (cfs)', \
+			title='Average annual mean flow, %s, %s' %(usgs_site_name, usgs_site_code), \
+			fontsize=16, add_info_text=True, model_info=model_info, \
+			stats='Period average of annual mean flow (WY); \n          historical and control - average over WY%d-%d; \n          future projection - WY%d-%d' %(plot_hist_start_date.year+1, plot_hist_end_date.year, plot_future_start_date.year+1, plot_future_end_date.year))
+
+fig = plt.savefig('%s.future.flow.WY_mean_boxplot.png' %output_plot_basename, format='png')
+
 
 
 
