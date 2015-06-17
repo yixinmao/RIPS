@@ -5,3 +5,5 @@ control_cmp_flow.py / control_cmp_streamT.py
 cmp_flow.py
 	plot flow data from RBM output and compare with USGS streamflow
 
+plot_flow_future.py
+	plot flow for comparing seasonality and average annual mean flow of climate scenarios and historical/control run
