@@ -60,8 +60,6 @@ list_future_plot_end_date = [dt.datetime(2039,9,30),   # future 1, 2020s
                       dt.datetime(2099,9,30)]   # future 3, 2080s
 
 
-time_locator = ('year', 20)  # time locator on the plot; 'year' for year; 'month' for month. e.g., ('month', 3) for plot one tick every 3 months
-
 #-------------------------------------------------
 hist_label = 'Historical, 1980s'
 control_label = 'Control, 1980s, 5 GCM avg.'
@@ -116,35 +114,35 @@ for i in range(nfuture):
 # plot
 #========================================================
 
-#============== plot seasonality data ===============#
-# plot rcp45
-fig = my_functions.plot_seasonality_data(list_s_data=[control_s_to_plot]+list_future_s_to_plot_rcp45, \
-		list_style=[control_style]+list_future_style, \
-		list_label=[control_label]+list_future_label, \
-		plot_start=1, plot_end=12, \
-		ylabel='Flow (thousand cfs)', \
-		title='Monthly mean seasonality, {:s}, {:s}, RCP4.5'.format(usgs_site_name, usgs_site_code), 
-		fontsize=16, legend_loc=None, \
-		xtick_location=range(1,13), \
-		xtick_labels=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Nov','Oct','Nov','Dec'], \
-		add_info_text=True, model_info=model_info, stats='Monthly mean; historical - WY%d-%d; future projection - 1980s: WY1970-1999; \n          2020s: WY2010-2039; 2050s: WY2040-2069; 2080s: WY2070-2099' %(hist_plot_start_date.year+1, hist_plot_end_date.year)) \
-
-fig = plt.savefig('%s.rcp45.future.flow.seas.png' %output_plot_basename, format='png')
-
-# plot rcp85
-fig = my_functions.plot_seasonality_data(list_s_data=[control_s_to_plot]+list_future_s_to_plot_rcp85, \
-		list_style=[control_style]+list_future_style, \
-		list_label=[control_label]+list_future_label, \
-		plot_start=1, plot_end=12, \
-		ylabel='Flow (thousand cfs)', \
-		title='Monthly mean seasonality, {:s}, {:s}, RCP8.5'.format(usgs_site_name, usgs_site_code), 
-		fontsize=16, legend_loc=None, \
-		xtick_location=range(1,13), \
-		xtick_labels=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Nov','Oct','Nov','Dec'], \
-		add_info_text=True, model_info=model_info, stats='Monthly mean; historical - WY%d-%d; future projection - 1980s: WY1970-1999; \n          2020s: WY2010-2039; 2050s: WY2040-2069; 2080s: WY2070-2099' %(hist_plot_start_date.year+1, hist_plot_end_date.year)) \
-
-fig = plt.savefig('%s.rcp85.future.flow.seas.png' %output_plot_basename, format='png')
-
+##============== plot seasonality data ===============#
+## plot rcp45
+#fig = my_functions.plot_seasonality_data(list_s_data=[control_s_to_plot]+list_future_s_to_plot_rcp45, \
+#		list_style=[control_style]+list_future_style, \
+#		list_label=[control_label]+list_future_label, \
+#		plot_start=1, plot_end=12, \
+#		ylabel='Flow (thousand cfs)', \
+#		title='Monthly mean seasonality, {:s}, {:s}, RCP4.5'.format(usgs_site_name, usgs_site_code), 
+#		fontsize=16, legend_loc=None, \
+#		xtick_location=range(1,13), \
+#		xtick_labels=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Nov','Oct','Nov','Dec'], \
+#		add_info_text=True, model_info=model_info, stats='Monthly mean; historical - WY%d-%d; future projection - 1980s: WY1970-1999; \n          2020s: WY2010-2039; 2050s: WY2040-2069; 2080s: WY2070-2099' %(hist_plot_start_date.year+1, hist_plot_end_date.year)) \
+#
+#fig = plt.savefig('%s.rcp45.future.flow.seas.png' %output_plot_basename, format='png')
+#
+## plot rcp85
+#fig = my_functions.plot_seasonality_data(list_s_data=[control_s_to_plot]+list_future_s_to_plot_rcp85, \
+#		list_style=[control_style]+list_future_style, \
+#		list_label=[control_label]+list_future_label, \
+#		plot_start=1, plot_end=12, \
+#		ylabel='Flow (thousand cfs)', \
+#		title='Monthly mean seasonality, {:s}, {:s}, RCP8.5'.format(usgs_site_name, usgs_site_code), 
+#		fontsize=16, legend_loc=None, \
+#		xtick_location=range(1,13), \
+#		xtick_labels=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Nov','Oct','Nov','Dec'], \
+#		add_info_text=True, model_info=model_info, stats='Monthly mean; historical - WY%d-%d; future projection - 1980s: WY1970-1999; \n          2020s: WY2010-2039; 2050s: WY2040-2069; 2080s: WY2070-2099' %(hist_plot_start_date.year+1, hist_plot_end_date.year)) \
+#
+#fig = plt.savefig('%s.rcp85.future.flow.seas.png' %output_plot_basename, format='png')
+#
 ##============== plot period-average annual mean flow ===============#
 ## calculate annual mean flow data (WY)
 #hist_s_WY_mean = my_functions.calc_WY_mean(hist_s_to_plot)  # only plot one control result
@@ -155,42 +153,42 @@ fig = plt.savefig('%s.rcp85.future.flow.seas.png' %output_plot_basename, format=
 #	s_WY_mean_rcp85 = my_functions.calc_WY_mean(list_future_s_to_plot_rcp85[i])
 #	list_future_s_WY_mean.append([s_WY_mean_rcp45, s_WY_mean_rcp85])  # only plot one control result
 #
-##------- plot historical vs. control (control is for individual models) -------#
-## This part is not general and has some hard-coded parts!!!
-## Read in individual GCM results
-#list_individual_GCM = []
-#f = open(individual_model_list, 'r')
-#while 1:
-#	line = f.readline().rstrip("\n")
-#	if line=="":
-#		break
-#	list_individual_GCM.append(line)
-#f.close()
-## Load data and select control period for each GCM
-#list_s_control_GCMs_WY_mean = [[hist_s_WY_mean]]
-#list_xlabels = ['Historical\n1980s']
-#color_list = [[hist_color]]
-#list_s_control_GCMs_WY_mean.append([control_s_WY_mean])
-#list_xlabels.append('Control, 1980s\n5 GCM avg.')
-#color_list.append([control_color])
-#for i in range(len(list_individual_GCM)):
-#	s_GCM_45 = my_functions.read_Lohmann_route_daily_output('{}/{}_rcp45_r1i1p1/{}'.format(future_scenario_basedir, list_individual_GCM[i], os.path.basename(hist_route_path)))/1000  # convert to 1000 cfs
-#	s_GCM_control = my_functions.select_time_range(s_GCM_45, control_plot_start_date, control_plot_end_date)
-#	s_GCM_control_WY_mean = my_functions.calc_WY_mean(s_GCM_control)
-#	list_s_control_GCMs_WY_mean.append([s_GCM_control_WY_mean])
-#	list_xlabels.append(list_individual_GCM[i])
-#	color_list.append(['m'])
-#
-#fig = my_functions.plot_boxplot(list_data = list_s_control_GCMs_WY_mean, \
-#			list_xlabels = list_xlabels, \
-#			color_list = color_list, \
-#			rotation = 0, ylabel = 'Flow (thousand cfs)', \
-#			title='Average annual mean flow, {}, {}'.format(usgs_site_name, usgs_site_code), \
-#			fontsize=16, add_info_text=True, model_info=model_info, \
-#			stats = 'Period average of annual mean flow (WY); \n          historical & control - WY1970-1999', \
-#			bottom=0.4, text_location=-0.2)
-#
-#fig = plt.savefig('%sfuture.flow.WY_mean_boxplot.hist_control.png' %output_plot_basename, format='png')
+###------- plot historical vs. control (control is for individual models) -------#
+### This part is not general and has some hard-coded parts!!!
+### Read in individual GCM results
+##list_individual_GCM = []
+##f = open(individual_model_list, 'r')
+##while 1:
+##	line = f.readline().rstrip("\n")
+##	if line=="":
+##		break
+##	list_individual_GCM.append(line)
+##f.close()
+### Load data and select control period for each GCM
+##list_s_control_GCMs_WY_mean = [[hist_s_WY_mean]]
+##list_xlabels = ['Historical\n1980s']
+##color_list = [[hist_color]]
+##list_s_control_GCMs_WY_mean.append([control_s_WY_mean])
+##list_xlabels.append('Control, 1980s\n5 GCM avg.')
+##color_list.append([control_color])
+##for i in range(len(list_individual_GCM)):
+##	s_GCM_45 = my_functions.read_Lohmann_route_daily_output('{}/{}_rcp45_r1i1p1/{}'.format(future_scenario_basedir, list_individual_GCM[i], os.path.basename(hist_route_path)))/1000  # convert to 1000 cfs
+##	s_GCM_control = my_functions.select_time_range(s_GCM_45, control_plot_start_date, control_plot_end_date)
+##	s_GCM_control_WY_mean = my_functions.calc_WY_mean(s_GCM_control)
+##	list_s_control_GCMs_WY_mean.append([s_GCM_control_WY_mean])
+##	list_xlabels.append(list_individual_GCM[i])
+##	color_list.append(['m'])
+##
+##fig = my_functions.plot_boxplot(list_data = list_s_control_GCMs_WY_mean, \
+##			list_xlabels = list_xlabels, \
+##			color_list = color_list, \
+##			rotation = 0, ylabel = 'Flow (thousand cfs)', \
+##			title='Average annual mean flow, {}, {}'.format(usgs_site_name, usgs_site_code), \
+##			fontsize=16, add_info_text=True, model_info=model_info, \
+##			stats = 'Period average of annual mean flow (WY); \n          historical & control - WY1970-1999', \
+##			bottom=0.4, text_location=-0.2)
+##
+##fig = plt.savefig('%sfuture.flow.WY_mean_boxplot.hist_control.png' %output_plot_basename, format='png')
 #
 ##--------- plot future periods ----------#
 ## determine data to plot (control; future periods (each period has rcp45 and rcp85))
@@ -217,8 +215,17 @@ fig = plt.savefig('%s.rcp85.future.flow.seas.png' %output_plot_basename, format=
 #			bottom=0.4, text_location=-0.2)
 #
 #fig = plt.savefig('%sfuture.flow.WY_mean_boxplot.png' %output_plot_basename, format='png')
-#
-#
-#
-#
-#
+
+#============== plot flow duration curve ===============#
+fig = my_functions.plot_duration_curve(list_s_data=[control_s_to_plot]+list_future_s_to_plot_rcp45, \
+		list_style=[control_style]+list_future_style, \
+		list_label=[control_label]+list_future_label, \
+		figsize=(10,10), ylog=True, xlim=None, ylim=None, \
+		xlabel='Exceedence', ylabel='Flow (thousand cfs)', \
+		title='{:s}, {:s}, RCP4.5'.format(usgs_site_name, usgs_site_code), fontsize=16, \
+		legend_loc='upper right', add_info_text=True, model_info=model_info, \
+		stats='Flow duration curve based on daily data', show=False)
+
+fig = plt.savefig('%sfuture.flow_duration.png' %output_plot_basename, format='png')
+
+
