@@ -5,7 +5,7 @@
 #    where <lat>, <lon> are lat and lon of the grid cell;
 #          <reach#> is the reach number defined in RBM (this can be helpful when trying to look at confluence grid cells);
 #          <seg#> is the segment number (1 or 2)
-# The columns of each file: <year> <month> <day> <streamflow (cfs)> <stream T (degC)>
+# The columns of each file: <year> <month> <day> <streamflow (cfs)> <stream T (degC)> <headwater T (degC)> <airT (degC)>
 
 # The script takes two command line arguments: ./rbm_output_process.py lat lon
 
@@ -14,21 +14,97 @@ import datetime as dt
 import os
 import sys
 
+# -------------------------------------------------------------------- #
+def read_config(config_file, default_config=None):
+    """
+    Return a dictionary with subdictionaries of all configFile options/values
+    """
+
+    from netCDF4 import Dataset
+    try:
+        from cyordereddict import OrderedDict
+    except:
+        from collections import OrderedDict
+    try:
+        from configparser import SafeConfigParser
+    except:
+        from ConfigParser import SafeConfigParser
+    import configobj
+
+    config = SafeConfigParser()
+    config.optionxform = str
+    config.read(config_file)
+    sections = config.sections()
+    dict1 = OrderedDict()
+    for section in sections:
+        options = config.options(section)
+        dict2 = OrderedDict()
+        for option in options:
+            dict2[option] = config_type(config.get(section, option))
+        dict1[section] = dict2
+
+    if default_config is not None:
+        for name, section in dict1.items():
+            if name in default_config.keys():
+                for option, key in default_config[name].items():
+                    if option not in section.keys():
+                        dict1[name][option] = key
+
+    return dict1
+# -------------------------------------------------------------------- #
+
+# -------------------------------------------------------------------- #
+def config_type(value):
+    """
+    Parse the type of the configuration file option.
+    First see the value is a bool, then try float, finally return a string.
+    """
+    val_list = [x.strip() for x in value.split(',')]
+    if len(val_list) == 1:
+        value = val_list[0]
+        if value in ['true', 'True', 'TRUE', 'T']:
+            return True
+        elif value in ['false', 'False', 'FALSE', 'F']:
+            return False
+        elif value in ['none', 'None', 'NONE', '']:
+            return None
+        else:
+            try:
+                return int(value)
+            except:
+                pass
+            try:
+                return float(value)
+            except:
+                return value
+    else:
+        try:
+            return list(map(int, val_list))
+        except:
+            pass
+        try:
+            return list(map(float, val_list))
+        except:
+            return val_list
+# -------------------------------------------------------------------- #
+
 #=======================================================
 # Parameter setting
 #=======================================================
+cfg = read_config(sys.argv[1])  # configure file for this script
+
 #=== input ===#
 # We assume that direct RBM output files are: $rbm_output_dir/$run_code.Temp/.Spat
 # A directory named $rbm_run_code will be made under the RBM output directory; formatted files will be under this directory
-run_code = 'Tennessee_1949_2010'
-rbm_output_dir = '/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/RBM/Maurer_8th/Tennessee'  # RBM output directory
-lat_to_extract = float(sys.argv[1])  # grid cell to extract
-lon_to_extract = float(sys.argv[2])
-precision = 4   # number of decimal points of grid cell
-nseg_nday_path = rbm_output_dir + '/' + run_code + '.nseg_nday'  # a text file; first line: total # all stream segments; second line: total # days of the run
+run_code = cfg['INPUT']['run_code']  # 'Tennessee_1949_2010'
+rbm_output_dir = cfg['INPUT']['rbm_output_dir']  # '/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/RBM/Maurer_8th/Tennessee/Tennessee_1949_2010'  # RBM output directory
+lat_to_extract = float(sys.argv[2])  # grid cell to extract
+lon_to_extract = float(sys.argv[3])
+precision = cfg['INPUT']['precision']  # number of decimal points of grid cell
+nseg_nday_path = os.path.join(rbm_output_dir, cfg['INPUT']['nseg_nday_filename'])  # run_code + '.nseg_nday'  # a text file; first line: total # all stream segments; second line: total # days of the run
 
 #=== output ===#
-output_dir = rbm_output_dir + '/' + run_code + '/' + '%.*f_%.*f' %(precision, lat_to_extract, precision, lon_to_extract)
+output_dir = os.path.join(rbm_output_dir, run_code, '%.*f_%.*f' %(precision, lat_to_extract, precision, lon_to_extract) )
 
 #=========================================================
 # Extracting grid cell data
@@ -75,12 +151,14 @@ while 1:  # loop over each line in the .Temp file
 		decimal_year = line.split()[0]
 		year = int(decimal_year.split('.')[0])
 		day_of_year = int(line.split()[1])
-		if day_of_year > 360 and decimal_year.split('.')[1] == '0013':  # correct bad decimal year integer part
+		if day_of_year > 360 and float('0.'+decimal_year.split('.')[1]) <= 0.005:  # correct bad decimal year integer part
 			year = year - 1
 		date = dt.datetime(year, 1, 1) + dt.timedelta(days=day_of_year-1)  # convert day of year to date
 		flow = float(line.split()[8])
 		T_stream = float(line.split()[5])
-		data[line_num_in_spat].append([year, date.month, date.day, flow, T_stream])
+		T_headwater = float(line.split()[6])
+		T_air = float(line.split()[7])
+		data[line_num_in_spat].append([year, date.month, date.day, flow, T_stream, T_headwater, T_air])
 		print 'Processing', year, date.month, date.day, '...'
 
 for i in data:  # convert to np.array
@@ -98,7 +176,7 @@ for line_num in cell_info:
 	f = open('%s/%.*f_%.*f_reach%d_seg%d' %(output_dir, precision, lat_to_extract, precision, lon_to_extract, cell_info[line_num][0], cell_info[line_num][1]), 'w')
 	data_current = data[line_num]
 	for i in range(nday):
-		f.write('%d %d %d %.1f %.2f\n' %(data_current[i,0], data_current[i,1], data_current[i,2], data_current[i,3], data_current[i,4]))
+		f.write('%d %d %d %.1f %.2f %.2f %.2f\n' %(data_current[i,0], data_current[i,1], data_current[i,2], data_current[i,3], data_current[i,4], data_current[i,5], data_current[i,6]))
 	f.close()
 
 

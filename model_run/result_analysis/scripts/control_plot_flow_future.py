@@ -6,6 +6,10 @@ import csv
 import subprocess
 import os
 import numpy as np
+import sys
+
+# Read in config file
+cfg = sys.argv[1]
 
 #=======================================================
 # Parameter setting
@@ -48,11 +52,15 @@ for line in csvreader:  # for each stream gauge
 		future_route_path_rcp85 = os.path.join(future_scenario_basedir, '{}_rcp85_r1i1p1'.format(GCM), route_outfile_name)
 		# Run plotting script
 		print 'Plotting site {} {}, GCM {}...'.format(usgs_code, usgs_name, GCM)
-		subprocess.call(["./plot_flow_future.py", "--USGS_code", usgs_code, \
+		subprocess.call(["./plot_flow_future.py", "--cfg", cfg, \
+			"--USGS_code", usgs_code, \
 			"--USGS_name", usgs_name, "--hist_route_path", hist_route_path, \
 			"--future_route_paths_rcp45", future_route_path_rcp45, \
 			"--future_route_paths_rcp85", future_route_path_rcp85, \
 			"--future_route_names", "{}".format(GCM)])
 	f_GCM.close()
+
+exit()
+
 f.close()
 

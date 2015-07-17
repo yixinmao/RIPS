@@ -12,6 +12,7 @@ import os
 import my_functions
 
 parser = argparse.ArgumentParser()
+parser.add_argument("--cfg", type=str,  help="config file for this script")
 parser.add_argument("--USGS_code", type=str,  help="USGS code")
 parser.add_argument("--USGS_name", type=str,  help="USGS name")
 parser.add_argument("--hist_route_path", type=str, help="Historical route output path")
@@ -20,9 +21,12 @@ parser.add_argument("--future_route_paths_rcp85", nargs='+', type=str, help="eg.
 parser.add_argument("--future_route_names", nargs='+', type=str, help="eg. 'GCM1' 'GCM2'")
 args = parser.parse_args()
 
+# Read in cfg file
+cfg = my_functions.read_config(args.cfg)
+
 #-------------- The following is temporal --------------#
-individual_model_list = '/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/result_analysis/data/list_5GCM_route_path'
-future_scenario_basedir = '/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/Lohmann_route/reclamation_CMIP5/Tennessee_1950_2099'  # Lohmann route output files of a certain scenario will be: future_scenario_basedir/GCM/
+individual_model_list = cfg['INPUT']['GCM_list_path']  # '/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/result_analysis/data/list_5GCM_route_path'
+future_scenario_basedir = cfg['INPUT']['future_scenario_basedir']  # '/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/Lohmann_route/reclamation_CMIP5/Tennessee_1950_2099'  # Lohmann route output files of a certain scenario will be: future_scenario_basedir/GCM/
 
 #========================================================
 # Parameter setting
@@ -35,7 +39,7 @@ future_route_paths_rcp45 = args.future_route_paths_rcp45 # future run. Lohmann r
 future_route_paths_rcp85 = args.future_route_paths_rcp85 # future run. Lohmann routing output. year; month; day; flow(cfs); ['path1', 'path2']
 future_route_names = args.future_route_names # future run. year; month; day; flow(cfs); ['GCM1', 'GCM2']
 
-output_plot_basename = '../output/Tennessee.' + usgs_site_code + '.' + future_route_names[0].split(' ')[0] + '.' # output plot path basename (suffix will be added to different plots)
+output_plot_basename = cfg['OUTPUT']['output_plot_basepath'] + '.' + usgs_site_code + '.' + future_route_names[0].split(' ')[0]  # output plot path basename (suffix will be added to different plots)
 
 #-------------------------------------------------
 # list of Lohmann daily output data paths
@@ -47,42 +51,66 @@ list_future_route_path_rcp85 = [future_route_paths_rcp85[0], future_route_paths_
 nfuture = len(list_future_route_path_rcp45)
 
 # list of start date shown on the plot for each time series to plot (should be complete water years)
-hist_plot_start_date = dt.datetime(1969,10,1)  # historical
-control_plot_start_date = dt.datetime(1969,10,1)  # control
-list_future_plot_start_date = [dt.datetime(2009,10,1),  # future 1, 2020s
-                          dt.datetime(2039,10,1),  # future 2, 2050s
-                          dt.datetime(2069,10,1)]   # future 3, 2080s
-# list of end date shown on the plot for each time series to plot (should be complete water years)
-hist_plot_end_date = dt.datetime(1999,9,30)  # historical
-control_plot_end_date = dt.datetime(1999,9,30)  # control
-list_future_plot_end_date = [dt.datetime(2039,9,30),   # future 1, 2020s
-                      dt.datetime(2069,9,30),   # future 2, 2050s 
-                      dt.datetime(2099,9,30)]   # future 3, 2080s
-
+#hist_plot_start_date = dt.datetime(1969,10,1)  # historical
+#control_plot_start_date = dt.datetime(1969,10,1)  # control
+#list_future_plot_start_date = [dt.datetime(2009,10,1),  # future 1, 2020s
+#                          dt.datetime(2039,10,1),  # future 2, 2050s
+#                          dt.datetime(2069,10,1)]   # future 3, 2080s
+hist_plot_start_date = dt.datetime(cfg['PLOT']['hist_plot_start_date'][0],
+                                   cfg['PLOT']['hist_plot_start_date'][1],
+                                   cfg['PLOT']['hist_plot_start_date'][2])  # historical
+control_plot_start_date = dt.datetime(cfg['PLOT']['control_plot_start_date'][0],
+                                      cfg['PLOT']['control_plot_start_date'][1],
+                                      cfg['PLOT']['control_plot_start_date'][2])  # control
+list_future_plot_start_date = [dt.datetime(cfg['PLOT']['future_plot_start_date_1'][0],
+                                           cfg['PLOT']['future_plot_start_date_1'][1],
+                                           cfg['PLOT']['future_plot_start_date_1'][2]),  # future 1, 2020s
+                               dt.datetime(cfg['PLOT']['future_plot_start_date_2'][0],
+                                           cfg['PLOT']['future_plot_start_date_2'][1],
+                                           cfg['PLOT']['future_plot_start_date_2'][2]),  # future 2, 2050s
+                               dt.datetime(cfg['PLOT']['future_plot_start_date_3'][0],
+                                           cfg['PLOT']['future_plot_start_date_3'][1],
+                                           cfg['PLOT']['future_plot_start_date_3'][2])]  # future 3, 2080s # list of end date shown on the plot for each time series to plot (should be complete water years)
+#hist_plot_end_date = dt.datetime(1999,9,30)  # historical
+#control_plot_end_date = dt.datetime(1999,9,30)  # control
+#list_future_plot_end_date = [dt.datetime(2039,9,30),   # future 1, 2020s
+#                      dt.datetime(2069,9,30),   # future 2, 2050s 
+#                      dt.datetime(2099,9,30)]   # future 3, 2080s
+hist_plot_end_date = dt.datetime(cfg['PLOT']['hist_plot_end_date'][0],
+                                 cfg['PLOT']['hist_plot_end_date'][1],
+                                 cfg['PLOT']['hist_plot_end_date'][2])  # historical
+control_plot_end_date = dt.datetime(cfg['PLOT']['control_plot_end_date'][0],
+                                    cfg['PLOT']['control_plot_end_date'][1],
+                                    cfg['PLOT']['control_plot_end_date'][2])  # control
+list_future_plot_end_date = [dt.datetime(cfg['PLOT']['future_plot_end_date_1'][0],
+                                         cfg['PLOT']['future_plot_end_date_1'][1],
+                                         cfg['PLOT']['future_plot_end_date_1'][2]),  # future 1, 2020s
+                               dt.datetime(cfg['PLOT']['future_plot_end_date_2'][0],
+                                           cfg['PLOT']['future_plot_end_date_2'][1],
+                                           cfg['PLOT']['future_plot_end_date_2'][2]),  # future 2, 2050s
+                               dt.datetime(cfg['PLOT']['future_plot_end_date_3'][0],
+                                           cfg['PLOT']['future_plot_end_date_3'][1],
+                                           cfg['PLOT']['future_plot_end_date_3'][2])]  # future 3, 2080s
 
 #-------------------------------------------------
-hist_label = 'Historical, 1980s'
-control_label = 'Control, 1980s, 5 GCM avg.'
-list_future_label = ['2020s',
-              '2050s',
-              '2080s']
+hist_label = cfg['PLOT']['hist_label'] # 'Historical, 1980s'
+control_label = cfg['PLOT']['control_label'] # 'Control, 1980s, 5 GCM avg.'
+list_future_label = cfg['PLOT']['list_future_label']  # ['2020s', '2050s', '2080s']
 
-hist_style = 'k-'
-control_style = 'b-'
-list_future_style = ['y--',  # future 1, 2020s
-              'g--',  # future 2, 2050s
-              'r--']  # future 3, 2080s
+hist_style = cfg['PLOT']['hist_style']  # 'k-'
+control_style = cfg['PLOT']['control_style']  #  'b-'
+list_future_style = cfg['PLOT']['list_future_style']   # ['y--', 'g--', 'r--']
 
-hist_color = 'k'
-control_color = 'b'
-list_future_color = ['y',  # future 1, 2020s
-              'g',  # future 2, 2050s
-              'r']  # future 3, 2080s
+hist_color = cfg['PLOT']['hist_color']  # 'k'
+control_color = cfg['PLOT']['control_color']  # 'b'
+list_future_color = cfg['PLOT']['list_future_color']  # ['y', 'g', 'r'] 
 
 #-------------------------------------------------
 
 #model_info = 'VIC runoff, historical -  1/8 deg, Maurer forcing, Andy Wood setup\n          VIC runoff, climate change scenarios - 1/8 deg, Reclamation archive (GCM forcing)\n          Route: Lohmann, Wu flowdir, Andy Wood setup'
-model_info = 'VIC runoff, historical -  1/8 deg, Maurer forcing, Andy Wood setup\n          VIC runoff, climate change scenarios - 1/8 deg, Reclamation archive (GCM forcing)\n          5 model avg.: average the routing results of: access1-0; bcc-csm1-1-m; canesm2; \n          ccsm4; cesm1-bgc\n          Route: Lohmann, Wu flowdir, Andy Wood setup'
+#model_info = 'VIC runoff, historical -  1/8 deg, Maurer forcing, Andy Wood setup\n          VIC runoff, climate change scenarios - 1/8 deg, Reclamation archive (GCM forcing)\n          5 model avg.: average the routing results of: access1-0; bcc-csm1-1-m; canesm2; \n          ccsm4; cesm1-bgc\n          Route: Lohmann, Wu flowdir, Andy Wood setup'
+model_info = cfg['PLOT']['model_info']
+model_info = model_info.replace("\\n", "\n")
 
 #========================================================
 # Load data
@@ -188,7 +216,7 @@ for i in range(nfuture):
 ##			stats = 'Period average of annual mean flow (WY); \n          historical & control - WY1970-1999', \
 ##			bottom=0.4, text_location=-0.2)
 ##
-##fig = plt.savefig('%sfuture.flow.WY_mean_boxplot.hist_control.png' %output_plot_basename, format='png')
+##fig = plt.savefig('%s.future.flow.WY_mean_boxplot.hist_control.png' %output_plot_basename, format='png')
 #
 ##--------- plot future periods ----------#
 ## determine data to plot (control; future periods (each period has rcp45 and rcp85))
@@ -214,7 +242,7 @@ for i in range(nfuture):
 #			stats='Period average of annual mean flow (WY); \n          historical - WY%d-%d; future projection - 1980s: WY1970-1999; \n          2020s: WY2010-2039; 2050s: WY2040-2069; 2080s: WY2070-2099' %(hist_plot_start_date.year+1, hist_plot_end_date.year), \
 #			bottom=0.4, text_location=-0.2)
 #
-#fig = plt.savefig('%sfuture.flow.WY_mean_boxplot.png' %output_plot_basename, format='png')
+#fig = plt.savefig('%s.future.flow.WY_mean_boxplot.png' %output_plot_basename, format='png')
 
 #============== plot flow duration curve ===============#
 fig = my_functions.plot_duration_curve(list_s_data=[control_s_to_plot]+list_future_s_to_plot_rcp45, \
@@ -226,6 +254,6 @@ fig = my_functions.plot_duration_curve(list_s_data=[control_s_to_plot]+list_futu
 		legend_loc='upper right', add_info_text=True, model_info=model_info, \
 		stats='Flow duration curve based on daily data', show=False)
 
-fig = plt.savefig('%sfuture.flow_duration.png' %output_plot_basename, format='png')
+fig = plt.savefig('%s.future.flow_duration.png' %output_plot_basename, format='png')
 
 
