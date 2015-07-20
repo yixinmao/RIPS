@@ -42,10 +42,15 @@ def read_config(config_file, default_config=None):
 # -------------------------------------------------------------------- #
 def config_type(value):
     """
+    This function is originally from tonic (author: Joe Hamman); modified so that '\' is considered as an escapor. For example, '\,' can be used for strings with ','. e.g., Historical\, 1980s  will be recognized as one complete string
     Parse the type of the configuration file option.
     First see the value is a bool, then try float, finally return a string.
     """
-    val_list = [x.strip() for x in value.split(',')]
+
+    import cStringIO
+    import csv
+
+    val_list = [x.strip() for x in csv.reader(cStringIO.StringIO(value), delimiter=',', escapechar='\\').next()]
     if len(val_list) == 1:
         value = val_list[0]
         if value in ['true', 'True', 'TRUE', 'T']:
@@ -477,18 +482,20 @@ def read_Lohmann_route_daily_output(path):
 	Return: a pd.Series object with datetime as index and flow[cfs] as data
 
 	Required:
-		convert_YYYYMMDD_to_datetime(year, month, day)
-		convert_time_series_to_Series(time, data)
+#		convert_YYYYMMDD_to_datetime(year, month, day)
+#		convert_time_series_to_Series(time, data)
 	'''
 
-	import numpy as np
+	import pandas as pd
+	import datetime as dt
+
+	parse = lambda x: dt.datetime.strptime(x, '%Y %m %d')
 
 	# load data
-	data = np.loadtxt(path)
-	# convert date to datetime
-	date = convert_YYYYMMDD_to_datetime(data[:,0], data[:,1], data[:,2])
-	# convert flow data to pd.Series
-	s = convert_time_series_to_Series(date, data[:,3])
+	df = pd.read_csv(path, delim_whitespace=True, parse_dates=[[0,1,2]], index_col=0, date_parser=parse, header=None)
+	df = df.rename(columns={3:'flow'})
+	# convert data to pd.Series
+	s = df.ix[:,0]
 
 	return s
 
@@ -552,6 +559,69 @@ def plot_time_series(plot_date, list_s_data, list_style, list_label, plot_start,
 		plt.xlim([plot_start, plot_end])
 		if xtick_location:
 			plot_format(ax, xtick_location=xtick_location, xtick_labels=xtick_labels)
+	# add info text
+	if add_info_text==True:
+		add_info_text_to_plot(fig, ax, model_info, stats)
+
+	if show==True:
+		plt.show()
+
+	return fig
+
+#==============================================================
+#==============================================================
+
+def plot_xy(list_x, list_y, list_style, list_label, figsize=(12,8), xlog=False, ylog=False, xlim=None, ylim=None, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', add_info_text=False, model_info=None, stats=None, show=False):
+	''' This function plots xy data
+
+	Input:
+		list_x, list_y: a list of x and y data; [np.array or list]
+		list_style: a list of plotting style (e.g., ['b-', 'r--']); must be the same size as 'list_s_data'
+		list_label: a list of plotting label (e.g., ['Scenario1', 'Scenario2']); must be the same size as 'list_s_data'
+		xlog, ylog: True for plotting log scale for the axis; False for plotting regular scale
+		xlabel: [str]
+		ylabel: [str]
+		title: [str]
+		fontsize: for xlabe, ylabel and title [int]
+		legend_loc: [str]
+		xlim, ylim
+		add_info_text: True for adding info text at the bottom of the plot
+		model_info, stats: descriptions added in the info text [str]
+		show: True for showing the plot
+
+	Require:
+		add_info_text_to_plot(fig, ax, model_info, stats)
+		plot_format
+	'''
+
+	import matplotlib.pyplot as plt
+
+	# Check if list_s_data, list_style and list_label have the same length
+	if len(list_x) !=len(list_y) or len(list_x)!=len(list_style) or len(list_x)!=len(list_label):
+		print 'Input list lengths are not the same!'
+		exit()
+
+	fig = plt.figure(figsize=figsize)
+	ax = plt.axes()
+	for i in range(len(list_x)):
+		plt.plot(list_x[i], list_y[i], list_style[i], label=list_label[i])
+	if xlabel:
+		plt.xlabel(xlabel, fontsize=fontsize)
+	if ylabel:
+		plt.ylabel(ylabel, fontsize=fontsize)
+	if title:
+		plt.title(title, fontsize=fontsize)
+	if xlog:
+		ax.set_xscale('log')
+	if ylog:
+		ax.set_yscale('log')
+	# format plot
+	leg = plt.legend(loc=legend_loc, frameon=True)
+	leg.get_frame().set_alpha(0)
+	if xlim:
+		plt.xlim(xlim)
+	if ylim:
+		plt.ylim(ylim)
 	# add info text
 	if add_info_text==True:
 		add_info_text_to_plot(fig, ax, model_info, stats)
@@ -652,30 +722,33 @@ def plot_WY_mean_data(list_s_data, list_style, list_label, plot_start, plot_end,
 #==============================================================
 #==============================================================
 
-def calc_WY_mean(list_s_data):
+def calc_WY_mean(s_data):
 	''' This function calculates mean annual data (water year) 
 	
 	Require:
 		calc_ts_stats_by_group
 	'''
 
-	list_s_WY = []   # list of new monthly mean data in pd.Series type 
-	for i in range(len(list_s_data)):
-		s_WY = calc_ts_stats_by_group(list_s_data[i], 'WY', 'mean')
-		list_s_WY.append(s_WY)
+	s_WY = calc_ts_stats_by_group(s_data, 'WY', 'mean')
 
-	return list_s_WY
+	return s_WY
 
 #==============================================================
 #==============================================================
 
-def plot_boxplot(list_data, list_xlabels, xlabel=None, rotation=0, ylabel=None, title=None, fontsize=16, add_info_text=False, model_info=None, stats=None, bottom=0.3, text_location=-0.1, show=False):
+def plot_boxplot(list_data, list_xlabels, color_list, xlabel=None, rotation=0, ylabel=None, title=None, fontsize=16, legend_text_list=None, legend_color_list=None, legend_loc=None, add_info_text=False, model_info=None, stats=None, bottom=0.3, text_location=-0.1, show=False):
 	''' This function plots a vertical boxplot
 
 	Input:
-		list_data: a list of data to be plotted; each element of the list is an array of data
-		list_xlabels: a list of xaxis labels correspondong to list_data; must be the same length of list_data
+		list_data: a list of boxplot groups to be plotted; each group is a list of data arrays
+		list_xlabels: a list of xaxis labels correspondong to each group in list_data; must be the same length with list_data
+		color_list: a list of colors for each box plot group; each element of this list corresponds to one box group, which is a list of colors of each box in this group; color_list must be the same length with list_data
+		legend_text_list: a list of legend text to be added
+		legend_color_list: a list of legend color to be added (must be the same length as legend_text_list)
 		rotation: rotation angle (deg) of x labels
+
+	Require:
+		setBoxColors(bp, color_list)
 	'''
 
 	import matplotlib.pyplot as plt
@@ -687,14 +760,39 @@ def plot_boxplot(list_data, list_xlabels, xlabel=None, rotation=0, ylabel=None, 
 
 	fig = plt.figure(figsize=(12,8))
 	ax = plt.axes()
-	plt.boxplot(list_data)
-	plt.xticks(range(1,len(list_data)+1), list_xlabels, rotation=rotation)
+	position_count = 0
+	position_label = []  # this records where xticks should be located (the first location of each group)
+	for i in range(len(list_data)):  # plot each box group
+		# Determine plotting box position
+		position_label.append(position_count)
+		position = []
+		for j in range(len(list_data[i])):
+			position.append(position_count)
+			position_count = position_count + 1
+		position_count = position_count + 1  # this is for some space between groups
+		# Plot this box group
+		bp = plt.boxplot(list_data[i], positions=position, widths=0.6)
+		setBoxColors(bp, color_list[i])  # set color
+		# Plot mean value as a dot
+		for j in range(len(list_data[i])):
+			plt.plot(position[j], list_data[i][j].mean(), marker='o', markerfacecolor=color_list[i][j], markeredgecolor=color_list[i][j])
+	plt.xticks(position_label, list_xlabels, rotation=rotation)
+	plt.xlim([position_label[0]-1, position_label[-1]+2])
 	if xlabel:
 		plt.xlabel(xlabel, fontsize=fontsize)
 	if ylabel:
 		plt.ylabel(ylabel, fontsize=fontsize)
 	if title:
 		plt.title(title, fontsize=fontsize)
+	# add legend (draw temporary color lines and use them to create a legend)
+	if legend_text_list!=None:
+		plt_handles = []
+		for i in range(len(legend_text_list)):
+			h, = plt.plot(list_data[0][0].mean(), legend_color_list[i])
+			plt_handles.append(h)
+		plt.legend(plt_handles, legend_text_list, loc=legend_loc)
+		for h in plt_handles:
+			h.set_visible(False)
 	# add info text
 	if add_info_text==True:
 		add_info_text_to_plot(fig, ax, model_info, stats, bottom=bottom, text_location=text_location)
@@ -704,6 +802,137 @@ def plot_boxplot(list_data, list_xlabels, xlabel=None, rotation=0, ylabel=None, 
 
 	return fig
 
+#==============================================================
+#==============================================================
+
+def setBoxColors(bp, color_list):
+    ''' This function set color for each box on a boxplot
+
+    Input:
+        bp: a boxplot object (bp = plt.boxplot(...))
+        color_list: a list of color; same length as number of boxes (e.g., ['b', 'r'])
+    '''
+
+    import matplotlib.pyplot as plt
+    nbox = len(bp['boxes'])
+    for i in range(nbox):
+        plt.setp(bp['boxes'][i], color=color_list[i])
+        plt.setp(bp['caps'][i*2], color=color_list[i])
+        plt.setp(bp['caps'][i*2+1], color=color_list[i])
+        plt.setp(bp['whiskers'][i*2], color=color_list[i])
+        plt.setp(bp['whiskers'][i*2+1], color=color_list[i])
+        plt.setp(bp['fliers'][i], color=color_list[i])
+        plt.setp(bp['medians'][i], color=color_list[i])
+
+#========================================================================
+#========================================================================
+
+def read_nc(infile, varname, dimension=-1, is_time=0):
+	'''Read a variable from a netCDF file
+
+	Input:
+		input file path
+		variable name
+		dimension: if < 0, read in all dimensions of the variable; if >= 0, only read in the [dimension]th of the variable (index starts from 0). For example, if the first dimension of the variable is time, and if dimension=2, then only reads in the 3rd time step.
+		is_time: if the desired variable is time (1 for time; 0 for not time). If it is time, return an array of datetime object
+
+	Return:
+		var: a numpy array of
+	'''
+
+	from netCDF4 import Dataset
+	from netCDF4 import num2date
+
+	nc = Dataset(infile, 'r')
+	if is_time==0:  # if not time variable
+		if dimension<0:
+			var = nc.variables[varname][:]
+		else:
+			var = nc.variables[varname][dimension]
+	if is_time==1:  # if time variable
+		time = nc.variables[varname]
+		if hasattr(time, 'calendar'):  # if time variable has 'calendar' attribute
+			if dimension<0:
+				var = num2date(time[:], time.units, time.calendar)
+			else:
+				var = num2date(time[dimension], time.units, time.calendar)
+		else:  # if time variable does not have 'calendar' attribute
+			if dimension<0:
+				var = num2date(time[:], time.units)
+			else:
+				var = num2date(time[dimension], time.units)
+	nc.close()
+	return var
+
+#========================================================================
+#========================================================================
+
+def get_nc_ts(infile, varname, timename):
+	''' This function reads in a time series form a netCDF file
+		(only suitable if the variable only has time dimension, or its other dimensions (e.g. lat and lon) are 1)
+
+	Require:
+		read_nc
+
+	Input:
+		infile: nc file path [string]
+		varname: data variable name in the nc file [string]
+		timename: time variable name in the nc file [string]
+
+	Return:
+		s: [pd.Series] object with index of time
+	'''
+
+	import pandas as pd
+
+	data = read_nc(infile, varname, dimension=-1, is_time=0)
+	time = read_nc(infile, timename, dimension=-1, is_time=1)
+	data = data.squeeze()  # delete single-dimensions (e.g. lat=1, lon=1)
+
+	s = pd.Series(data, index=time)
+	return s
+
+#==============================================================
+#==============================================================
+
+def plot_duration_curve(list_s_data, list_style, list_label, figsize=(10,10), xlog=False, ylog=False, xlim=None, ylim=None, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', add_info_text=False, model_info=None, stats=None, show=False):
+	''' This function plots duration curve for time series (exceedence is calculated by Weibull plotting position method)
+
+	Require:
+#		plot_date_format
+#		add_info_text_to_plot(fig, ax, model_info, stats)
+#		plot_time_series
+#		plot_format
+	'''
+
+	import numpy as np
+
+	# Check if list_s_data, list_style and list_label have the same length
+	if len(list_s_data) !=len(list_style) or len(list_s_data)!=len(list_label):
+		print 'Input list lengths are not the same!'
+		exit()
+
+	# Calculate
+	list_data_sorted = []   # list of sorted data
+	list_data_exceed = []   # list of exceedence for each data set
+	for i in range(len(list_s_data)):
+		data = list_s_data[i].values  # retrieve data as np array
+		ndata = len(data)  # length of data
+		data_exceed = np.empty(ndata)  # exceedence
+		data_sorted = sorted(data, reverse=True, key=float)
+		for j in range(ndata):
+			data_exceed[j] = float((j+1)) / (ndata+1)
+		list_data_sorted.append(data_sorted)
+		list_data_exceed.append(data_exceed)
+
+	# plot
+	fig = plot_xy(list_data_exceed, list_data_sorted, list_style, list_label, \
+				figsize=figsize, xlim=xlim, ylim=ylim, xlog=xlog, ylog=ylog, \
+				xlabel=xlabel, ylabel=ylabel, title=title, fontsize=fontsize, \
+				legend_loc=legend_loc, add_info_text=add_info_text, \
+				model_info=model_info, stats=stats, show=show)
+
+	return fig
 
 
 
