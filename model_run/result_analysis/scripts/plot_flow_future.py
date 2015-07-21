@@ -16,9 +16,9 @@ parser.add_argument("--cfg", type=str,  help="config file for this script")
 parser.add_argument("--USGS_code", type=str,  help="USGS code")
 parser.add_argument("--USGS_name", type=str,  help="USGS name")
 parser.add_argument("--hist_route_path", type=str, help="Historical route output path")
-parser.add_argument("--future_route_paths_rcp45", nargs='+', type=str, help="eg. 'path1' 'path2'")
-parser.add_argument("--future_route_paths_rcp85", nargs='+', type=str, help="eg. 'path1' 'path2'")
-parser.add_argument("--future_route_names", nargs='+', type=str, help="eg. 'GCM1' 'GCM2'")
+parser.add_argument("--future_route_paths_rcp45", type=str, help="eg. 'path_rcp45'")
+parser.add_argument("--future_route_paths_rcp85", type=str, help="eg. 'path_rcp85'")
+parser.add_argument("--future_route_names", type=str, help="eg. 'GCM'")
 args = parser.parse_args()
 
 # Read in cfg file
@@ -39,14 +39,14 @@ future_route_paths_rcp45 = args.future_route_paths_rcp45 # future run. Lohmann r
 future_route_paths_rcp85 = args.future_route_paths_rcp85 # future run. Lohmann routing output. year; month; day; flow(cfs); ['path1', 'path2']
 future_route_names = args.future_route_names # future run. year; month; day; flow(cfs); ['GCM1', 'GCM2']
 
-output_plot_basename = cfg['OUTPUT']['output_plot_basepath'] + '.' + usgs_site_code + '.' + future_route_names[0].split(' ')[0]  # output plot path basename (suffix will be added to different plots)
+output_plot_basename = cfg['OUTPUT']['output_plot_basepath'] + '.' + usgs_site_code + '.' + future_route_names  # output plot path basename (suffix will be added to different plots)
 
 #-------------------------------------------------
 # list of Lohmann daily output data paths
 hist_route_path = hist_route_path
-control_route_path = future_route_paths_rcp45[0]
-list_future_route_path_rcp45 = [future_route_paths_rcp45[0], future_route_paths_rcp45[0], future_route_paths_rcp45[0]]
-list_future_route_path_rcp85 = [future_route_paths_rcp85[0], future_route_paths_rcp85[0], future_route_paths_rcp85[0]]
+control_route_path = future_route_paths_rcp45
+list_future_route_path_rcp45 = [future_route_paths_rcp45, future_route_paths_rcp45, future_route_paths_rcp45]
+list_future_route_path_rcp85 = [future_route_paths_rcp85, future_route_paths_rcp85, future_route_paths_rcp85]
 
 nfuture = len(list_future_route_path_rcp45)
 
