@@ -1,0 +1,18 @@
+Steps for preparing and running RVIC:
+
+#========================================================#
+# Run parameter part
+#========================================================#
+Step 1. Prepare parameter fun input files
+   ## If converting from Lohmann routing: 
+   #    run: './process/RVIC/convert_params_Lohmann2RVIC.scr'
+   #        (need to prepare a config file)
+
+Step 2. Prepare RVIC parameter run config file
+
+Step 3. Run RVIC parameter:
+    $source activate rvic
+    $rvic parameters $rvic_parameter.cfg
+
+
+

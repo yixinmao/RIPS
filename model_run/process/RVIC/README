@@ -1,0 +1,7 @@
+convert_params_Lohmann2RVIC.scr
+    This script converts Lohmann routing input parameter files to RVIC inputs
+    (need to prepare config file)
+
+calc_area_netCDF.py
+    This script is called by 'convert_params_Lohmann2RVIC.scr'
+
