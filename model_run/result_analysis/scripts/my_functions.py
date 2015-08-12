@@ -83,7 +83,7 @@ def config_type(value):
 #==============================================================
 
 def read_USGS_data(file, columns, names):
-	'''This function reads USGS streamflow from the directly downloaded format (date and data are in the 3rd and 4th columns, respectively; data in cfs)
+	'''This function reads USGS streamflow from the directly downloaded format (date are in the 3rd columns)
 
 	Input: 
 		file: directly downloaded streamflow file path [str]
@@ -481,9 +481,6 @@ def read_Lohmann_route_daily_output(path):
 	Input: daily output file path
 	Return: a pd.Series object with datetime as index and flow[cfs] as data
 
-	Required:
-#		convert_YYYYMMDD_to_datetime(year, month, day)
-#		convert_time_series_to_Series(time, data)
 	'''
 
 	import pandas as pd
@@ -934,7 +931,29 @@ def plot_duration_curve(list_s_data, list_style, list_label, figsize=(10,10), xl
 
 	return fig
 
+#==============================================================
+#==============================================================
 
+def read_RMB_formatted_output(path):
+	''' This function reads formatted RBM output
+
+	Input: formatted RBM output path for a stream segment (columns: year; month; day; flow(cfs); T_stream(degC); Thead; Tair)
+	Return: a pd.Series object with datetime as index, and T_stream as data
+
+	'''
+
+	import pandas as pd
+	import datetime as dt
+
+	parse = lambda x: dt.datetime.strptime(x, '%Y %m %d')
+
+	# load data
+	df = pd.read_csv(path, delim_whitespace=True, parse_dates=[[0,1,2]], index_col=0, date_parser=parse, header=None)
+	df = df.rename(columns={3:'flow', 4:'Tstream', 5:'Thead', 6:'Tair'})
+	# convert data to pd.Series
+	s = df.ix[:,1]
+
+	return s
 
 
 

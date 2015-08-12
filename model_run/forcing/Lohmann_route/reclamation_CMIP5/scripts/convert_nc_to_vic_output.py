@@ -4,13 +4,17 @@
 #================================================#
 
 import numpy as np
+import sys
 import my_functions
+
+scenario = sys.argv[1]
+
 
 #=================================================#
 # Parameter setting
 #=================================================#
 #=== input ===#
-input_nc_basepath = '/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/forcing/Lohmann_route/reclamation_CMIP5/ccsm4_rcp45_r1i1p1/nc/conus_c5.ccsm4_rcp45_r1i1p1.daily.total_runoff'  # input netCDF file containing VIC output runoff (surface runoff and baseflow data); Each file is one year; ".$year.nc" will be appended to this basepath
+input_nc_basepath = '/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/forcing/Lohmann_route/reclamation_CMIP5/%s/nc/conus_c5.%s.daily.total_runoff' %(scenario, scenario)  # input netCDF file containing VIC output runoff (surface runoff and baseflow data); Each file is one year; ".$year.nc" will be appended to this basepath
 start_year = 1950  # process start year
 end_year = 2099  # process end year
 lat_name = 'latitude'  # variable name of lat in the nc file
@@ -22,7 +26,7 @@ baseflow_name = None  # variable name of baseflow in the nc file; None for no ba
 basin_latlon_list_path = '/raid2/ymao/VIC_RBM_east/VIC_RBM/preprocess/find_basin_grid_cells/output/global_Wu_8th/Tennessee/Tennessee.latlon_list'  # [lat]; [lon]. A latlon list of desired basin; only these latlon grid cells will be converted to VIC output ascii format
 
 #=== output ===#
-output_dir = '/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/forcing/Lohmann_route/reclamation_CMIP5/ccsm4_rcp45_r1i1p1/asc/Tennessee'  # outpud directory to put traditional VIC output files in
+output_dir = '/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/forcing/Lohmann_route/reclamation_CMIP5/%s/asc/Tennessee' %scenario  # outpud directory to put traditional VIC output files in
 latlon_digit = 4  # number of digits in the output file names
 
 #=================================================#

@@ -9,20 +9,20 @@ set -e
 #==================================================
 # Parameter setting
 #==================================================
-run_code=Yakima_Mabtom
+run_code=$1 # Yakima_Mabtom
 
 #=== input ===#
-fdir_nc=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/process/route_RBM/output/Yakima_Mabtom/$run_code.fdir.nc  # flow direction file, netCDF format, RBM required format
+fdir_nc=$2 # /raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/process/route_RBM/output/Yakima_Mabtom/$run_code.fdir.nc  # flow direction file, netCDF format, RBM required format
 
 #=== mohseni parameters ===#
-alpha=23.10 # this is actually 'alpha-mu'
-beta=12.1
-gamma=0.25
-mu=0.5
-timelag=0.1
+alpha=$3 # 23.10 # this is actually 'alpha-mu'
+beta=$4 # 12.1
+gamma=$5 # 0.25
+mu=$6 # 0.5
+timelag=$7 # 0.1
 
 #=== output ===#
-out_dir=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/process/route_RBM/output/Yakima_Mabtom
+out_dir=$8 # /raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/process/route_RBM/output/Yakima_Mabtom
 
 #==================================================
 # Generate Mohseni parameter files
@@ -61,5 +61,14 @@ cp $fdir_nc $timelag_nc  # create param nc file
 ncap2 -O -s 'Band1=float(Band1)' $timelag_nc $timelag_nc  # change variable type to double
 ncap2 -O -s "Band1(:,:)=$timelag" $timelag_nc $timelag_nc  # assign constant param value
 gdal_translate -of AAIGrid -co DECIMAL_PRECISION=2 $timelag_nc $out_dir/$run_code.Mohseni.timelag  # convert to ascii file
+
+#==================================================
+# Clean up
+#==================================================
+rm $out_dir/$run_code.Mohseni.alpha.aux.xml
+rm $out_dir/$run_code.Mohseni.beta.aux.xml
+rm $out_dir/$run_code.Mohseni.gamma.aux.xml
+rm $out_dir/$run_code.Mohseni.mu.aux.xml
+rm $out_dir/$run_code.Mohseni.timelag.aux.xml
 
 

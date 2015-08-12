@@ -1,16 +1,26 @@
-The steps of running VIC is:
+Steps of running VIC is:
 
+#====================================================
+# Prepare VIC parameter files
+#====================================================
 1. Run './process/vic/select_vic_soil_param.scr'
 	(Need to change the parameter section in the code)
-	This create a smaller soil param file including grid cells that need to be run
+	This creates a smaller soil param file including grid cells that need to be run
 
-2. Prepare VIC global files
+#====================================================
+# Preprocess VIC forcing if needed
+#====================================================
+#============== If using Reclamation forcing netCDF files ==============#
+2. Run './process/vic/convert_reclamation_nc_to_vic_forcing.py' (need to change the parameters section in the code)
+
+
+3. Prepare VIC global files
 	Global files are put in the directory: ./control/vic/
 	Note:
 		This step needs to be manually done
 		The output section must be kept the same as in ./control/vic/Yakima_Mabtom.vic.global.1990_1995  (2 output files per grid cell, daily output, with header). RBM requires header and daily flow output. Energy output can be subdaily, but generating subdaily energy flux files need a separate VIC run.
 
-3. Post-process VIC energy output - deleting the date columns
+4. Post-process VIC energy output - deleting the date columns
 	Run './process/vic/delet_dates_in_VICoutput.scr' (Need the change the parameter section in the code)
 	This deletes the date columns in the VIC energy output files, which is required by RBM
 

@@ -9,7 +9,7 @@ import numpy as np
 # Parameter setting
 #=======================================================
 gauge_info_path = '../data/USGS_data/USGS_gauge_info/Tennessee_location_intested.csv'  # gauge info csv
-rbm_output_basedir = '/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/RBM/Maurer_8th/Tennessee/Tennessee_1949_2010'  # RBM formatted output file would be: rbm_output_basedir/lat_lon/lat_lon_reach<reach#>_seg<1OR2>
+rbm_output_basedir = '/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/RBM/Maurer_8th/Tennessee/Tennessee_1949_2010/Tennessee_1949_2010'  # RBM formatted output file would be: rbm_output_basedir/lat_lon/lat_lon_reach<reach#>_seg<1OR2>
 
 #=======================================================
 # Process
@@ -38,6 +38,6 @@ for line in csvreader:  # for each stream gauge
 	rbm_output_formatted_path = '%s/%s_%s/%s_%s_reach%d_seg2' %(rbm_output_basedir, grid_lat, grid_lon, grid_lat, grid_lon, reach_biggest)
 	# Run plotting script
 	print 'Plotting site %s %s...' %(usgs_code, usgs_name)
-	subprocess.call(['./cmp_streamT.py', rbm_output_formatted_path, usgs_code, usgs_name, usgs_streamT_col])
+	subprocess.call(['./cmp_streamT_Thead_Tair.py', rbm_output_formatted_path, usgs_code, usgs_name, usgs_streamT_col])
 f.close()
 

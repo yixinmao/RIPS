@@ -7,26 +7,26 @@ set -e
 #===================================================
 # Parameter setting
 #===================================================
-basin_code=Yakima_Mabtom
-run_code=Yakima_Mabtom_1990_1995
+basin_code=$1 # Yakima_Mabtom
+run_code=$2 # Yakima_Mabtom_1990_1995
 
 #=== template ===#
-param_control_template=./input/RBM_param_prep.Control.template  # template control file for preparing RBM input
+param_control_template=$3 # ./input/RBM_param_prep.Control.template  # template control file for preparing RBM input
 
 #=== variables in the control file ===#
 # Input
-START_DATE=19900101  # model starting date [YYYYMMDD]
-END_DATE=19951231  # model ending date  [YYYYMMDD]
-TOPOLOGY_FILE=./output/Yakima_Mabtom/$basin_code.Topology  # topology file [input]
-MOHSENI_FILE=./output/Yakima_Mabtom/$basin_code.Mohseni  # the basename of Mohseni parameter files; suffix - .alpha, .beta, .gamma, .mu and .timelag - will be appended to the end of the file name
+START_DATE=$4 # 19900101  # model starting date [YYYYMMDD]
+END_DATE=$5 # 19951231  # model ending date  [YYYYMMDD]
+TOPOLOGY_FILE=$6 # ./output/Yakima_Mabtom/$basin_code.Topology  # topology file [input]
+MOHSENI_FILE=$7 # ./output/Yakima_Mabtom/$basin_code.Mohseni  # the basename of Mohseni parameter files; suffix - .alpha, .beta, .gamma, .mu and .timelag - will be appended to the end of the file name
 
 # Oupput
-NETWORK_FILE=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/control/RBM/${run_code}_Network  # output network file (must end in '_Network'); this is actually the config file for RBM run
-OUTPUT_FLOW_FILE=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/route_modified/$run_code.DA_flow  # file name of routing flow output (i.e., this file will be the output from the routing model run)
-OUTPUT_ENERGY_FILE=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/route_modified/$run_code.DA_energy  # file name of routing energy output (i.e., this file will be the output from the routing model run)
+NETWORK_FILE=$8 # (better to put in ./output first, and then copy later) /raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/control/RBM/${run_code}_Network  # output network file (must end in '_Network'); this is actually the config file for RBM run
+OUTPUT_FLOW_FILE=$9 # /raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/route_modified/$run_code.DA_flow  # file name of routing flow output (i.e., this file will be the output from the routing model run)
+OUTPUT_ENERGY_FILE=${10} # /raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/route_modified/$run_code.DA_energy  # file name of routing energy output (i.e., this file will be the output from the routing model run)
 
 #=== output new param control file ===#
-param_control_new=./output/Yakima_Mabtom/$run_code.Control
+param_control_new=${11} # ./output/Yakima_Mabtom/$run_code.Control
 
 #===================================================
 # Generate new param control file

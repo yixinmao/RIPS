@@ -7,3 +7,8 @@ cmp_flow.py
 
 plot_flow_future.py
 	plot flow for comparing seasonality and average annual mean flow of climate scenarios and historical/control run
+
+calc_MultiModelAvg_Lohmann.py
+	calculate multi model average of Lohmann daily output;
+	the results of this script can be feeded in to 'plot_flow_future.py' or 'control_plot_flow_future.py' for plotting multi-model-average climate scenario results
+

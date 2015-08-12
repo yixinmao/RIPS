@@ -112,7 +112,10 @@ my_functions.plot_date_format(ax, time_range=(plot_start_date, plot_end_date), l
 stats = 'daily, no stats'
 my_functions.add_info_text_to_plot(fig, ax, model_info, stats)
 
-fig = plt.savefig('%s.streamT.daily.with_Thead_Tair.png' %output_plot_basename, format='png', dpi=200)
+if if_plot_Thead_Tair==True:
+	fig = plt.savefig('%s.streamT.daily.with_Thead_Tair.png' %output_plot_basename, format='png', dpi=200)
+else:
+	fig = plt.savefig('%s.streamT.daily.png' %output_plot_basename, format='png', dpi=200)
 
 #============== plot monthly data ===============#
 # calculate
@@ -136,7 +139,10 @@ my_functions.plot_date_format(ax, time_range=(plot_start_date, plot_end_date), l
 stats = 'Monthly mean'
 my_functions.add_info_text_to_plot(fig, ax, model_info, stats)
 
-fig = plt.savefig('%s.streamT.monthly.with_Thead_Tair.png' %output_plot_basename, format='png')
+if if_plot_Thead_Tair==True:
+	fig = plt.savefig('%s.streamT.monthly.with_Thead_Tair.png' %output_plot_basename, format='png')
+else:
+	fig = plt.savefig('%s.streamT.monthly.png' %output_plot_basename, format='png')
 
 ##============== plot seasonal data ===============#
 ## calculate

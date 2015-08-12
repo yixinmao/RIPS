@@ -19,6 +19,15 @@ Step 3. Convert route station file from the modified-route format to Lohmann-rou
 	Run './process/Lohmann_route/convert_route_station_file_from_modified_to_Lohmann.scr' (need to change the parameter section in the code)
 
 Step 4. Prepare route control file (other parameter files can directly use those from the modified routing model)
+    #----------------------------------------------------
+    # For routing Reclamation scenarios runoff
+    #----------------------------------------------------
+    Step 4.1 Generate routing config files for different scenarios
+		Run './process/Lohmann_route/generate_route_config_file_for_reclamation_scenarios.scr' (need to change the parameter section in the code)
+
+
+
+
 
 
 

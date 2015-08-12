@@ -11,14 +11,14 @@ set -e
 # Parameter setting
 #==================================================
 #=== input ===#
-flowir_asc_orig=/raid2/ymao/VIC_RBM_east/VIC_RBM/preprocess/find_basin_grid_cells/input/PNW/PNW.fdir  # original big flow directin file, ascii format
-basin_mask_nc=/raid2/ymao/VIC_RBM_east/VIC_RBM/preprocess/find_basin_grid_cells/output/PNW/Yakima_Mabtom/Yakima_Mabtom.basin_mask.nc  # basin mask nc file, should be generated from the big flow direction file and thus has the same size
-outlet_file=/raid2/ymao/VIC_RBM_east/VIC_RBM/preprocess/find_basin_grid_cells/input/PNW/Yakima_Mabtom/outlet_location_yakima_mabtom.csv  # Must only have two lines!
+flowir_asc_orig=$1 # /raid2/ymao/VIC_RBM_east/VIC_RBM/preprocess/find_basin_grid_cells/input/PNW/PNW.fdir  # original big flow directin file, ascii format
+basin_mask_nc=$2 # /raid2/ymao/VIC_RBM_east/VIC_RBM/preprocess/find_basin_grid_cells/output/PNW/Yakima_Mabtom/Yakima_Mabtom.basin_mask.nc  # basin mask nc file, should be generated from the big flow direction file and thus has the same size
+outlet_file=$3 # /raid2/ymao/VIC_RBM_east/VIC_RBM/preprocess/find_basin_grid_cells/input/PNW/Yakima_Mabtom/outlet_location_yakima_mabtom.csv  # Must only have two lines!
 
 #=== output ===#
-output_dir=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/process/route_RBM/output/Yakima_Mabtom
-output_prefix=Yakima_Mabtom  # prefix of output files
-route_param_dir=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/param/route_modified/Yakima_Mabtom  # routing model param file directory. The final flow dir file will be copied into this directory
+output_dir=$4 # /raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/process/route_RBM/output/Yakima_Mabtom
+output_prefix=$5 # Yakima_Mabtom  # prefix of output files
+# route_param_dir=$6 # /raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/param/route_modified/Yakima_Mabtom  # routing model param file directory. The final flow dir file will be copied into this directory
 
 #==================================================
 # Generate smaller basin flow direction file
@@ -56,10 +56,10 @@ rm $output_dir/$output_prefix.fdir.orig.temp.nc
 rm $output_dir/$output_prefix.fdir.smaller.temp.nc
 rm $output_dir/$output_prefix.fdir.smaller.temp2.nc
 rm $output_dir/$output_prefix.fdir.smaller.crop.temp.nc
-
+rm $output_dir/$output_prefix.fdir.aux.xml
 
 #==================================================
 # Copy flow direction file to routing param directory
 #==================================================
-cp $output_dir/$output_prefix.fdir $route_param_dir
+#cp $output_dir/$output_prefix.fdir $route_param_dir
 

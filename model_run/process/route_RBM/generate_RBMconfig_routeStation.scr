@@ -8,11 +8,11 @@ set -e
 #===================================================
 # Parameter setting
 #===================================================
-basin_code=Yakima_Mabtom
-run_code=Yakima_Mabtom_1990_1995
+basin_code=$1 # Yakima_Mabtom
+run_code=$2 # Yakima_Mabtom_1990_1995
 
-param_control_dir=./output/Yakima_Mabtom  # directory of the param control file; the control file name is: $run_code.Control
-route_param_dir=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/param/route_modified/Yakima_Mabtom  # directory of routing model parameter files
+param_control_dir=$3 # ./output/Yakima_Mabtom  # directory of the param control file; the control file name is: $run_code.Control
+route_param_dir=$4 # (better to first put under ./output, then copy to param directory) /raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/param/route_modified/Yakima_Mabtom  # directory of routing model parameter files
 
 #===================================================
 # Generate new RBM config file & routing station files

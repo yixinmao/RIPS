@@ -60,7 +60,5 @@ for line in csvreader:  # for each stream gauge
 			"--future_route_names", "{}".format(GCM)])
 	f_GCM.close()
 
-exit()
-
 f.close()
 
