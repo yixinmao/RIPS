@@ -1,0 +1,3 @@
+[submodule "model_run/source/RVIC"]
+	path = model_run/source/RVIC
+	url = https://github.com/UW-Hydro/RVIC.git
