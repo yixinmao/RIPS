@@ -7,7 +7,7 @@
 # Parameter setting
 #===========================================
 #=== input ===#
-vic_output_dir=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/vic/from_2860  # VIC output directory
+vic_output_dir=/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/vic/Maurer_0.125/Tennessee/fluxes_1949_2010 # /raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/vic/from_2860  # VIC output directory
 energy_output_prefix=energy  # prefix of VIC energy output files (files have 6 header lines)
 
 #=== params ===#
