@@ -934,26 +934,34 @@ def plot_duration_curve(list_s_data, list_style, list_label, figsize=(10,10), xl
 #==============================================================
 #==============================================================
 
-def read_RMB_formatted_output(path):
-	''' This function reads formatted RBM output
+def read_RMB_formatted_output(path, var='Tstream'):
+    ''' This function reads formatted RBM output
 
-	Input: formatted RBM output path for a stream segment (columns: year; month; day; flow(cfs); T_stream(degC); Thead; Tair)
-	Return: a pd.Series object with datetime as index, and T_stream as data
+    Input: 
+        path - formatted RBM output path for a stream segment (columns: year; month; day; flow(cfs); T_stream(degC); Thead; Tair)
+        var - variable needed; choose from: 'Tstream'; 'flow'; default: 'Tstream'
+    Return: a pd.Series object with datetime as index, and T_stream as data
 
-	'''
+    '''
 
-	import pandas as pd
-	import datetime as dt
+    import pandas as pd
+    import datetime as dt
 
-	parse = lambda x: dt.datetime.strptime(x, '%Y %m %d')
+    parse = lambda x: dt.datetime.strptime(x, '%Y %m %d')
 
-	# load data
-	df = pd.read_csv(path, delim_whitespace=True, parse_dates=[[0,1,2]], index_col=0, date_parser=parse, header=None)
-	df = df.rename(columns={3:'flow', 4:'Tstream', 5:'Thead', 6:'Tair'})
-	# convert data to pd.Series
-	s = df.ix[:,1]
+    # load data
+    df = pd.read_csv(path, delim_whitespace=True, parse_dates=[[0,1,2]], index_col=0, date_parser=parse, header=None)
+    df = df.rename(columns={3:'flow', 4:'Tstream', 5:'Thead', 6:'Tair'})
+    # convert data to pd.Series
+    if var=='Tstream': 
+        s = df.ix[:,1]
+    elif var=='flow':
+        s = df.ix[:,0]
+    else:
+        print 'Error: unsupported RBM output variable!'
+        exit()
 
-	return s
+    return s
 
 
 
