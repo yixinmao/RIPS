@@ -33,9 +33,10 @@ cfg = my_functions.read_config(args.cfg)
 #--- Load routed flow data ---#
 if cfg['INPUT_ROUTE']['route_flow_format']=='RBM_formatted':  # if from formatted RBM output
     s_route = my_functions.read_RMB_formatted_output(cfg['INPUT_ROUTE']['route_path'], \
-                                                     var='flow')
+                                                     var='flow') / 1000 # convert to thousand cfs
 elif cfg['INPUT_ROUTE']['route_flow_format']=='Lohmann':  # if from formatted RBM output
-    s_route = my_functions.read_Lohmann_route_daily_output(cfg['INPUT_ROUTE']['route_path'])
+    s_route = my_functions.read_Lohmann_route_daily_output(cfg['INPUT_ROUTE']['route_path'])\
+                                                         / 1000 # convert to thousand cfs
 else:
     print 'Error: unsupported routed flow format!'
     exit()
@@ -43,7 +44,8 @@ else:
 #--- Load USGS observed flow ---#
 if type(cfg['INPUT_USGS']['usgs_flow_col']) is int:  # if only one needed data column
 	df_usgs = my_functions.read_USGS_data(cfg['INPUT_USGS']['usgs_data_path'], \
-                                          columns=[cfg['INPUT_USGS']['usgs_flow_col']], names=['flow'])
+                                          columns=[cfg['INPUT_USGS']['usgs_flow_col']], \
+                                          names=['flow']) / 1000 # convert to thousand cfs
 	s_usgs= df_usgs.ix[:,0]  # convert df to Series
 
 else:  # if more than one data column needed, take average
@@ -52,7 +54,9 @@ else:  # if more than one data column needed, take average
 	for i in range(len(usgs_flow_col_split)):
 		usgs_flow_col_split[i] = int(usgs_flow_col_split[i])
 		names.append('flow%d' %i)
-	df_usgs = my_functions.read_USGS_data(cfg['INPUT_USGS']['usgs_data_path'], columns=usgs_flow_col_split, names=names)  # read in data
+	df_usgs = my_functions.read_USGS_data(cfg['INPUT_USGS']['usgs_data_path'], \
+                                          columns=usgs_flow_col_split, \
+                                          names=names) / 1000  # convert to thousand cfs
 	s_usgs = df_usgs.mean(axis=1, skipna=False) # if either column is missing, return NaN
 
 #========================================================
@@ -81,83 +85,83 @@ s_usgs_to_plot = my_functions.select_time_range(s_usgs, plot_start_date, plot_en
 # plot
 #========================================================
 #============== plot daily data ===============#
-fig = plt.figure(figsize=(10,5))
-ax = plt.axes()
-plt.plot_date(s_usgs_to_plot.index, s_usgs_to_plot/1000, 'b-', label='USGS gauge (observed)')
-plt.plot_date(s_route_to_plot.index, s_route_to_plot/1000, 'r--', label='Simulated (naturalized)')
-plt.ylabel('Flow (thousand cfs)', fontsize=16)
-plt.title('%s, %s' %(cfg['INPUT_USGS']['usgs_site_name'], cfg['INPUT_USGS']['usgs_site_code']), fontsize=16)
-leg = plt.legend(loc='upper left')
-leg.get_frame().set_alpha(0)
-my_functions.plot_date_format(ax, time_range=(plot_start_date, plot_end_date), locator=time_locator, time_format='%Y/%m')
-
-fig = plt.savefig('%s.flow.daily.png' %cfg['OUTPUT']['output_plot_basename'], format='png')
+fig = my_functions.plot_time_series(plot_date=True, \
+            list_s_data=[s_usgs_to_plot, s_route_to_plot], \
+            list_style=[cfg['PLOT_OPTIONS']['usgs_style'], cfg['PLOT_OPTIONS']['route_style']],\
+            list_label=[cfg['PLOT_OPTIONS']['usgs_label'], cfg['PLOT_OPTIONS']['route_label']],\
+            plot_start=plot_start_date, plot_end=plot_end_date, \
+            xlabel=None, ylabel='Flow (thousand cfs)', \
+            title='{}, {}'.format(cfg['INPUT_USGS']['usgs_site_name'], \
+                                  cfg['INPUT_USGS']['usgs_site_code']), \
+            fontsize=16, legend_loc='upper left', \
+            time_locator=time_locator, time_format='%Y/%m', \
+            xtick_location=None, xtick_labels=None, \
+            add_info_text=False, model_info=None, stats=None, show=False)
+plt.savefig('%s.flow.daily.png' %cfg['OUTPUT']['output_plot_basename'], format='png')
 
 #============== plot monthly data ===============#
-# calculate
-s_usgs_mon = my_functions.calc_monthly_data(s_usgs_to_plot)
-s_route_mon = my_functions.calc_monthly_data(s_route_to_plot)
-# plot
-fig = plt.figure(figsize=(10,5))
-ax = plt.axes()
-plt.plot_date(s_usgs_mon.index, s_usgs_mon/1000, 'b-', label='USGS gauge (observed)')
-plt.plot_date(s_route_mon.index, s_route_mon/1000, 'r--', label='Simulated (naturalized)')
-plt.ylabel('Flow (thousand cfs)', fontsize=16)
-plt.title('Monthly, %s, %s' %(cfg['INPUT_USGS']['usgs_site_name'], cfg['INPUT_USGS']['usgs_site_code']), fontsize=16)
-leg = plt.legend(loc='upper left')
-leg.get_frame().set_alpha(0)
-my_functions.plot_date_format(ax, time_range=(plot_start_date, plot_end_date), locator=time_locator, time_format='%Y/%m')
-
+fig = my_functions.plot_monthly_data(\
+            list_s_data=[s_usgs_to_plot, s_route_to_plot], \
+            list_style=[cfg['PLOT_OPTIONS']['usgs_style'], cfg['PLOT_OPTIONS']['route_style']],\
+            list_label=[cfg['PLOT_OPTIONS']['usgs_label'], cfg['PLOT_OPTIONS']['route_label']],\
+            plot_start=plot_start_date, plot_end=plot_end_date, \
+            xlabel=None, ylabel='Flow (thousand cfs)', \
+            title='Monthly, {}, {}'.format(cfg['INPUT_USGS']['usgs_site_name'], \
+                                           cfg['INPUT_USGS']['usgs_site_code']), \
+            fontsize=16, legend_loc='upper left', \
+            time_locator=time_locator, time_format='%Y/%m', \
+            add_info_text=False, model_info=None, stats=None, show=False)
 fig = plt.savefig('%s.flow.monthly.png' %cfg['OUTPUT']['output_plot_basename'], format='png')
 
 #============== plot seasonal data ===============#
+fig = my_functions.plot_seasonality_data(\
+            list_s_data=[s_usgs_to_plot, s_route_to_plot], \
+            list_style=[cfg['PLOT_OPTIONS']['usgs_style'], cfg['PLOT_OPTIONS']['route_style']],\
+            list_label=[cfg['PLOT_OPTIONS']['usgs_label'], cfg['PLOT_OPTIONS']['route_label']],\
+            plot_start=1, plot_end=12, \
+            xlabel=None, ylabel='Flow (thousand cfs)', \
+            title='Seasonality, {}, {}'.format(cfg['INPUT_USGS']['usgs_site_name'], \
+                                               cfg['INPUT_USGS']['usgs_site_code']), \
+            fontsize=16, legend_loc='upper left', \
+            xtick_location=range(1,13), \
+            xtick_labels=['Jan','Feb','Mar','Apr','May','Jun', \
+                          'Jul','Aug','Nov','Oct','Nov','Dec'], \
+            add_info_text=False, model_info=None, stats=None, show=False)
+
+# Calculate average annual mean flow (water year)
 # calculate
 df_to_plot = s_usgs_to_plot.to_frame(name='usgs')
 df_to_plot['routed'] = s_route_to_plot
 df_to_plot = df_to_plot[np.isfinite(df_to_plot['usgs'])]  # drop rows with NaN; this is for the purpose of comparing the same period of time, because USGS data has missing values
-df_seas = my_functions.calc_ts_stats_by_group(df_to_plot, 'month', 'mean') # index is 1-12 (month)
-# plot
-fig = plt.figure(figsize=(10,6))
-ax = plt.axes()
-plt.plot_date(df_seas.index, df_seas['usgs']/1000, 'b-', label='USGS gauge')
-plt.plot_date(df_seas.index, df_seas['routed']/1000, 'r--', label='Lohmann route')
-plt.ylabel('Flow (thousand cfs)', fontsize=16)
-plt.title('%s, %s\nMonthly mean seasonality, water years %d - %d' %(cfg['INPUT_USGS']['usgs_site_name'], cfg['INPUT_USGS']['usgs_site_code'], plot_start_date.year+1, plot_end_date.year), fontsize=16)
-#plt.legend()
-# formatting
-plt.xlim([1, 12])
-tick_labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Nov','Oct','Nov','Dec']
-my_functions.plot_format(ax, xtick_location=range(1,13), xtick_labels=tick_labels)
-# Calculate average annual mean flow (water year)
 df_WY_mean = my_functions.calc_ts_stats_by_group(df_to_plot, 'year', 'mean')
 avg_WY_mean = df_WY_mean.mean()
 bias = (avg_WY_mean['routed'] - avg_WY_mean['usgs'])/avg_WY_mean['usgs']
 plt.text(0.65, 0.85, 'Simulation bias: {:.1f}%\n({:d}-{:d})'\
            .format(bias*100, df_WY_mean.index[0]+1, df_WY_mean.index[-1]), 
-           transform=ax.transAxes, fontsize=16)
+           transform=plt.gca().transAxes, fontsize=16)
 print 'Start year: {:d}  End year: {:d}'.format(df_WY_mean.index[0]+1, df_WY_mean.index[-1])
 print avg_WY_mean
 
 fig = plt.savefig('%s.flow.season.png' %cfg['OUTPUT']['output_plot_basename'], format='png')
 
-#============== plot annual cumulative flow ===============#
-# calculate
-time, usgs_cum = my_functions.calc_annual_cumsum_water_year(s_usgs_to_plot.index, s_usgs_to_plot)
-s_usgs_cum = pd.Series(usgs_cum, index=time)
-time, route_cum = my_functions.calc_annual_cumsum_water_year(s_route_to_plot.index, s_route_to_plot)
-s_route_cum = pd.Series(route_cum, index=time)
-# plot
-fig = plt.figure()
-ax = plt.axes()
-plt.plot_date(s_usgs_cum.index, s_usgs_cum, 'b-', label='USGS gauge')
-plt.plot_date(s_route_cum.index, s_route_cum, 'r--', label='Lohmann route')
-plt.ylabel('Flow (cfs)', fontsize=16)
-plt.title('%s, %s\nAnnual cumulative' %(cfg['INPUT_USGS']['usgs_site_name'], cfg['INPUT_USGS']['usgs_site_code']), fontsize=16)
-plt.legend()
-my_functions.plot_date_format(ax, time_range=(plot_start_date, plot_end_date), locator=time_locator, time_format='%Y/%m')
-
-fig = plt.savefig('%s.flow.cumsum.png' %cfg['OUTPUT']['output_plot_basename'], format='png')
-
-
-
-
+##============== plot annual cumulative flow ===============#
+## calculate
+#time, usgs_cum = my_functions.calc_annual_cumsum_water_year(s_usgs_to_plot.index, s_usgs_to_plot)
+#s_usgs_cum = pd.Series(usgs_cum, index=time)
+#time, route_cum = my_functions.calc_annual_cumsum_water_year(s_route_to_plot.index, s_route_to_plot)
+#s_route_cum = pd.Series(route_cum, index=time)
+## plot
+#fig = plt.figure()
+#ax = plt.axes()
+#plt.plot_date(s_usgs_cum.index, s_usgs_cum, 'b-', label='USGS gauge')
+#plt.plot_date(s_route_cum.index, s_route_cum, 'r--', label='Lohmann route')
+#plt.ylabel('Flow (cfs)', fontsize=16)
+#plt.title('%s, %s\nAnnual cumulative' %(cfg['INPUT_USGS']['usgs_site_name'], cfg['INPUT_USGS']['usgs_site_code']), fontsize=16)
+#plt.legend()
+#my_functions.plot_date_format(ax, time_range=(plot_start_date, plot_end_date), locator=time_locator, time_format='%Y/%m')
+#
+#fig = plt.savefig('%s.flow.cumsum.png' %cfg['OUTPUT']['output_plot_basename'], format='png')
+#
+#
+#
+#
