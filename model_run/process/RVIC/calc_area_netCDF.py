@@ -21,6 +21,7 @@ area = ds.area*0 + RERD*RERD * grid_size/180.0*np.pi * \
             np.absolute(np.sin((ds.lat-grid_size/2.0)/180.0*np.pi) \
                         - np.sin((ds.lat+grid_size/2.0)/180.0*np.pi))
 
+ds['area'] = area
 ds['area'].attrs['units'] = 'm2'
 
 # Save as netCDF

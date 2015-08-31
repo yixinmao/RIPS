@@ -23,8 +23,8 @@ set -e
 #=== input ===#
 # Flow direction file, ascii, Lohmann model format
 flowdir_asc_file=$1
-# xmask (currently only support spatially-constant value)
-xmask=$2
+# xmask file, ascii format
+xmask_file=$2
 grid_size=$3
 
 #=== output paths ===#
@@ -44,8 +44,8 @@ cdo ifthen $output_route_param_file $output_route_param_file.temp_1.nc $output_r
 ncrename -v Flow_Direction,Basin_ID $output_route_param_file.temp_1_masked.nc
 ncks -A $output_route_param_file.temp_1_masked.nc $output_route_param_file
 # add Flow_Distance variable
-ncrename -v Basin_ID,Flow_Distance $output_route_param_file.temp_1_masked.nc
-cdo mulc,$xmask $output_route_param_file.temp_1_masked.nc $output_route_param_file.temp_fdist_masked.nc
+gdal_translate -of netcdf $xmask_file $output_route_param_file.temp_fdist_masked.nc
+ncrename -v Band1,Flow_Distance $output_route_param_file.temp_fdist_masked.nc  # rename flow distance variable
 ncks -A $output_route_param_file.temp_fdist_masked.nc $output_route_param_file
 
 #====================================================#
@@ -54,13 +54,13 @@ ncks -A $output_route_param_file.temp_fdist_masked.nc $output_route_param_file
 # create domain file
 cp $output_route_param_file.temp_1_masked.nc $output_domain_file
 # change the variable to mask variable (all 1)
-ncrename -v Flow_Distance,mask $output_domain_file
+ncrename -v Basin_ID,mask $output_domain_file
 # add frac variable (all 1)
-ncrename -v Flow_Distance,frac $output_route_param_file.temp_1_masked.nc
+ncrename -v Basin_ID,frac $output_route_param_file.temp_1_masked.nc
 ncks -A $output_route_param_file.temp_1_masked.nc $output_domain_file
 # calculate and add area variable
 ncrename -v frac,area $output_route_param_file.temp_1_masked.nc
-/raid2/ymao/VIC_RBM_east/RVIC/scripts/calc_area_netCDF.py --domain_file $output_route_param_file.temp_1_masked.nc --grid_size $grid_size
+/raid2/ymao/VIC_RBM_east_RIPS/RIPS/model_run/process/RVIC/calc_area_netCDF.py --domain_file $output_route_param_file.temp_1_masked.nc --grid_size $grid_size
 ncks -A $output_route_param_file.temp_1_masked.nc $output_domain_file
 
 #====================================================#
@@ -70,5 +70,4 @@ rm $output_route_param_file.temp_0.nc
 rm $output_route_param_file.temp_1.nc
 rm $output_route_param_file.temp_1_masked.nc
 rm $output_route_param_file.temp_fdist_masked.nc
-
 
