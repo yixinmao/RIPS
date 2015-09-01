@@ -1,0 +1,4 @@
+NOTE: currently, vic2netcdf.py is an old version. Better to switch to new version (which requires installing tonic)
+
+In current version, might need to change line 182: delimeter = r'\t' in order to work
+
