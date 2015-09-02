@@ -59,6 +59,14 @@ for i in range(cfg['INPUT_CONTROL']['n_ts']):  # Load all time series data
                                         dam_num=cfg[input_section]['dam_num']) \
                                         / 1000  # convert to thousand cfs
 
+    # If RVIC output array format
+    elif cfg[input_section]['ts_format']=='RVIC_array':
+        df, dict_outlet = my_functions.read_RVIC_output(cfg[input_section]['ts_path'], \
+                                      output_format='array', \
+                                      outlet_ind=cfg[input_section]['outlet_ind'])
+        df = df / 1000  # convert to thousand cfs
+        s = df.ix[:,0]
+
     else:
         print 'Error: unsupported routed flow format!'
         exit()
@@ -118,7 +126,7 @@ fig = my_functions.plot_time_series(plot_date=True, \
             fontsize=16, legend_loc='upper right', \
 #            time_locator=time_locator, time_format='%Y/%m', \
             xtick_location=None, xtick_labels=None, \
-            add_info_text=False, model_info=None, stats=None, show=True)
+            add_info_text=True, model_info=None, stats=None, show=True)
 plt.savefig('%s.flow.daily.png' %cfg['OUTPUT']['output_plot_basename'], format='png')
 
 #============== plot monthly data ===============#
@@ -131,7 +139,7 @@ fig = my_functions.plot_monthly_data(\
             title='Monthly, {}'.format(cfg['PLOT_OPTIONS']['plot_title']), \
             fontsize=16, legend_loc='upper right', \
 #            time_locator=time_locator, time_format='%Y/%m', \
-            add_info_text=False, model_info=None, stats=None, show=False)
+            add_info_text=True, model_info=None, stats=None, show=False)
 fig = plt.savefig('%s.flow.monthly.png' %cfg['OUTPUT']['output_plot_basename'], format='png')
 
 #============== plot seasonal data ===============#
@@ -141,12 +149,14 @@ fig = my_functions.plot_seasonality_data(\
             list_label=list_plot_label, \
             plot_start=1, plot_end=12, \
             xlabel=None, ylabel='Flow (thousand cfs)', \
-            title='Seasonality, {}'.format(cfg['PLOT_OPTIONS']['plot_title']), \
+            title='Seasonality, {}, WY {}-{}'.format(cfg['PLOT_OPTIONS']['plot_title'], \
+                                                     plot_start_date.year+1, \
+                                                     plot_end_date.year), \
             fontsize=16, legend_loc='upper right', \
             xtick_location=range(1,13), \
             xtick_labels=['Jan','Feb','Mar','Apr','May','Jun', \
                           'Jul','Aug','Nov','Oct','Nov','Dec'], \
-            add_info_text=False, model_info=None, stats=None, show=False)
+            add_info_text=True, model_info=None, stats=None, show=False)
 
 ## Calculate average annual mean flow (water year)
 ## calculate
