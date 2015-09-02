@@ -115,6 +115,9 @@ for i in range(cfg['INPUT_CONTROL']['n_ts']):  # Loop over each time series
 #========================================================
 # plot
 #========================================================
+#============ Process "\n" in "model_info" ==================#
+model_info = cfg['PLOT_OPTIONS']['model_info'].replace("\\n", "\n")
+
 #============== plot original data (daily, weekly) ===============#
 fig = my_functions.plot_time_series(plot_date=True, \
             list_s_data=list_s_to_plot, \
@@ -126,7 +129,8 @@ fig = my_functions.plot_time_series(plot_date=True, \
             fontsize=16, legend_loc='upper right', \
 #            time_locator=time_locator, time_format='%Y/%m', \
             xtick_location=None, xtick_labels=None, \
-            add_info_text=True, model_info=None, stats=None, show=True)
+            add_info_text=True, model_info=model_info, \
+            stats='Daily (no stats)', show=False)
 plt.savefig('%s.flow.daily.png' %cfg['OUTPUT']['output_plot_basename'], format='png')
 
 #============== plot monthly data ===============#
@@ -139,7 +143,8 @@ fig = my_functions.plot_monthly_data(\
             title='Monthly, {}'.format(cfg['PLOT_OPTIONS']['plot_title']), \
             fontsize=16, legend_loc='upper right', \
 #            time_locator=time_locator, time_format='%Y/%m', \
-            add_info_text=True, model_info=None, stats=None, show=False)
+            add_info_text=True, model_info=model_info, \
+            stats='Monthly mean', show=False)
 fig = plt.savefig('%s.flow.monthly.png' %cfg['OUTPUT']['output_plot_basename'], format='png')
 
 #============== plot seasonal data ===============#
@@ -156,7 +161,8 @@ fig = my_functions.plot_seasonality_data(\
             xtick_location=range(1,13), \
             xtick_labels=['Jan','Feb','Mar','Apr','May','Jun', \
                           'Jul','Aug','Nov','Oct','Nov','Dec'], \
-            add_info_text=True, model_info=None, stats=None, show=False)
+            add_info_text=True, model_info=model_info, \
+            stats='Seasonality for each month', show=False)
 
 ## Calculate average annual mean flow (water year)
 ## calculate
