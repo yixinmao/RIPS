@@ -274,23 +274,29 @@ def find_first_and_last_nonNaN_index(s):
 #==============================================================
 #==============================================================
 
-def find_data_common_range(s1, s2):
-	''' This function determines the common range of valid data of two datasets (missing data in the middle also count as 'valid')
+def find_data_common_range(list_s):
+    ''' This function determines the common range of valid data of multiple datasets (missing data in the middle also count as 'valid')
 
-	Input: pd.Series objects
+    Input: a list of pd.Series objects
 
-	Return: first and last datetimes of common range (Note: if one or both data have missing data at the beginning or end, those missing periods will be omitted; however, if there is missing data in the middle, those missing points will still be considered as valid)
+    Return: first and last datetimes of common range (Note: if one or all data have missing data at the beginning or end, those missing periods will be omitted; however, if there is missing data in the middle, those missing points will still be considered as valid)
 
-	Requred:
-		find_first_and_last_nonNaN_index
-	'''
+    Requred:
+        find_first_and_last_nonNaN_index
+    '''
 
-	s1_first_date, s1_last_date =  find_first_and_last_nonNaN_index(s1)
-	s2_first_date, s2_last_date =  find_first_and_last_nonNaN_index(s2)
-	data_avai_start_date = sorted([s1_first_date, s2_first_date])[-1]
-	data_avai_end_date = sorted([s1_last_date, s2_last_date])[0]
+    list_first_date = []
+    list_last_date = []
+    for i in range(len(list_s)):
+        s = list_s[i]
+        s_first_date, s_last_date =  find_first_and_last_nonNaN_index(s)
+        list_first_date.append(s_first_date)
+        list_last_date.append(s_last_date)
 
-	return data_avai_start_date, data_avai_end_date 
+    data_avai_start_date = sorted(list_first_date)[-1]
+    data_avai_end_date = sorted(list_last_date)[0]
+
+    return data_avai_start_date, data_avai_end_date
 
 #==============================================================
 #==============================================================
@@ -345,45 +351,72 @@ def calc_monthly_data(data):
 #==============================================================
 
 def wateryear(calendar_date):
-	if calendar_date.month >= 10:
-		return calendar_date.year+1
-	return calendar_date.year
+    if calendar_date.month >= 10:
+        return calendar_date.year+1
+    return calendar_date.year
+
+def TVA_week(calendar_date):
+    ''' Return TVA weekly data formatted week number (1-52); 
+        Week starts from Jan 1; the 52th week has 8 or 9 days'''
+    import datetime as dt
+    day = (calendar_date - dt.datetime(calendar_date.year, 1, 1)).days + 1
+    if day <= 364:
+        week = (day-1) / 7 + 1
+    else:
+        week = 52
+    return calendar_date.year, week
 
 def calc_ts_stats_by_group(data, by, stat):
-	'''This function calculates statistics of time series data grouped by year, month, etc
+    '''This function calculates statistics of time series data grouped by year, month, etc
 
-	Input:
-		df: a [pd.DataFrame/Series] object, with index of time
-		by: string of group by, (select from 'year' or 'month' or 'WY')
-		stat: statistics to be calculated, (select from 'mean')
-		(e.g., if want to calculate monthly mean seasonality (12 values), by='month' and stat='mean')
+    Input:
+        df: a [pd.DataFrame/Series] object, with index of time
+        by: string of group by, (select from 'year' or 'month' or 'WY')
+        stat: statistics to be calculated, (select from 'mean')
+        (e.g., if want to calculate monthly mean seasonality (12 values), by='month' and stat='mean')
 
-	Return:
-		A [dateframe/Series] object, with group as index (e.g. 1-12 for 'month')
+    Return:
+        A [dateframe/Series] object, with group as index (e.g. 1-12 for 'month')
 
-	Require:
-		wateryear
-		find_full_water_years_within_a_range(dt1, dt2)
-		select_time_range(data, start_datetime, end_datetime)
-	'''
+    Require:
+        wateryear
+        find_full_water_years_within_a_range(dt1, dt2)
+        select_time_range(data, start_datetime, end_datetime)
+    '''
 
-	import pandas as pd
+    import pandas as pd
+    import calendar
+    import datetime as dt
 
-	if by=='year':
-		if stat=='mean':
-			data_result = data.groupby(lambda x:x.year).mean()
-	elif by=='month':
-		if stat=='mean':
-			data_result = data.groupby(lambda x:x.month).mean()
-	elif by=='WY':  # group by water year
-		# first, secelect out full water years
-		start_date, end_date = find_full_water_years_within_a_range(data.index[0], data.index[-1])
-		data_WY = select_time_range(data, start_date, end_date)
-		# then, group by water year
-		if stat=='mean':
-			data_result = data_WY.groupby(lambda x:wateryear(x)).mean()
+    if by=='year':
+        if stat=='mean':
+            data_result = data.groupby(lambda x:x.year).mean()
+    elif by=='month':
+        if stat=='mean':
+            data_result = data.groupby(lambda x:x.month).mean()
+    elif by=='WY':  # group by water year
+        # first, secelect out full water years
+        start_date, end_date = find_full_water_years_within_a_range(data.index[0], data.index[-1])
+        data_WY = select_time_range(data, start_date, end_date)
+        # then, group by water year
+        if stat=='mean':
+            data_result = data_WY.groupby(lambda x:wateryear(x)).mean()
+    elif by=='TVA_week':  # group by week in calendar year, TVA weekly data format
+        if stat=='mean':
+            data_result = data.groupby(lambda x:TVA_week(x)).mean()
+        # Put weekly data on the middle day of week
+        index_new = []
+        for i in range(len(data_result)):  # Loop over every week
+            year = data_result.index[i][0]  # extract year
+            week = data_result.index[i][1]  # extract week number
+            day = 4 + (week-1)*7  # middle day (day of year)
+            if calendar.isleap(year) and week==52:
+                day = day + 1
+            date = dt.datetime(year,1,1) + dt.timedelta(days=day-1)
+            index_new.append(date)
+        data_result.index = index_new
 
-	return data_result
+    return data_result
 
 #==============================================================
 #==============================================================
@@ -500,70 +533,71 @@ def read_Lohmann_route_daily_output(path):
 #==============================================================
 
 def plot_time_series(plot_date, list_s_data, list_style, list_label, plot_start, plot_end, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', time_locator=None, time_format='%Y/%m', xtick_location=None, xtick_labels=None, add_info_text=False, model_info=None, stats=None, show=False):
-	''' This function plots daily data time series
+    ''' This function plots daily data time series
 
-	Input:
-		plot_date: True for plot_date, False for plot regular time series
-		list_s_data: a list of pd.Series objects to be plotted
-		list_style: a list of plotting style (e.g., ['b-', 'r--']); must be the same size as 'list_s_data'
-		list_label: a list of plotting label (e.g., ['Scenario1', 'Scenario2']); must be the same size as 'list_s_data'
-		xlabel: [str]
-		ylabel: [str]
-		title: [str]
-		fontsize: for xlabe, ylabel and title [int]
-		legend_loc: [str]
-		plot_start, plot_end: if plot_date=True, [dt.datetime]; if plot_date=False, [float/int]
-		time_locator: time locator on the plot; 'year' for year; 'month' for month. e.g., ('month', 3) for plot one tick every 3 months [tuple]
-		time_format: [str]
-		xtick_location: a list of xtick locations [list of float/int]
-		xtick_labels: a list of xtick labels [list of str]; must be the same length as 'xtick_locations'
-		add_info_text: True for adding info text at the bottom of the plot
-		model_info, stats: descriptions added in the info text [str]
-		show: True for showing the plot
+    Input:
+        plot_date: True for plot_date, False for plot regular time series
+        list_s_data: a list of pd.Series objects to be plotted
+        list_style: a list of plotting style (e.g., ['b-', 'r--']); must be the same size as 'list_s_data'
+        list_label: a list of plotting label (e.g., ['Scenario1', 'Scenario2']); must be the same size as 'list_s_data'
+        xlabel: [str]
+        ylabel: [str]
+        title: [str]
+        fontsize: for xlabe, ylabel and title [int]
+        legend_loc: [str]
+        plot_start, plot_end: if plot_date=True, [dt.datetime]; if plot_date=False, [float/int]
+        time_locator: time locator on the plot; 'year' for year; 'month' for month. e.g., ('month', 3) for plot one tick every 3 months [tuple]
+        time_format: [str]
+        xtick_location: a list of xtick locations [list of float/int]
+        xtick_labels: a list of xtick labels [list of str]; must be the same length as 'xtick_locations'
+        add_info_text: True for adding info text at the bottom of the plot
+        model_info, stats: descriptions added in the info text [str]
+        show: True for showing the plot
 
-	Require:
-		plot_date_format
-		add_info_text_to_plot(fig, ax, model_info, stats)
-		plot_format
-	'''
+    Require:
+        plot_date_format
+        add_info_text_to_plot(fig, ax, model_info, stats)
+        plot_format
+    '''
 
-	import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt
 
-	# Check if list_s_data, list_style and list_label have the same length
-	if len(list_s_data) !=len(list_style) or len(list_s_data)!=len(list_label):
-		print 'Input list lengths are not the same!'
-		exit()
+    # Check if list_s_data, list_style and list_label have the same length
+    if len(list_s_data) !=len(list_style) or len(list_s_data)!=len(list_label):
+        print 'Input list lengths are not the same!'
+        exit()
 
-	fig = plt.figure(figsize=(12,8))
-	ax = plt.axes()
-	for i in range(len(list_s_data)):
-		if plot_date==True:  # if plot date
-			plt.plot_date(list_s_data[i].index, list_s_data[i], list_style[i], label=list_label[i])
-		else:  # if plot regular time series
-			plt.plot(list_s_data[i].index, list_s_data[i], list_style[i], label=list_label[i])
-	if xlabel:
-		plt.xlabel(xlabel, fontsize=fontsize)
-	if ylabel:
-		plt.ylabel(ylabel, fontsize=fontsize)
-	if title:
-		plt.title(title, fontsize=fontsize)
-	# format plot
-	leg = plt.legend(loc=legend_loc, frameon=True)
-	leg.get_frame().set_alpha(0)
-	if plot_date==True:  # if plot date
-		plot_date_format(ax, time_range=(plot_start, plot_end), locator=time_locator, time_format='%Y/%m')
-	else:  # if plot regular time series
-		plt.xlim([plot_start, plot_end])
-		if xtick_location:
-			plot_format(ax, xtick_location=xtick_location, xtick_labels=xtick_labels)
-	# add info text
-	if add_info_text==True:
-		add_info_text_to_plot(fig, ax, model_info, stats)
+    fig = plt.figure(figsize=(12,8))
+    ax = plt.axes()
+    for i in range(len(list_s_data)):
+        if plot_date==True:  # if plot date
+            plt.plot_date(list_s_data[i].index, list_s_data[i], list_style[i], label=list_label[i])
+#            list_s_data[i].plot(style=list_style[i], label=list_label[i])
+        else:  # if plot regular time series
+            plt.plot(list_s_data[i].index, list_s_data[i], list_style[i], label=list_label[i])
+    if xlabel:
+        plt.xlabel(xlabel, fontsize=fontsize)
+    if ylabel:
+        plt.ylabel(ylabel, fontsize=fontsize)
+    if title:
+        plt.title(title, fontsize=fontsize)
+    # format plot
+    leg = plt.legend(loc=legend_loc, frameon=True)
+    leg.get_frame().set_alpha(0)
+    if plot_date==True:  # if plot date
+        plot_date_format(ax, time_range=(plot_start, plot_end), locator=time_locator, time_format='%Y/%m')
+    else:  # if plot regular time series
+        plt.xlim([plot_start, plot_end])
+        if xtick_location:
+            plot_format(ax, xtick_location=xtick_location, xtick_labels=xtick_labels)
+    # add info text
+    if add_info_text==True:
+        add_info_text_to_plot(fig, ax, model_info, stats)
 
-	if show==True:
-		plt.show()
+    if show==True:
+        plt.show()
 
-	return fig
+    return fig
 
 #==============================================================
 #==============================================================
@@ -963,8 +997,61 @@ def read_RMB_formatted_output(path, var='Tstream'):
 
     return s
 
+#========================================================================
+#========================================================================
 
+def read_RVIC_output(filepath, output_format='array', outlet_ind=-1):
+    ''' This function reads RVIC output netCDF file
 
+    Input:
+        filepath: path of the output netCDF file
+        output_format: 'array' or 'grid' (currently only support 'array')
+        outlet_ind: index of the outlet to be read (index starts from 0); -1 for reading all outlets
+
+    Return:
+        df - a DataFrame containing streamflow [unit: cfs]; column name(s): outlet name
+        dict_outlet - a dictionary with outlet name as keys; [lat lon] as content
+
+    '''
+
+    import numpy as np
+    import pandas as pd
+    import xray
+
+    ds = xray.open_dataset(filepath)
+
+    #=== Read in outlet names ===#
+    outlet_names = []
+    for i, name in enumerate(ds['outlet_name']):
+        outlet_names.append(str(name.values))
+
+    #=== Read in outlet lat lon ===#
+    dict_outlet = {}
+    # If read all outlets
+    if outlet_ind==-1:
+        for i, name in enumerate(outlet_names):
+            dict_outlet[name] = [ds['lat'].values[i], ds['lon'].values[i]]
+    # If read one outlet
+    else:
+        dict_outlet[outlet_names[outlet_ind]] = \
+                        [ds['lat'].values[outlet_ind], ds['lon'].values[outlet_ind]]
+
+    #=== Read in streamflow variable ===#
+    flow = ds['streamflow'].values
+    flow = flow * np.power(1000/25.4/12, 3)  # convert m3/s to cfs
+    # If read all outlets
+    if outlet_ind==-1:
+        pass
+#        df = pd.DataFrame(flow, index=ds['time'].to_index(), columns=outlet_names)
+    # If read one outlet
+    else:
+        df = pd.DataFrame(flow[:,outlet_ind], index=ds.coords['time'].values, \
+                          columns=[outlet_names[outlet_ind]])
+
+    #=== Read in streamflow variable ===#
+    df = df[:-1]  # Get rid of the last time step
+
+    return df, dict_outlet
 
 
 

@@ -113,6 +113,27 @@ for i in range(cfg['INPUT_CONTROL']['n_ts']):  # Loop over each time series
     list_s_to_plot.append(s_to_plot)
 
 #========================================================
+# Calculate weekly average (TVA weekly data week definition)
+#========================================================
+list_s_to_plot_weekly = []
+for i, s_to_plot in enumerate(list_s_to_plot):
+    s_to_plot_week = my_functions.calc_ts_stats_by_group(s_to_plot, by='TVA_week', stat='mean')
+    list_s_to_plot_weekly.append(s_to_plot_week)
+
+#========================================================
+# Calculate annual streamflow bias (water year) and KGE
+#========================================================
+# Calculate annual bias
+df_to_plot = pd.concat(list_s_to_plot, axis=1, ignore_index=True)
+df_to_plot.columns = ['obs_TVA', 'sim_before_cali', 'sim_after_cali']
+df_WY_mean = my_functions.calc_ts_stats_by_group(df_to_plot, 'year', 'mean')
+avg_WY_mean = df_WY_mean.mean()
+bias_before_cali = (avg_WY_mean['sim_before_cali'] - avg_WY_mean['obs_TVA'])/avg_WY_mean['obs_TVA']
+bias_after_cali = (avg_WY_mean['sim_after_cali'] - avg_WY_mean['obs_TVA'])/avg_WY_mean['obs_TVA']
+# Calculate KGE
+
+
+#========================================================
 # plot
 #========================================================
 #============ Process "\n" in "model_info" ==================#
@@ -120,7 +141,7 @@ model_info = cfg['PLOT_OPTIONS']['model_info'].replace("\\n", "\n")
 
 #============== plot original data (daily, weekly) ===============#
 fig = my_functions.plot_time_series(plot_date=True, \
-            list_s_data=list_s_to_plot, \
+            list_s_data=list_s_to_plot_weekly, \
             list_style=list_plot_style, \
             list_label=list_plot_label, \
             plot_start=plot_start_date, plot_end=plot_end_date, \
@@ -130,8 +151,8 @@ fig = my_functions.plot_time_series(plot_date=True, \
 #            time_locator=time_locator, time_format='%Y/%m', \
             xtick_location=None, xtick_labels=None, \
             add_info_text=True, model_info=model_info, \
-            stats='Daily (no stats)', show=False)
-plt.savefig('%s.flow.daily.png' %cfg['OUTPUT']['output_plot_basename'], format='png')
+            stats='Weekly (TVA week definition)', show=False)
+plt.savefig('%s.flow.weekly.png' %cfg['OUTPUT']['output_plot_basename'], format='png')
 
 #============== plot monthly data ===============#
 fig = my_functions.plot_monthly_data(\
@@ -164,21 +185,32 @@ fig = my_functions.plot_seasonality_data(\
             add_info_text=True, model_info=model_info, \
             stats='Seasonality for each month', show=False)
 
-## Calculate average annual mean flow (water year)
-## calculate
-#df_to_plot = s_usgs_to_plot.to_frame(name='usgs')
-#df_to_plot['routed'] = s_route_to_plot
-#df_to_plot = df_to_plot[np.isfinite(df_to_plot['usgs'])]  # drop rows with NaN; this is for the purpose of comparing the same period of time, because USGS data has missing values
-#df_WY_mean = my_functions.calc_ts_stats_by_group(df_to_plot, 'year', 'mean')
-#avg_WY_mean = df_WY_mean.mean()
-#bias = (avg_WY_mean['routed'] - avg_WY_mean['usgs'])/avg_WY_mean['usgs']
-#plt.text(0.65, 0.85, 'Simulation bias: {:.1f}%\n({:d}-{:d})'\
-#           .format(bias*100, df_WY_mean.index[0]+1, df_WY_mean.index[-1]), 
-#           transform=plt.gca().transAxes, fontsize=16)
-#print 'Start year: {:d}  End year: {:d}'.format(df_WY_mean.index[0]+1, df_WY_mean.index[-1])
-#print avg_WY_mean
+#plt.text(0.65, 0.4, \
+#        'Annual flow cfs:\nObs TVA: {:.1f}\nBefore_cali: {:.1f}\nafter_cali: {:.1f}\n\nAnnual bias: \nBefore calibration: {:.1f}%\nAfter calibration: {:.1f}%\n(WY {}-{})'\
+#                    .format(avg_WY_mean['obs_TVA'], avg_WY_mean['sim_before_cali'], \
+#                            avg_WY_mean['sim_after_cali'], \
+#                            bias_before_cali*100, bias_after_cali*100, \
+#                            plot_start_date.year+1, plot_end_date.year), 
+#        transform=plt.gca().transAxes, fontsize=12)
 
 fig = plt.savefig('%s.flow.season.png' %cfg['OUTPUT']['output_plot_basename'], format='png')
+
+#============== plot flow duration curve (based on weekly data) ===============#
+fig = my_functions.plot_duration_curve(\
+            list_s_data=list_s_to_plot_weekly, \
+            list_style=list_plot_style, \
+            list_label=list_plot_label, \
+            figsize=(10,10), xlog=False, ylog=True, \
+            xlim=None, ylim=None, \
+            xlabel='Exceedence', ylabel='Flow (thousand cfs)', \
+            title='{}, WY {}-{}'.format(cfg['PLOT_OPTIONS']['plot_title'], \
+                                        plot_start_date.year+1, \
+                                        plot_end_date.year), \
+            fontsize=16, legend_loc='upper right', \
+            add_info_text=True, model_info=model_info, \
+            stats='Flow duration curve based on weekly data', show=False)
+
+fig = plt.savefig('%s.flow_duration_weekly.png' %cfg['OUTPUT']['output_plot_basename'], format='png')
 
 ##============== plot annual cumulative flow ===============#
 ## calculate
