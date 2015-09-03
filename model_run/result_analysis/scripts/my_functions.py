@@ -1061,15 +1061,15 @@ def kge(sim, obs):
 
     import numpy as np
 
-    obs_mask=obs/obs
-    sim *= obs_mask
-    obs *= obs_mask
+#    obs_mask=obs/obs
+#    sim *= obs_mask
+#    obs *= obs_mask
     
     std_sim = np.std(sim)
     std_obs = np.std(obs)
     mean_sim = sim.mean(axis=0)
     mean_obs = obs.mean(axis=0)
-    r_array = np.corrcoef(sim.values,obs.values)
+    r_array = np.corrcoef(sim.values, obs.values)
     r = r_array[0,1]
     relvar = std_sim/std_obs
     bias = mean_sim/mean_obs
