@@ -1053,5 +1053,26 @@ def read_RVIC_output(filepath, output_format='array', outlet_ind=-1):
 
     return df, dict_outlet
 
+#========================================================================
+#========================================================================
 
+def kge(sim, obs):
+    ''' Calculate Kling-Gupta Efficiency (function from Oriana) '''
+
+    import numpy as np
+
+    obs_mask=obs/obs
+    sim *= obs_mask
+    obs *= obs_mask
+    
+    std_sim = np.std(sim)
+    std_obs = np.std(obs)
+    mean_sim = sim.mean(axis=0)
+    mean_obs = obs.mean(axis=0)
+    r_array = np.corrcoef(sim.values,obs.values)
+    r = r_array[0,1]
+    relvar = std_sim/std_obs
+    bias = mean_sim/mean_obs
+    kge = 1-np.sqrt(np.square(r-1) + np.square(relvar-1) + np.square(bias-1))
+    return kge
 

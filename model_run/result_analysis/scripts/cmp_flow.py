@@ -131,7 +131,8 @@ avg_WY_mean = df_WY_mean.mean()
 bias_before_cali = (avg_WY_mean['sim_before_cali'] - avg_WY_mean['obs_TVA'])/avg_WY_mean['obs_TVA']
 bias_after_cali = (avg_WY_mean['sim_after_cali'] - avg_WY_mean['obs_TVA'])/avg_WY_mean['obs_TVA']
 # Calculate KGE
-
+kge_before_cali = my_functions.kge(list_s_to_plot_weekly[1], list_s_to_plot_weekly[0])
+kge_after_cali = my_functions.kge(list_s_to_plot_weekly[2], list_s_to_plot_weekly[0])
 
 #========================================================
 # plot
@@ -169,10 +170,20 @@ fig = my_functions.plot_monthly_data(\
 fig = plt.savefig('%s.flow.monthly.png' %cfg['OUTPUT']['output_plot_basename'], format='png')
 
 #============== plot seasonal data ===============#
+list_plot_label_new = []
+list_plot_label_new.append('{}\n(Annual flow={:.1f}cfs)'.\
+                      format(list_plot_label[0], avg_WY_mean['obs_TVA']))  # TVA obs
+list_plot_label_new.append('{}\n(Weekly KGE={:.2f}\nAnnual flow={:.1f}cfs\nAnnual bias={:.1f}%)'\
+                      .format(list_plot_label[1], kge_before_cali, \
+                              avg_WY_mean['sim_before_cali'], bias_before_cali*100))  # Before calibration
+list_plot_label_new.append('{}\n(Weekly KGE={:.2f}\nAnnual flow={:.1f}cfs\nAnnual bias={:.1f}%)'\
+                      .format(list_plot_label[2], kge_after_cali, \
+                              avg_WY_mean['sim_after_cali'], bias_after_cali*100))  # After calibration
+
 fig = my_functions.plot_seasonality_data(\
             list_s_data=list_s_to_plot, \
             list_style=list_plot_style, \
-            list_label=list_plot_label, \
+            list_label=list_plot_label_new, \
             plot_start=1, plot_end=12, \
             xlabel=None, ylabel='Flow (thousand cfs)', \
             title='Seasonality, {}, WY {}-{}'.format(cfg['PLOT_OPTIONS']['plot_title'], \
@@ -211,6 +222,13 @@ fig = my_functions.plot_duration_curve(\
             stats='Flow duration curve based on weekly data', show=False)
 
 fig = plt.savefig('%s.flow_duration_weekly.png' %cfg['OUTPUT']['output_plot_basename'], format='png')
+
+#============== plot sim vs. obs on scatter plot (based on weekly data) ===============#
+
+
+
+
+
 
 ##============== plot annual cumulative flow ===============#
 ## calculate
