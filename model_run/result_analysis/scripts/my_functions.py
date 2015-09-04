@@ -1142,3 +1142,61 @@ def plot_scatter(list_x, list_y, list_s, list_c, list_marker, list_label, figsiz
 
     return fig
 
+#========================================================================
+#========================================================================
+
+def define_map_projection(projection='gall', llcrnrlat=-80, urcrnrlat=80, llcrnrlon=-180, urcrnrlon=180, resolution='i', land_color='grey', ocean_color='lightblue', lakes=True):
+    '''Define projected map
+
+    Return: the projection
+    '''
+
+    from mpl_toolkits.basemap import Basemap
+    import matplotlib.pyplot as plt
+
+    m = Basemap(projection=projection, llcrnrlat=llcrnrlat, urcrnrlat=urcrnrlat, llcrnrlon=llcrnrlon, urcrnrlon=urcrnrlon, resolution=resolution)
+    m.drawlsmask(land_color=land_color, ocean_color=ocean_color, lakes=lakes)
+    m.drawcoastlines(linewidth=0.75)
+    m.drawstates(linewidth=0.5)
+    m.drawcountries(linewidth=0.5)
+
+    return m
+
+#========================================================================
+#========================================================================
+
+def mesh_xyz(lat, lon, data, dlat, dlon):
+    ''' Convert xyz data into meshgrid format
+
+    Input arguments: lat, lon, data (np array or list)
+    Return: lat_mesh, lon_mesh, data_mesh_masked (no-data grids is masked)
+    '''
+
+    import numpy as np
+
+    # Make meshed lon & lat
+    min_lon = min(lon)  # min longitude
+    max_lon = max(lon)  # max longitude
+    nlon = int(round((max_lon-min_lon)/dlon + 1))  # number of longitude meshes
+    min_lat = min(lat)  # min latitude
+    max_lat = max(lat)  # max latitude
+    nlat = int(round((max_lat-min_lat)/dlat + 1))  # number of latitude meshes
+
+    lat_array = np.arange(max_lat, min_lat-dlat/2.0, -dlat)
+    lon_array = np.arange(min_lon, max_lon+dlon/2.0, dlon)
+    lon_mesh, lat_mesh = np.meshgrid(lon_array, lat_array)
+
+    # Make meshed data
+    data_mesh = np.empty((nlat, nlon))
+    data_mesh[:] = np.nan
+    for i in range(len(data)):
+        lat_ind = int(round((max_lat-lat[i])/dlat))
+        lon_ind = int(round((lon[i]-min_lon)/dlon))
+        data_mesh[lat_ind][lon_ind] = data[i]
+    data_mesh_masked = np.ma.masked_invalid(data_mesh)
+
+    return lat_mesh, lon_mesh, data_mesh_masked
+
+
+
+
