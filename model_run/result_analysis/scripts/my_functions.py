@@ -1041,8 +1041,7 @@ def read_RVIC_output(filepath, output_format='array', outlet_ind=-1):
     flow = flow * np.power(1000/25.4/12, 3)  # convert m3/s to cfs
     # If read all outlets
     if outlet_ind==-1:
-        pass
-#        df = pd.DataFrame(flow, index=ds['time'].to_index(), columns=outlet_names)
+        df = pd.DataFrame(flow, index=ds.coords['time'].values, columns=outlet_names)
     # If read one outlet
     else:
         df = pd.DataFrame(flow[:,outlet_ind], index=ds.coords['time'].values, \
@@ -1075,4 +1074,71 @@ def kge(sim, obs):
     bias = mean_sim/mean_obs
     kge = 1-np.sqrt(np.square(r-1) + np.square(relvar-1) + np.square(bias-1))
     return kge
+
+#==============================================================
+#==============================================================
+
+def plot_scatter(list_x, list_y, list_s, list_c, list_marker, list_label, figsize=(12,8), linewidths=None, alpha=1, xlog=False, ylog=False, xlim=None, ylim=None, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', add_info_text=False, model_info=None, stats=None, show=False):
+    ''' This function plots xy data
+
+    Input:
+        list_x, list_y: a list of x and y data; [np.array or list]
+        list_s, list_c, list_marker: a list of size, color and marker
+        list_label: a list of plotting label (e.g., ['Scenario1', 'Scenario2']); must be the same size as 'list_s_data'
+        xlog, ylog: True for plotting log scale for the axis; False for plotting regular scale
+        xlabel: [str]
+        ylabel: [str]
+        title: [str]
+        fontsize: for xlabe, ylabel and title [int]
+        linewidths: width of marker line
+        alpha: transparency; 0 for transparent; 1 for opaque
+        legend_loc: [str]
+        xlim, ylim
+        add_info_text: True for adding info text at the bottom of the plot
+        model_info, stats: descriptions added in the info text [str]
+        show: True for showing the plot
+
+    Require:
+        add_info_text_to_plot(fig, ax, model_info, stats)
+        plot_format
+    '''
+
+    import matplotlib.pyplot as plt
+
+    # Check if list_s_data, list_style and list_label have the same length
+    if len(list_x) !=len(list_y) or len(list_x)!=len(list_s) or len(list_x)!=len(list_c) or len(list_x)!=len(list_marker) or len(list_x)!=len(list_label):
+        print 'Input list lengths are not the same!'
+        exit()
+
+    fig = plt.figure(figsize=figsize)
+    ax = plt.axes()
+    for i in range(len(list_x)):
+        plt.scatter(list_x[i], list_y[i], s=list_s[i], c=list_c[i], \
+                    marker=list_marker[i], linewidths=linewidths, \
+                    alpha=alpha, label=list_label[i])
+    if xlabel:
+        plt.xlabel(xlabel, fontsize=fontsize)
+    if ylabel:
+        plt.ylabel(ylabel, fontsize=fontsize)
+    if title:
+        plt.title(title, fontsize=fontsize)
+    if xlog:
+        ax.set_xscale('log')
+    if ylog:
+        ax.set_yscale('log')
+    # format plot
+    leg = plt.legend(loc=legend_loc, frameon=True)
+    leg.get_frame().set_alpha(0)
+    if xlim:
+        plt.xlim(xlim)
+    if ylim:
+        plt.ylim(ylim)
+    # add info text
+    if add_info_text==True:
+        add_info_text_to_plot(fig, ax, model_info, stats)
+
+    if show==True:
+        plt.show()
+
+    return fig
 
