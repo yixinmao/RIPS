@@ -329,7 +329,7 @@ for period in ['caliPeriod', 'valiPeriod']:
         
         # If calibration period, plot grid-cell data also
         if period=='caliPeriod':
-            cs = m.pcolormesh(xx, yy, dict_bias_gridmesh[cali], cmap=plt.cm.RdBu, vmin=-0.6, vmax=1.0)
+            cs = m.pcolormesh(xx, yy, dict_bias_gridmesh[cali]*100, cmap=plt.cm.RdBu, vmin=-30, vmax=30)
         
         # Plot station data
         for lat_lon in dict_kge.keys():
@@ -349,9 +349,42 @@ for period in ['caliPeriod', 'valiPeriod']:
                                              period, cali), format='png')
     
 
-
-
+    #============================ Plot KGE difference before and after cali ===========================#
+    fig = plt.figure(figsize=(16, 8))
+    ax = plt.axes()
+    m = my_functions.define_map_projection(projection='gall', llcrnrlat=34, urcrnrlat=38, \
+                                           llcrnrlon=-91, urcrnrlon=-80, resolution='l', \
+                                           land_color='grey', ocean_color='lightblue', lakes=True) 
+    # Project VIC meshed grid cells
+    xx, yy = m(lon_mesh, lat_mesh)
     
+    # If calibration period, plot grid-cell data also
+    if period=='caliPeriod':
+        cs = m.pcolormesh(xx, yy, dict_kge_gridmesh['afterCali'] - dict_kge_gridmesh['beforeCali'], \
+                          cmap=plt.cm.PuOr, vmin=-0.5, vmax=0.5)
+    
+    # Plot station data
+    for lat_lon in dict_kge.keys():
+        lat = float(lat_lon.split('_')[0])
+        lon = float(lat_lon.split('_')[1])
+        x, y = m(lon, lat)
+        m.scatter(x, y, s=90, \
+                  c=dict_kge[lat_lon][period]['afterCali']-dict_kge[lat_lon][period]['beforeCali'], \
+                  cmap=plt.cm.PuOr, \
+                  edgecolors='black', vmin=-0.5, vmax=0.5)
+    cbar=m.colorbar(extend='both')
+    cbar.ax.tick_params(labelsize=16)
+    cbar.set_label('KGE difference', fontsize=20)
+    plt.title('KGE difference (afterCali - beforeCali), {}'.format(period), size=20)
+    my_functions.add_info_text_to_plot(fig, ax, model_info=model_info, \
+                                       stats='KGE based on weekly avg. data, afterCali-beforeCali', \
+                                       fontsize=14, bottom=0.3, text_location=-0.1)        
+    fig.savefig('{}.KGE_diff.{}.{}.png'.format(cfg['OUTPUT']['output_plot_basename'], \
+                                         period, cali), format='png')
+    
+
+
+
 
 
 
