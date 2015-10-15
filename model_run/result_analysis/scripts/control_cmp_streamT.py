@@ -9,7 +9,7 @@ import numpy as np
 # Parameter setting
 #=======================================================
 gauge_info_path = '../data/USGS_data/USGS_gauge_info/Tennessee_location_intested.csv'  # gauge info csv
-rbm_output_basedir = '/raid2/ymao/VIC_RBM_east/VIC_RBM/model_run/output/RBM/Maurer_8th/Tennessee/Tennessee_1949_2010/Tennessee_1949_2010'  # RBM formatted output file would be: rbm_output_basedir/lat_lon/lat_lon_reach<reach#>_seg<1OR2>
+rbm_output_basedir = '/raid2/ymao/VIC_RBM_east_RIPS/RIPS/model_run/output/RBM/Maurer_8th/Tennessee/hist_1949_2010.from_RVIC.calibrated_1961_1970/Tennessee'  # RBM formatted output file would be: rbm_output_basedir/lat_lon/lat_lon_reach<reach#>_seg<1OR2>
 
 #=======================================================
 # Process

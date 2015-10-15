@@ -15,6 +15,8 @@ parser.add_argument("--cfg", type=str,  help="config file for this script")
 args = parser.parse_args()
 cfg = my_functions.read_config(args.cfg)
 
+dpi = 200 # This needs to be put into config file
+
 #========================================================
 # Load data
 #========================================================
@@ -157,30 +159,36 @@ fig = my_functions.plot_time_series(plot_date=True, \
             list_s_data=list_s_to_plot_weekly, \
             list_style=list_plot_style, \
             list_label=list_plot_label, \
-            plot_start=plot_start_date, plot_end=plot_end_date, \
+            plot_start=dt.datetime(1988,10,1),  # plot_start_date, \
+            plot_end=dt.datetime(1989,9,30),  # plot_end_date, \
             xlabel=None, ylabel='Flow (thousand cfs)', \
             title='{}\n{}'.format(cfg['PLOT_OPTIONS']['plot_title'], title_new_line), \
-            fontsize=16, legend_loc='upper right', \
+            fontsize=18, legend_loc='upper right', \
 #            time_locator=time_locator, time_format='%Y/%m', \
             xtick_location=None, xtick_labels=None, \
             add_info_text=True, model_info=model_info, \
             stats='Weekly (TVA week definition)', show=False)
-plt.savefig('%s.flow.weekly.png' %cfg['OUTPUT']['output_plot_basename'], format='png')
+ax = plt.gca()
+for tick in ax.yaxis.get_major_ticks():
+    tick.label.set_fontsize(16)
+
+plt.savefig('%s.flow.weekly.png' %cfg['OUTPUT']['output_plot_basename'], format='png', dpi=dpi)
 
 #============== plot monthly data ===============#
 fig = my_functions.plot_monthly_data(\
             list_s_data=list_s_to_plot, \
             list_style=list_plot_style, \
             list_label=list_plot_label, \
-            plot_start=plot_start_date, plot_end=plot_end_date, \
+            plot_start=dt.datetime(1991,10,1), # plot_start_date, 
+            plot_end=dt.datetime(1996,9,30), # plot_end_date, \
             xlabel=None, ylabel='Flow (thousand cfs)', \
             title='Monthly, {}\n{}'.format(cfg['PLOT_OPTIONS']['plot_title'], \
                                            title_new_line), \
-            fontsize=16, legend_loc='upper right', \
+            fontsize=18, legend_loc='upper right', \
 #            time_locator=time_locator, time_format='%Y/%m', \
             add_info_text=True, model_info=model_info, \
             stats='Monthly mean', show=False)
-fig = plt.savefig('%s.flow.monthly.png' %cfg['OUTPUT']['output_plot_basename'], format='png')
+fig = plt.savefig('%s.flow.monthly.png' %cfg['OUTPUT']['output_plot_basename'], format='png', dpi=dpi)
 
 #============== plot seasonal data ===============#
 # Add stats to label
@@ -209,12 +217,18 @@ fig = my_functions.plot_seasonality_data(\
                   .format(cfg['PLOT_OPTIONS']['plot_title'], 
                           plot_start_date.year+1, plot_end_date.year, \
                           title_new_line), \
-            fontsize=16, legend_loc='upper right', \
+            fontsize=18, legend_loc='upper right', \
             xtick_location=range(1,13), \
             xtick_labels=['Jan','Feb','Mar','Apr','May','Jun', \
                           'Jul','Aug','Nov','Oct','Nov','Dec'], \
             add_info_text=True, model_info=model_info, \
             stats='Seasonality for each month', show=False)
+
+ax = plt.gca()
+for tick in ax.xaxis.get_major_ticks():
+    tick.label.set_fontsize(16)
+for tick in ax.yaxis.get_major_ticks():
+    tick.label.set_fontsize(16)
 
 #plt.text(0.65, 0.4, \
 #        'Annual flow cfs:\nObs TVA: {:.1f}\nBefore_cali: {:.1f}\nafter_cali: {:.1f}\n\nAnnual bias: \nBefore calibration: {:.1f}%\nAfter calibration: {:.1f}%\n(WY {}-{})'\
@@ -224,7 +238,7 @@ fig = my_functions.plot_seasonality_data(\
 #                            plot_start_date.year+1, plot_end_date.year), 
 #        transform=plt.gca().transAxes, fontsize=12)
 
-fig = plt.savefig('%s.flow.season.png' %cfg['OUTPUT']['output_plot_basename'], format='png')
+fig = plt.savefig('%s.flow.season.png' %cfg['OUTPUT']['output_plot_basename'], format='png', dpi=dpi)
 
 #============== plot flow duration curve (based on weekly data) ===============#
 fig = my_functions.plot_duration_curve(\
@@ -238,11 +252,17 @@ fig = my_functions.plot_duration_curve(\
                                         plot_start_date.year+1, \
                                         plot_end_date.year, \
                                         title_new_line), \
-            fontsize=16, legend_loc='upper right', \
+            fontsize=18, legend_loc='upper right', \
             add_info_text=True, model_info=model_info, \
             stats='Flow duration curve based on weekly data', show=False)
 
-fig = plt.savefig('%s.flow_duration_weekly.png' %cfg['OUTPUT']['output_plot_basename'], format='png')
+ax = plt.gca()
+for tick in ax.xaxis.get_major_ticks():
+    tick.label.set_fontsize(16)
+for tick in ax.yaxis.get_major_ticks():
+    tick.label.set_fontsize(16)
+
+fig = plt.savefig('%s.flow_duration_weekly.png' %cfg['OUTPUT']['output_plot_basename'], format='png', dpi=dpi)
 
 #============== plot sim vs. obs on scatter plot (based on weekly data) ===============#
 # list_x: TVA_obs;
@@ -253,7 +273,7 @@ max_flow = max([max(s) for s in list_s_to_plot_weekly])
 fig = my_functions.plot_scatter(\
             list_x=[list_s_to_plot_weekly[0], list_s_to_plot_weekly[0]], \
             list_y=[list_s_to_plot_weekly[1], list_s_to_plot_weekly[2]], \
-            list_s=[10,10], list_c=['r','g'], list_marker=['o','o'], \
+            list_s=[10,10], list_c=['r','b'], list_marker=['o','o'], \
             list_label=[list_plot_label[1], list_plot_label[2]], \
             figsize=(12,8), linewidths=0, alpha=0.5, \
             xlog=False, ylog=False, \
@@ -264,7 +284,7 @@ fig = my_functions.plot_scatter(\
                 .format(cfg['PLOT_OPTIONS']['plot_title'], \
                         plot_start_date.year+1, plot_end_date.year, \
                         title_new_line), \
-            fontsize=16, legend_loc='upper left', \
+            fontsize=18, legend_loc='upper left', \
             add_info_text=True, model_info=model_info, \
             stats='Simulated vs. TVA naturalized flow, before and after calibration, \
                    \n          all avg. to weekly', show=False)
@@ -282,16 +302,16 @@ slope_after_cali, interc_after_cali, r_after_cali, p_after_cali, std_err_after_c
 plt.plot([0,max_flow], [interc_before_cali,interc_before_cali+slope_before_cali*max_flow], \
          'r-', lw=2)
 plt.plot([0,max_flow], [interc_after_cali,interc_after_cali+slope_after_cali*max_flow], \
-         'g-', lw=2)
+         'b-', lw=2)
 
-fig = plt.savefig('%s.flow_weekly_scatter.png' %cfg['OUTPUT']['output_plot_basename'], format='png')
+fig = plt.savefig('%s.flow_weekly_scatter.png' %cfg['OUTPUT']['output_plot_basename'], format='png', dpi=dpi)
 
 
 #-------- log, no fitting line ---#
 fig = my_functions.plot_scatter(\
             list_x=[list_s_to_plot_weekly[0], list_s_to_plot_weekly[0]], \
             list_y=[list_s_to_plot_weekly[1], list_s_to_plot_weekly[2]], \
-            list_s=[10,10], list_c=['r','g'], list_marker=['o','o'], \
+            list_s=[10,10], list_c=['r','b'], list_marker=['o','o'], \
             list_label=[list_plot_label[1], list_plot_label[2]], \
             figsize=(12,8), linewidths=0, alpha=0.5, \
             xlog=True, ylog=True, \
@@ -302,7 +322,7 @@ fig = my_functions.plot_scatter(\
                 .format(cfg['PLOT_OPTIONS']['plot_title'], \
                         plot_start_date.year+1, plot_end_date.year, \
                         title_new_line), \
-            fontsize=16, legend_loc='upper left', \
+            fontsize=18, legend_loc='upper left', \
             add_info_text=True, model_info=model_info, \
             stats='Simulated vs. TVA naturalized flow, before and after calibration, \
                    \n          all avg. to weekly', show=False)
@@ -313,7 +333,7 @@ plt.ylim([0.1, max_flow])
 # Add 1:1 line
 plt.plot([0,max_flow], [0,max_flow], 'k--', lw=2)
 
-fig = plt.savefig('%s.flow_weekly_scatter_log.png' %cfg['OUTPUT']['output_plot_basename'], format='png')
+fig = plt.savefig('%s.flow_weekly_scatter_log.png' %cfg['OUTPUT']['output_plot_basename'], format='png', dpi=dpi)
 
 
 
