@@ -7,3 +7,6 @@
 [submodule "model_run/source/VIC_RBM"]
 	path = model_run/source/VIC_RBM
 	url = https://github.com/yixinmao/VIC_RBM.git
+[submodule "model_run/source/simple_reservoir_model"]
+	path = model_run/source/simple_reservoir_model
+	url = https://github.com/yixinmao/simple_reservoir_model.git
