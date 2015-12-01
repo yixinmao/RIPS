@@ -253,7 +253,7 @@ def fit_Leopold_depth(df, discharge_name, depth_name):
         depth = aQ^b
 
     Input:
-        df: pd.DataFrame containing velocity and discharge data
+        df: pd.DataFrame containing depth and discharge data
 
     Return:
         An array of fitted parameters (here, an array with two elements - a and b)
@@ -276,4 +276,34 @@ def fit_Leopold_depth(df, discharge_name, depth_name):
 
     return popt
 
+#==============================================================
+#==============================================================
+
+def fit_Leopold_width(df, discharge_name, width_name):
+    ''' This function fits Leopold coefficients for width
+        width = aQ^b
+
+    Input:
+        df: pd.DataFrame containing width and discharge data
+
+    Return:
+        An array of fitted parameters (here, an array with two elements - a and b)
+    '''
+
+    import numpy as np
+    from scipy.optimize import curve_fit
+    import matplotlib.pyplot as plt
+
+    # Define function width = aQ^b
+    def func(x, a, b):
+        return a*np.power(x, b)
+
+    # Delete missing values
+    df_temp = df[np.isnan(df[width_name])==False]
+    df_perfect = df_temp[np.isnan(df_temp[discharge_name])==False]
+
+    popt, pcov = curve_fit(func, df_perfect[discharge_name].values, 
+                            df_perfect[width_name].values, p0=(1.0, 0.5))
+
+    return popt
 
