@@ -231,6 +231,34 @@ for tick in ax.yaxis.get_major_ticks():
 
 fig = plt.savefig('%s.flow.season.png' %cfg['OUTPUT']['output_plot_basename'], format='png', dpi=dpi)
 
+#============== plot seasonal reservoir impact (regulated - unregulated) ===============#
+if len(list_s_to_plot_noNAN)==4:  # if has full data
+    fig = my_functions.plot_seasonality_data(\
+            list_s_data=[list_s_to_plot_noNAN[1]-list_s_to_plot_noNAN[0], \
+                         list_s_to_plot_noNAN[3]-list_s_to_plot_noNAN[2]], \
+            list_style=['k-', 'm'], \
+            list_label=['Regulated - unregulated, obs.', 'Regulated - unregulated, simulated'], \
+            plot_start=1, plot_end=12, \
+            xlabel=None, ylabel='Flow (thousand cfs)', \
+            title='Rugulation impact seasonality, {}, WY{}-{}\n'\
+                  .format(cfg['PLOT_OPTIONS']['plot_title'],
+                          plot_start_date.year+1, plot_end_date.year), \
+            fontsize=18, legend_loc='upper left', \
+            xtick_location=range(1,13), \
+            xtick_labels=['Jan','Feb','Mar','Apr','May','Jun', \
+                          'Jul','Aug','Sep','Oct','Nov','Dec'], \
+            add_info_text=True, model_info=model_info, \
+            stats='Seasonality for each month', show=False)
+    plt.plot(range(1,13), np.zeros(12), 'k--')
+
+    ax = plt.gca()
+    for tick in ax.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+
+    fig = plt.savefig('%s.flow.season_regulation_impact.png' %cfg['OUTPUT']['output_plot_basename'], format='png', dpi=dpi)
+
 #============== plot flow duration curve (based on weekly data) ===============#
 s = list_s_to_plot_weekly[0]
 
