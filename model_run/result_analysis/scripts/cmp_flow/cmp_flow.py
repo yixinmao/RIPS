@@ -146,6 +146,7 @@ for i, key in enumerate(df_to_plot.columns):
     list_s_to_plot_weekly.append(s_to_plot_week)
 df_to_plot_weekly = pd.concat(list_s_to_plot_weekly, axis=1, \
                          keys=['obs_TVA', 'sim_before_cali', 'sim_after_cali'])
+df_to_plot_weekly_noNAN = df_to_plot_weekly.dropna()
 
 #========================================================
 # Calculate annual streamflow bias (water year) and KGE
@@ -264,30 +265,34 @@ for tick in ax.yaxis.get_major_ticks():
 
 fig = plt.savefig('%s.flow.season.png' %cfg['OUTPUT']['output_plot_basename'], format='png', dpi=dpi)
 
-##============== plot flow duration curve (based on weekly data) (need to be updated with new plot function!) ===============#
-#fig = my_functions.plot_duration_curve(\
-#            list_s_data=list_s_to_plot_weekly, \
-#            list_style=list_plot_style, \
-#            list_label=list_plot_label, \
-#            figsize=(10,10), xlog=False, ylog=True, \
-#            xlim=None, ylim=None, \
-#            xlabel='Exceedence', ylabel='Flow (thousand cfs)', \
-#            title='{}, WY {}-{}\n{}'.format(cfg['PLOT_OPTIONS']['plot_title'], \
-#                                        plot_start_date.year+1, \
-#                                        plot_end_date.year, \
-#                                        title_new_line), \
-#            fontsize=18, legend_loc='upper right', \
-#            add_info_text=True, model_info=model_info, \
-#            stats='Flow duration curve based on weekly data', show=False)
-#
-#ax = plt.gca()
-#for tick in ax.xaxis.get_major_ticks():
-#    tick.label.set_fontsize(16)
-#for tick in ax.yaxis.get_major_ticks():
-#    tick.label.set_fontsize(16)
-#
-#fig = plt.savefig('%s.flow_duration_weekly.png' %cfg['OUTPUT']['output_plot_basename'], format='png', dpi=dpi)
-#
+#============== plot flow duration curve (based on weekly data) ===============#
+fig = plt.figure(figsize=(10,10))
+ax = plt.subplot()
+fig, ax = my_functions.plot_duration_curve(fig, ax, \
+            df_data=df_to_plot_weekly_noNAN, \
+            list_style=list_plot_style, \
+            list_color=list_plot_color, \
+            list_lw=list_plot_lw, \
+            list_label=list_plot_label, \
+            xlog=False, ylog=True, \
+            xlim=None, ylim=None, \
+            xlabel='Exceedence', ylabel='Flow (thousand cfs)', \
+            title='{}, WY {}-{}\n{}'.format(cfg['PLOT_OPTIONS']['plot_title'], \
+                                        plot_start_date.year+1, \
+                                        plot_end_date.year, \
+                                        title_new_line), \
+            fontsize=18, legend_loc='lower left', \
+            add_info_text=True, model_info=model_info, \
+            stats='Flow duration curve based on weekly data', show=False)
+
+ax = plt.gca()
+for tick in ax.xaxis.get_major_ticks():
+    tick.label.set_fontsize(16)
+for tick in ax.yaxis.get_major_ticks():
+    tick.label.set_fontsize(16)
+
+fig = plt.savefig('%s.flow_duration_weekly.png' %cfg['OUTPUT']['output_plot_basename'], format='png', dpi=dpi)
+
 ##============== plot sim vs. obs on scatter plot (based on weekly data) () ===============#
 ## list_x: TVA_obs;
 ## list_y: before_cali, after_cali
@@ -358,6 +363,6 @@ fig = plt.savefig('%s.flow.season.png' %cfg['OUTPUT']['output_plot_basename'], f
 #plt.plot([0,max_flow], [0,max_flow], 'k--', lw=2)
 #
 #fig = plt.savefig('%s.flow_weekly_scatter_log.png' %cfg['OUTPUT']['output_plot_basename'], format='png', dpi=dpi)
-#
-#
-#
+
+
+
