@@ -226,33 +226,33 @@ def select_time_range(data, start_datetime, end_datetime):
 #==============================================================
 
 def plot_date_format(ax, time_range=None, locator=None, time_format=None):
-	''' This function formatting plots by plt.plot_date
-	Input:
-		ax: plotting axis
-		time range: a tuple of two datetime objects indicating xlim. e.g., (dt.date(1991,1,1), dt.date(1992,12,31))
+    ''' This function formatting plots by plt.plot_date
+    Input:
+        ax: plotting axis
+        time range: a tuple of two datetime objects indicating xlim. e.g., (dt.date(1991,1,1), dt.date(1992,12,31))
 
-	'''
+    '''
 
-	import matplotlib.pyplot as plt
-	import datetime as dt
-	from matplotlib.dates import YearLocator, MonthLocator, DateFormatter
+    import matplotlib.pyplot as plt
+    import datetime as dt
+    from matplotlib.dates import YearLocator, MonthLocator, DateFormatter
 
-	# Plot time range
-	if time_range!=None:
-		plt.xlim(time_range[0], time_range[1])
+    # Plot time range
+    if time_range!=None:
+        plt.xlim(time_range[0], time_range[1])
 
-	# Set time locator (interval)
-	if locator!=None:
-		if locator[0]=='year':
-			ax.xaxis.set_major_locator(YearLocator(locator[1]))
-		elif locator[0]=='month':
-			ax.xaxis.set_major_locator(MonthLocator(interval=locator[1]))
+    # Set time locator (interval)
+    if locator!=None:
+        if locator[0]=='year':
+            ax.xaxis.set_major_locator(YearLocator(locator[1]))
+        elif locator[0]=='month':
+            ax.xaxis.set_major_locator(MonthLocator(interval=locator[1]))
 
-	# Set time ticks format
-	if time_format!=None:
-		ax.xaxis.set_major_formatter(DateFormatter(time_format))
+    # Set time ticks format
+    if time_format!=None:
+        ax.xaxis.set_major_formatter(DateFormatter(time_format))
 
-	return ax
+    return ax
 
 #==============================================================
 #==============================================================
@@ -531,7 +531,7 @@ def read_Lohmann_route_daily_output(path):
 #==============================================================
 #==============================================================
 
-def plot_time_series(fig, ax, plot_date, df_data, list_style, list_colors, list_lw, list_label, plot_start, plot_end, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', time_locator=None, time_format='%Y/%m', xtick_location=None, xtick_labels=None, add_info_text=False, model_info=None, stats=None, show=False):
+def plot_time_series(fig, ax, plot_date, df_data, list_style, list_color, list_lw, list_label, plot_start, plot_end, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', time_locator=None, time_format='%Y/%m', xtick_location=None, xtick_labels=None, add_info_text=False, model_info=None, stats=None, show=False):
     ''' This function plots daily data time series
 
     Input:
@@ -561,10 +561,18 @@ def plot_time_series(fig, ax, plot_date, df_data, list_style, list_colors, list_
 
     import matplotlib.pyplot as plt
 
+    df_to_plot = df_data.truncate(before=plot_start, after=plot_end)
+
     # Plot
     for i, key in enumerate(df_data.columns):
-        df_data[key].plot(ax=ax, style=list_style[i], colors=list_colors[i], \
+        if plot_date==True:  # if plot date
+            plt.plot_date(df_to_plot.index, df_to_plot[key], marker=None, \
+                          ls=list_style[i], color=list_color[i], \
                           lw=list_lw[i], label=list_label[i])
+        else:  # if regular time series
+            df_to_ploti[key].plot(\
+                    ax=ax, style=list_style[i], color=list_color[i], \
+                    lw=list_lw[i], label=list_label[i])
     # Format xy label
     if xlabel:
         plt.xlabel(xlabel, fontsize=fontsize)
@@ -576,7 +584,7 @@ def plot_time_series(fig, ax, plot_date, df_data, list_style, list_colors, list_
     leg = plt.legend(loc=legend_loc, frameon=True)
     leg.get_frame().set_alpha(0)
     if plot_date==True:  # if plot date
-        plot_date_format(ax, time_range=(plot_start, plot_end), locator=time_locator, time_format='%Y/%m')
+        plot_date_format(ax, locator=time_locator, time_format=time_format)
     else:  # if plot regular time series
         plt.xlim([plot_start, plot_end])
         if xtick_location:
@@ -593,7 +601,7 @@ def plot_time_series(fig, ax, plot_date, df_data, list_style, list_colors, list_
 #==============================================================
 #==============================================================
 
-def plot_xy(fig, ax, list_x, list_y, list_style, list_colors, list_lw, list_label, xlog=False, ylog=False, xlim=None, ylim=None, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', add_info_text=False, model_info=None, stats=None, show=False):
+def plot_xy(fig, ax, list_x, list_y, list_style, list_color, list_lw, list_label, xlog=False, ylog=False, xlim=None, ylim=None, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', add_info_text=False, model_info=None, stats=None, show=False):
     ''' This function plots xy data
 
     Input:
@@ -625,7 +633,7 @@ def plot_xy(fig, ax, list_x, list_y, list_style, list_colors, list_lw, list_labe
 
     for i in range(len(list_x)):
         plt.plot(list_x[i], list_y[i], ls=list_style[i], \
-                 color=list_colors[i], lw=list_lw[i], label=list_label[i])
+                 color=list_color[i], lw=list_lw[i], label=list_label[i])
     if xlabel:
         plt.xlabel(xlabel, fontsize=fontsize)
     if ylabel:
@@ -828,7 +836,7 @@ def get_nc_ts(infile, varname, timename):
 #==============================================================
 #==============================================================
 
-def plot_duration_curve(fig, ax, df_data, list_style, list_colors, list_lw, list_label, xlog=False, ylog=False, xlim=None, ylim=None, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', add_info_text=False, model_info=None, stats=None, show=False):
+def plot_duration_curve(fig, ax, df_data, list_style, list_color, list_lw, list_label, xlog=False, ylog=False, xlim=None, ylim=None, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', add_info_text=False, model_info=None, stats=None, show=False):
     ''' This function plots duration curve for time series (exceedence is calculated by Weibull plotting position method)
 
     Require:
@@ -855,7 +863,7 @@ def plot_duration_curve(fig, ax, df_data, list_style, list_colors, list_lw, list
 
     # plot
     fig, ax = plot_xy(fig, ax, list_data_exceed, list_data_sorted, \
-                list_style, list_colors, \
+                list_style, list_color, \
                 list_lw, list_label, \
                 xlim=xlim, ylim=ylim, xlog=xlog, ylog=ylog, \
                 xlabel=xlabel, ylabel=ylabel, title=title, fontsize=fontsize, \

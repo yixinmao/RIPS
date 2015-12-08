@@ -6,7 +6,6 @@ def read_config(config_file, default_config=None):
     Return a dictionary with subdictionaries of all configFile options/values
     """
 
-    from netCDF4 import Dataset
     try:
         from cyordereddict import OrderedDict
     except:
@@ -227,33 +226,33 @@ def select_time_range(data, start_datetime, end_datetime):
 #==============================================================
 
 def plot_date_format(ax, time_range=None, locator=None, time_format=None):
-	''' This function formatting plots by plt.plot_date
-	Input:
-		ax: plotting axis
-		time range: a tuple of two datetime objects indicating xlim. e.g., (dt.date(1991,1,1), dt.date(1992,12,31))
+    ''' This function formatting plots by plt.plot_date
+    Input:
+        ax: plotting axis
+        time range: a tuple of two datetime objects indicating xlim. e.g., (dt.date(1991,1,1), dt.date(1992,12,31))
 
-	'''
+    '''
 
-	import matplotlib.pyplot as plt
-	import datetime as dt
-	from matplotlib.dates import YearLocator, MonthLocator, DateFormatter
+    import matplotlib.pyplot as plt
+    import datetime as dt
+    from matplotlib.dates import YearLocator, MonthLocator, DateFormatter
 
-	# Plot time range
-	if time_range!=None:
-		plt.xlim(time_range[0], time_range[1])
+    # Plot time range
+    if time_range!=None:
+        plt.xlim(time_range[0], time_range[1])
 
-	# Set time locator (interval)
-	if locator!=None:
-		if locator[0]=='year':
-			ax.xaxis.set_major_locator(YearLocator(locator[1]))
-		elif locator[0]=='month':
-			ax.xaxis.set_major_locator(MonthLocator(interval=locator[1]))
+    # Set time locator (interval)
+    if locator!=None:
+        if locator[0]=='year':
+            ax.xaxis.set_major_locator(YearLocator(locator[1]))
+        elif locator[0]=='month':
+            ax.xaxis.set_major_locator(MonthLocator(interval=locator[1]))
 
-	# Set time ticks format
-	if time_format!=None:
-		ax.xaxis.set_major_formatter(DateFormatter(time_format))
+    # Set time ticks format
+    if time_format!=None:
+        ax.xaxis.set_major_formatter(DateFormatter(time_format))
 
-	return ax
+    return ax
 
 #==============================================================
 #==============================================================
@@ -532,7 +531,7 @@ def read_Lohmann_route_daily_output(path):
 #==============================================================
 #==============================================================
 
-def plot_time_series(plot_date, list_s_data, list_style, list_label, plot_start, plot_end, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', time_locator=None, time_format='%Y/%m', xtick_location=None, xtick_labels=None, add_info_text=False, model_info=None, stats=None, show=False):
+def plot_time_series(fig, ax, plot_date, df_data, list_style, list_color, list_lw, list_label, plot_start, plot_end, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', time_locator=None, time_format='%Y/%m', xtick_location=None, xtick_labels=None, add_info_text=False, model_info=None, stats=None, show=False):
     ''' This function plots daily data time series
 
     Input:
@@ -562,19 +561,19 @@ def plot_time_series(plot_date, list_s_data, list_style, list_label, plot_start,
 
     import matplotlib.pyplot as plt
 
-    # Check if list_s_data, list_style and list_label have the same length
-    if len(list_s_data) !=len(list_style) or len(list_s_data)!=len(list_label):
-        print 'Input list lengths are not the same!'
-        exit()
+    df_to_plot = df_data.truncate(before=plot_start, after=plot_end)
 
-    fig = plt.figure(figsize=(12,8))
-    ax = plt.axes()
-    for i in range(len(list_s_data)):
+    # Plot
+    for i, key in enumerate(df_data.columns):
         if plot_date==True:  # if plot date
-            plt.plot_date(list_s_data[i].index, list_s_data[i], list_style[i], label=list_label[i])
-#            list_s_data[i].plot(style=list_style[i], label=list_label[i])
-        else:  # if plot regular time series
-            plt.plot(list_s_data[i].index, list_s_data[i], list_style[i], label=list_label[i])
+            plt.plot_date(df_to_plot.index, df_to_plot[key], marker=None, \
+                          ls=list_style[i], color=list_color[i], \
+                          lw=list_lw[i], label=list_label[i])
+        else:  # if regular time series
+            df_to_ploti[key].plot(\
+                    ax=ax, style=list_style[i], color=list_color[i], \
+                    lw=list_lw[i], label=list_label[i])
+    # Format xy label
     if xlabel:
         plt.xlabel(xlabel, fontsize=fontsize)
     if ylabel:
@@ -585,7 +584,7 @@ def plot_time_series(plot_date, list_s_data, list_style, list_label, plot_start,
     leg = plt.legend(loc=legend_loc, frameon=True)
     leg.get_frame().set_alpha(0)
     if plot_date==True:  # if plot date
-        plot_date_format(ax, time_range=(plot_start, plot_end), locator=time_locator, time_format='%Y/%m')
+        plot_date_format(ax, locator=time_locator, time_format=time_format)
     else:  # if plot regular time series
         plt.xlim([plot_start, plot_end])
         if xtick_location:
@@ -597,158 +596,69 @@ def plot_time_series(plot_date, list_s_data, list_style, list_label, plot_start,
     if show==True:
         plt.show()
 
-    return fig
+    return fig, ax
 
 #==============================================================
 #==============================================================
 
-def plot_xy(list_x, list_y, list_style, list_label, figsize=(12,8), xlog=False, ylog=False, xlim=None, ylim=None, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', add_info_text=False, model_info=None, stats=None, show=False):
-	''' This function plots xy data
+def plot_xy(fig, ax, list_x, list_y, list_style, list_color, list_lw, list_label, xlog=False, ylog=False, xlim=None, ylim=None, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', add_info_text=False, model_info=None, stats=None, show=False):
+    ''' This function plots xy data
 
-	Input:
-		list_x, list_y: a list of x and y data; [np.array or list]
-		list_style: a list of plotting style (e.g., ['b-', 'r--']); must be the same size as 'list_s_data'
-		list_label: a list of plotting label (e.g., ['Scenario1', 'Scenario2']); must be the same size as 'list_s_data'
-		xlog, ylog: True for plotting log scale for the axis; False for plotting regular scale
-		xlabel: [str]
-		ylabel: [str]
-		title: [str]
-		fontsize: for xlabe, ylabel and title [int]
-		legend_loc: [str]
-		xlim, ylim
-		add_info_text: True for adding info text at the bottom of the plot
-		model_info, stats: descriptions added in the info text [str]
-		show: True for showing the plot
+    Input:
+        list_x, list_y: a list of x and y data; [np.array or list]
+        list_style: a list of plotting style (e.g., ['b-', 'r--']); must be the same size as 'list_s_data'
+        list_label: a list of plotting label (e.g., ['Scenario1', 'Scenario2']); must be the same size as 'list_s_data'
+        xlog, ylog: True for plotting log scale for the axis; False for plotting regular scale
+        xlabel: [str]
+        ylabel: [str]
+        title: [str]
+        fontsize: for xlabe, ylabel and title [int]
+        legend_loc: [str]
+        xlim, ylim
+        add_info_text: True for adding info text at the bottom of the plot
+        model_info, stats: descriptions added in the info text [str]
+        show: True for showing the plot
 
-	Require:
-		add_info_text_to_plot(fig, ax, model_info, stats)
-		plot_format
-	'''
+    Require:
+        add_info_text_to_plot(fig, ax, model_info, stats)
+        plot_format
+    '''
 
-	import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt
 
-	# Check if list_s_data, list_style and list_label have the same length
-	if len(list_x) !=len(list_y) or len(list_x)!=len(list_style) or len(list_x)!=len(list_label):
-		print 'Input list lengths are not the same!'
-		exit()
+    # Check if list_s_data, list_style and list_label have the same length
+    if len(list_x) !=len(list_y) or len(list_x)!=len(list_style) or len(list_x)!=len(list_label):
+        print 'Input list lengths are not the same!'
+        exit()
 
-	fig = plt.figure(figsize=figsize)
-	ax = plt.axes()
-	for i in range(len(list_x)):
-		plt.plot(list_x[i], list_y[i], list_style[i], label=list_label[i])
-	if xlabel:
-		plt.xlabel(xlabel, fontsize=fontsize)
-	if ylabel:
-		plt.ylabel(ylabel, fontsize=fontsize)
-	if title:
-		plt.title(title, fontsize=fontsize)
-	if xlog:
-		ax.set_xscale('log')
-	if ylog:
-		ax.set_yscale('log')
-	# format plot
-	leg = plt.legend(loc=legend_loc, frameon=True)
-	leg.get_frame().set_alpha(0)
-	if xlim:
-		plt.xlim(xlim)
-	if ylim:
-		plt.ylim(ylim)
-	# add info text
-	if add_info_text==True:
-		add_info_text_to_plot(fig, ax, model_info, stats)
+    for i in range(len(list_x)):
+        plt.plot(list_x[i], list_y[i], ls=list_style[i], \
+                 color=list_color[i], lw=list_lw[i], label=list_label[i])
+    if xlabel:
+        plt.xlabel(xlabel, fontsize=fontsize)
+    if ylabel:
+        plt.ylabel(ylabel, fontsize=fontsize)
+    if title:
+        plt.title(title, fontsize=fontsize)
+    if xlog:
+        ax.set_xscale('log')
+    if ylog:
+        ax.set_yscale('log')
+    # format plot
+    leg = plt.legend(loc=legend_loc, frameon=True)
+    leg.get_frame().set_alpha(0)
+    if xlim:
+        plt.xlim(xlim)
+    if ylim:
+        plt.ylim(ylim)
+    # add info text
+    if add_info_text==True:
+        add_info_text_to_plot(fig, ax, model_info, stats)
 
-	if show==True:
-		plt.show()
+    if show==True:
+        plt.show()
 
-	return fig
-
-#==============================================================
-#==============================================================
-
-def plot_monthly_data(list_s_data, list_style, list_label, plot_start, plot_end, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', time_locator=None, time_format='%Y/%m', add_info_text=False, model_info=None, stats=None, show=False):
-	''' This function plots monthly mean data time series
-
-	Require:
-		plot_date_format
-		add_info_text_to_plot(fig, ax, model_info, stats)
-		plot_time_series
-		calc_monthly_data
-	'''
-
-	# Check if list_s_data, list_style and list_label have the same length
-	if len(list_s_data) !=len(list_style) or len(list_s_data)!=len(list_label):
-		print 'Input list lengths are not the same!'
-		exit()
-
-	# Calculate monthly mean data
-	list_s_month = []   # list of new monthly mean data in pd.Series type 
-	for i in range(len(list_s_data)):
-		s_month = calc_monthly_data(list_s_data[i])
-		list_s_month.append(s_month)
-
-	# plot
-	fig = plot_time_series(True, list_s_month, list_style, list_label, plot_start, plot_end, xlabel, ylabel, title, fontsize, legend_loc, time_locator, time_format, add_info_text=add_info_text, model_info=model_info, stats=stats, show=show)
-
-	return fig
-
-#==============================================================
-#==============================================================
-
-def plot_seasonality_data(list_s_data, list_style, list_label, plot_start, plot_end, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', xtick_location=None, xtick_labels=None, add_info_text=False, model_info=None, stats=None, show=False):
-	''' This function plots seasonality data time series (12 month's mean)
-
-	Require:
-		plot_date_format
-		add_info_text_to_plot(fig, ax, model_info, stats)
-		plot_time_series
-		calc_ts_stats_by_group
-		plot_format
-	'''
-
-	# Check if list_s_data, list_style and list_label have the same length
-	if len(list_s_data) !=len(list_style) or len(list_s_data)!=len(list_label):
-		print 'Input list lengths are not the same!'
-		exit()
-
-	# Calculate monthly mean data
-	list_s_seas = []   # list of new monthly mean data in pd.Series type 
-	for i in range(len(list_s_data)):
-		s_seas = calc_ts_stats_by_group(list_s_data[i], 'month', 'mean') # index is 1-12 (month)
-		list_s_seas.append(s_seas)
-
-	# plot
-	fig = plot_time_series(False, list_s_seas, list_style, list_label, plot_start, plot_end, xlabel, ylabel, title, fontsize, legend_loc, xtick_location=xtick_location, xtick_labels=xtick_labels, add_info_text=add_info_text, model_info=model_info, stats=stats, show=show)
-
-	return fig
-
-#==============================================================
-#==============================================================
-
-def plot_WY_mean_data(list_s_data, list_style, list_label, plot_start, plot_end, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', time_locator=None, time_format='%Y/%m', add_info_text=False, model_info=None, stats=None, show=False):
-	''' This function plots water year annual mean data time series
-
-	Require:
-		plot_date_format
-		add_info_text_to_plot(fig, ax, model_info, stats)
-		plot_time_series
-		calc_ts_stats_by_group
-	'''
-
-	# Check if list_s_data, list_style and list_label have the same length
-	if len(list_s_data) !=len(list_style) or len(list_s_data)!=len(list_label):
-		print 'Input list lengths are not the same!'
-		exit()
-
-	# Calculate monthly mean data
-	list_s_WY = []   # list of new monthly mean data in pd.Series type 
-	for i in range(len(list_s_data)):
-		s_WY = calc_ts_stats_by_group(list_s_data[i], 'WY', 'mean')
-		list_s_WY.append(s_WY)
-
-	# plot
-	fig = plot_time_series(False, list_s_WY, list_style, list_label, plot_start, plot_end, xlabel, ylabel, title, fontsize, legend_loc, add_info_text=add_info_text, model_info=model_info, stats=stats, show=show)
-
-	return fig
+    return fig, ax
 
 #==============================================================
 #==============================================================
@@ -926,44 +836,41 @@ def get_nc_ts(infile, varname, timename):
 #==============================================================
 #==============================================================
 
-def plot_duration_curve(list_s_data, list_style, list_label, figsize=(10,10), xlog=False, ylog=False, xlim=None, ylim=None, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', add_info_text=False, model_info=None, stats=None, show=False):
-	''' This function plots duration curve for time series (exceedence is calculated by Weibull plotting position method)
+def plot_duration_curve(fig, ax, df_data, list_style, list_color, list_lw, list_label, xlog=False, ylog=False, xlim=None, ylim=None, xlabel=None, ylabel=None, title=None, fontsize=16, legend_loc='lower right', add_info_text=False, model_info=None, stats=None, show=False):
+    ''' This function plots duration curve for time series (exceedence is calculated by Weibull plotting position method)
 
-	Require:
-#		plot_date_format
-#		add_info_text_to_plot(fig, ax, model_info, stats)
-#		plot_time_series
-#		plot_format
-	'''
+    Require:
+#        plot_date_format
+#        add_info_text_to_plot(fig, ax, model_info, stats)
+#        plot_time_series
+#        plot_format
+    '''
 
-	import numpy as np
+    import numpy as np
 
-	# Check if list_s_data, list_style and list_label have the same length
-	if len(list_s_data) !=len(list_style) or len(list_s_data)!=len(list_label):
-		print 'Input list lengths are not the same!'
-		exit()
+    # Calculate
+    list_data_sorted = []   # list of sorted data
+    list_data_exceed = []   # list of exceedence for each data set
+    for i, key in enumerate(df_data.columns):
+        data = df_data[key].dropna().values  # retrieve data as np array
+        ndata = len(data)  # length of data
+        data_exceed = np.empty(ndata)  # exceedence
+        data_sorted = sorted(data, reverse=True, key=float)
+        for j in range(ndata):
+            data_exceed[j] = float((j+1)) / (ndata+1)
+        list_data_sorted.append(data_sorted)
+        list_data_exceed.append(data_exceed)
 
-	# Calculate
-	list_data_sorted = []   # list of sorted data
-	list_data_exceed = []   # list of exceedence for each data set
-	for i in range(len(list_s_data)):
-		data = list_s_data[i].values  # retrieve data as np array
-		ndata = len(data)  # length of data
-		data_exceed = np.empty(ndata)  # exceedence
-		data_sorted = sorted(data, reverse=True, key=float)
-		for j in range(ndata):
-			data_exceed[j] = float((j+1)) / (ndata+1)
-		list_data_sorted.append(data_sorted)
-		list_data_exceed.append(data_exceed)
+    # plot
+    fig, ax = plot_xy(fig, ax, list_data_exceed, list_data_sorted, \
+                list_style, list_color, \
+                list_lw, list_label, \
+                xlim=xlim, ylim=ylim, xlog=xlog, ylog=ylog, \
+                xlabel=xlabel, ylabel=ylabel, title=title, fontsize=fontsize, \
+                legend_loc=legend_loc, add_info_text=add_info_text, \
+                model_info=model_info, stats=stats, show=show)
 
-	# plot
-	fig = plot_xy(list_data_exceed, list_data_sorted, list_style, list_label, \
-				figsize=figsize, xlim=xlim, ylim=ylim, xlog=xlog, ylog=ylog, \
-				xlabel=xlabel, ylabel=ylabel, title=title, fontsize=fontsize, \
-				legend_loc=legend_loc, add_info_text=add_info_text, \
-				model_info=model_info, stats=stats, show=show)
-
-	return fig
+    return fig, ax
 
 #==============================================================
 #==============================================================
