@@ -20,7 +20,10 @@ dpi = 200 # This needs to be put into config file
 #========================================================
 list_s = []  # list of Series to be plotted
 list_plot_style = []  # list of plot style for each time series
+list_plot_color = []  # list of plot style for each time series
+list_plot_lw = []  # list of plot style for each time series
 list_plot_label = []  # list of plot legend label for each time series
+col_keys = []  # column names for df
 for i in range(cfg['INPUT_CONTROL']['n_ts']):  # Load all time series data
     input_section = 'INPUT_{}'.format(i+1)
 
@@ -92,7 +95,10 @@ for i in range(cfg['INPUT_CONTROL']['n_ts']):  # Load all time series data
     # Append this time series data to list
     list_s.append(s)
     list_plot_style.append(cfg[input_section]['plot_style'])
+    list_plot_color.append(cfg[input_section]['plot_color'])
+    list_plot_lw.append(cfg[input_section]['plot_lw'])
     list_plot_label.append(cfg[input_section]['plot_label'])
+    col_keys.append(str(i+1))
 
 #========================================================
 # Determine plot starting and ending date
@@ -128,34 +134,25 @@ else:  # if at least 5 years
 #========================================================
 # Select data to be plotted
 #========================================================
-df = pd.concat(list_s, axis=1)
+df = pd.concat(list_s, axis=1, keys=col_keys)
 df_to_plot = df.truncate(before=plot_start_date, after=plot_end_date)
 
-list_s_to_plot = []
-for i in range(cfg['INPUT_CONTROL']['n_ts']):  # Loop over each time series
-    list_s_to_plot.append(df_to_plot.iloc[:,i])
-    
 # No NAN version
 df_to_plot_noNAN = df_to_plot.dropna()
-list_s_to_plot_noNAN = []
-for i in range(cfg['INPUT_CONTROL']['n_ts']):  # Loop over each time series
-    list_s_to_plot_noNAN.append(df_to_plot_noNAN.iloc[:,i])
 
 #========================================================
 # Calculate weekly average (TVA weekly data week definition)
 #========================================================
 # Has NAN version
 list_s_to_plot_weekly = []
-for i, s_to_plot in enumerate(list_s_to_plot):
-    s_to_plot_week = my_functions.calc_ts_stats_by_group(s_to_plot, by='TVA_week', stat='mean')
+for i, key in enumerate(df_to_plot.columns):
+    s_to_plot_week = my_functions.calc_ts_stats_by_group(\
+                            df_to_plot[key], by='TVA_week', stat='mean')
     list_s_to_plot_weekly.append(s_to_plot_week)
 df_to_plot_weekly = pd.concat(list_s_to_plot_weekly, axis=1)
 
 # No NAN version
 df_to_plot_weekly_noNAN = df_to_plot_weekly.dropna()
-list_s_to_plot_weekly_noNAN = []
-for i in range(cfg['INPUT_CONTROL']['n_ts']):  # Loop over each time series
-    list_s_to_plot_weekly_noNAN.append(df_to_plot_weekly_noNAN.iloc[:,i])
 
 #========================================================
 # plot
@@ -171,116 +168,129 @@ else:  # if time series is short
     plot_start_date_ts = plot_start_date
     plot_end_date_ts = plot_end_date
 
-#============== plot original data (daily, weekly) ===============#
-fig = my_functions.plot_time_series(plot_date=True, \
-            list_s_data=list_s_to_plot_weekly, \
-            list_style=list_plot_style, \
-            list_label=list_plot_label, \
-            plot_start=plot_start_date_ts, \
-            plot_end=plot_end_date_ts, \
-            xlabel=None, ylabel='Flow (thousand cfs)', \
-            title='{}\n'.format(cfg['PLOT_OPTIONS']['plot_title']), \
-            fontsize=18, legend_loc='upper right', \
-#            time_locator=time_locator, time_format='%Y/%m', \
-            xtick_location=None, xtick_labels=None, \
-            add_info_text=True, model_info=model_info, \
-            stats='Weekly (TVA week definition)', show=False)
-ax = plt.gca()
-for tick in ax.yaxis.get_major_ticks():
-    tick.label.set_fontsize(16)
-
-plt.savefig('%s.flow.weekly.png' %cfg['OUTPUT']['output_plot_basename'], format='png', dpi=dpi)
-
-#============== plot monthly data ===============#
-fig = my_functions.plot_monthly_data(\
-            list_s_data=list_s_to_plot, \
-            list_style=list_plot_style, \
-            list_label=list_plot_label, \
-            plot_start=plot_start_date_ts,
-            plot_end=plot_end_date_ts, \
-            xlabel=None, ylabel='Flow (thousand cfs)', \
-            title='Monthly, {}\n'.format(cfg['PLOT_OPTIONS']['plot_title']), \
-            fontsize=18, legend_loc='upper right', \
-#            time_locator=time_locator, time_format='%Y/%m', \
-            add_info_text=True, model_info=model_info, \
-            stats='Monthly mean', show=False)
-fig = plt.savefig('%s.flow.monthly.png' %cfg['OUTPUT']['output_plot_basename'], format='png', dpi=dpi)
+##============== plot original data (daily, weekly) (need to be updated with new plot functions!) ===============#
+#fig = my_functions.plot_time_series(plot_date=True, \
+#            list_s_data=list_s_to_plot_weekly, \
+#            list_style=list_plot_style, \
+#            list_label=list_plot_label, \
+#            plot_start=plot_start_date_ts, \
+#            plot_end=plot_end_date_ts, \
+#            xlabel=None, ylabel='Flow (thousand cfs)', \
+#            title='{}\n'.format(cfg['PLOT_OPTIONS']['plot_title']), \
+#            fontsize=18, legend_loc='upper right', \
+##            time_locator=time_locator, time_format='%Y/%m', \
+#            xtick_location=None, xtick_labels=None, \
+#            add_info_text=True, model_info=model_info, \
+#            stats='Weekly (TVA week definition)', show=False)
+#ax = plt.gca()
+#for tick in ax.yaxis.get_major_ticks():
+#    tick.label.set_fontsize(16)
+#
+#plt.savefig('%s.flow.weekly.png' %cfg['OUTPUT']['output_plot_basename'], format='png', dpi=dpi)
+#
+##============== plot monthly data (need to be updated with new plot functions!) ===============#
+#fig = my_functions.plot_monthly_data(\
+#            list_s_data=list_s_to_plot, \
+#            list_style=list_plot_style, \
+#            list_label=list_plot_label, \
+#            plot_start=plot_start_date_ts,
+#            plot_end=plot_end_date_ts, \
+#            xlabel=None, ylabel='Flow (thousand cfs)', \
+#            title='Monthly, {}\n'.format(cfg['PLOT_OPTIONS']['plot_title']), \
+#            fontsize=18, legend_loc='upper right', \
+##            time_locator=time_locator, time_format='%Y/%m', \
+#            add_info_text=True, model_info=model_info, \
+#            stats='Monthly mean', show=False)
+#fig = plt.savefig('%s.flow.monthly.png' %cfg['OUTPUT']['output_plot_basename'], format='png', dpi=dpi)
 
 #============== plot seasonal data ===============#
-fig = my_functions.plot_seasonality_data(\
-            list_s_data=list_s_to_plot_noNAN, \
+# Calculate seasonality
+df_season_to_plot = my_functions.calc_ts_stats_by_group(\
+                        df_to_plot_noNAN, 'month', 'mean') # index is 1-12 (month)
+
+# Plot
+
+fig = plt.figure(figsize=(16,6))
+ax = plt.subplot()
+fig, ax = my_functions.plot_time_series(fig, ax, plot_date=False, \
+            df_data=df_season_to_plot, \
             list_style=list_plot_style, \
+            list_color=list_plot_color, \
+            list_lw=list_plot_lw, \
             list_label=list_plot_label, \
             plot_start=1, plot_end=12, \
             xlabel=None, ylabel='Flow (thousand cfs)', \
-            title='Seasonality, {}, WY{}-{}\n'\
+            title='Monthly climatology, {}, WY{}-{}\n'\
                   .format(cfg['PLOT_OPTIONS']['plot_title'],
                           plot_start_date.year+1, plot_end_date.year), \
-            fontsize=18, legend_loc='upper right', \
+            fontsize=24, legend_loc='upper right', \
             xtick_location=range(1,13), \
             xtick_labels=['Jan','Feb','Mar','Apr','May','Jun', \
                           'Jul','Aug','Sep','Oct','Nov','Dec'], \
             add_info_text=True, model_info=model_info, \
-            stats='Seasonality for each month', show=False)
+            stats='Monthly climatology for each month', show=False)
 
 ax = plt.gca()
 for tick in ax.xaxis.get_major_ticks():
-    tick.label.set_fontsize(16)
+    tick.label.set_fontsize(24)
 for tick in ax.yaxis.get_major_ticks():
-    tick.label.set_fontsize(16)
+    tick.label.set_fontsize(24)
 
 fig = plt.savefig('%s.flow.season.png' %cfg['OUTPUT']['output_plot_basename'], format='png', dpi=dpi)
 
-#============== plot seasonal reservoir impact (regulated - unregulated) ===============#
-if len(list_s_to_plot_noNAN)==4:  # if has full data
-    fig = my_functions.plot_seasonality_data(\
-            list_s_data=[list_s_to_plot_noNAN[1]-list_s_to_plot_noNAN[0], \
-                         list_s_to_plot_noNAN[3]-list_s_to_plot_noNAN[2]], \
-            list_style=['k-', 'm'], \
-            list_label=['Regulated - unregulated, obs.', 'Regulated - unregulated, simulated'], \
-            plot_start=1, plot_end=12, \
-            xlabel=None, ylabel='Flow (thousand cfs)', \
-            title='Rugulation impact seasonality, {}, WY{}-{}\n'\
-                  .format(cfg['PLOT_OPTIONS']['plot_title'],
-                          plot_start_date.year+1, plot_end_date.year), \
-            fontsize=18, legend_loc='upper left', \
-            xtick_location=range(1,13), \
-            xtick_labels=['Jan','Feb','Mar','Apr','May','Jun', \
-                          'Jul','Aug','Sep','Oct','Nov','Dec'], \
-            add_info_text=True, model_info=model_info, \
-            stats='Seasonality for each month', show=False)
-    plt.plot(range(1,13), np.zeros(12), 'k--')
-
-    ax = plt.gca()
-    for tick in ax.xaxis.get_major_ticks():
-        tick.label.set_fontsize(16)
-    for tick in ax.yaxis.get_major_ticks():
-        tick.label.set_fontsize(16)
-
-    fig = plt.savefig('%s.flow.season_regulation_impact.png' %cfg['OUTPUT']['output_plot_basename'], format='png', dpi=dpi)
+##============== plot seasonal reservoir impact (regulated - unregulated) (need to be updated with new plot functions!!!) ===============#
+#if len(list_s_to_plot_noNAN)==4:  # if has full data
+#    fig = my_functions.plot_seasonality_data(\
+#            list_s_data=[list_s_to_plot_noNAN[1]-list_s_to_plot_noNAN[0], \
+#                         list_s_to_plot_noNAN[3]-list_s_to_plot_noNAN[2]], \
+#            list_style=['k-', 'm'], \
+#            list_label=['Regulated - unregulated, obs.', 'Regulated - unregulated, simulated'], \
+#            plot_start=1, plot_end=12, \
+#            xlabel=None, ylabel='Flow (thousand cfs)', \
+#            title='Rugulation impact seasonality, {}, WY{}-{}\n'\
+#                  .format(cfg['PLOT_OPTIONS']['plot_title'],
+#                          plot_start_date.year+1, plot_end_date.year), \
+#            fontsize=18, legend_loc='upper left', \
+#            xtick_location=range(1,13), \
+#            xtick_labels=['Jan','Feb','Mar','Apr','May','Jun', \
+#                          'Jul','Aug','Sep','Oct','Nov','Dec'], \
+#            add_info_text=True, model_info=model_info, \
+#            stats='Seasonality for each month', show=False)
+#    plt.plot(range(1,13), np.zeros(12), 'k--')
+#
+#    ax = plt.gca()
+#    for tick in ax.xaxis.get_major_ticks():
+#        tick.label.set_fontsize(16)
+#    for tick in ax.yaxis.get_major_ticks():
+#        tick.label.set_fontsize(16)
+#
+#    fig = plt.savefig('%s.flow.season_regulation_impact.png' %cfg['OUTPUT']['output_plot_basename'], format='png', dpi=dpi)
 
 #============== plot flow duration curve (based on weekly data) ===============#
-s = list_s_to_plot_weekly[0]
+fig = plt.figure(figsize=(10,10))
+ax = plt.subplot()
 
-fig = my_functions.plot_duration_curve(\
-            list_s_data=list_s_to_plot_weekly_noNAN, \
+fig, ax = my_functions.plot_duration_curve(fig, ax, \
+            df_data=df_to_plot_weekly_noNAN, \
             list_style=list_plot_style, \
+            list_color=list_plot_color, \
+            list_lw=list_plot_lw, \
             list_label=list_plot_label, \
-            figsize=(10,10), xlog=False, ylog=True, \
+            xlog=False, ylog=True, \
             xlim=None, ylim=None, \
             xlabel='Exceedence', ylabel='Flow (thousand cfs)', \
             title='{}, WY {}-{}\n'.format(cfg['PLOT_OPTIONS']['plot_title'], \
                                         plot_start_date.year+1, \
                                         plot_end_date.year), \
-            fontsize=18, legend_loc='upper right', \
+            fontsize=24, legend_loc='lower left', \
             add_info_text=True, model_info=model_info, \
             stats='Flow duration curve based on weekly data', show=False)
 
 ax = plt.gca()
 for tick in ax.xaxis.get_major_ticks():
-    tick.label.set_fontsize(16)
+    tick.label.set_fontsize(24)
 for tick in ax.yaxis.get_major_ticks():
-    tick.label.set_fontsize(16)
+    tick.label.set_fontsize(24)
 
 fig = plt.savefig('%s.flow_duration_weekly.png' %cfg['OUTPUT']['output_plot_basename'], format='png', dpi=dpi)
 
