@@ -48,10 +48,10 @@ for i in range(len(df_gauges)):  # for each stream gauge
     for line in f1:
         # substitue variables
         line = line.replace('<USGS_CODE>', usgs_code)
+        line = line.replace('<USGS_NAME>', usgs_name.replace(',', '\,'))
         line = line.replace('<LAT>', str(grid_lat))
         line = line.replace('<LON>', str(grid_lon))
         line = line.replace('<RBM_FILENAME>', filename)
-        line = line.replace('<TITLE>', usgs_name.replace(',', '\,'))
         # write to new cfg file
         f2.write('{}'.format(line))
     f1.close()

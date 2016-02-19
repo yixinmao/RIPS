@@ -203,25 +203,25 @@ def convert_time_series_to_Series(time, data):
 #==============================================================
 
 def select_time_range(data, start_datetime, end_datetime):
-	''' This function selects out the part of data within a time range
+    ''' This function selects out the part of data within a time range
 
-	Input:
-		data: [dataframe/Series] data with index of datetime
-		start_datetime: [dt.datetime] start time
-		end_datetime: [dt.datetime] end time
+    Input:
+        data: [dataframe/Series] data with index of datetime
+        start_datetime: [dt.datetime] start time
+        end_datetime: [dt.datetime] end time
 
-	Return:
-		Selected data (same object type as input)
-	'''
+    Return:
+        Selected data (same object type as input)
+    '''
 
-	import datetime as dt
+    import datetime as dt
 
-	start = data.index.searchsorted(start_datetime)
-	end = data.index.searchsorted(end_datetime)
+    start = data.index.searchsorted(start_datetime)
+    end = data.index.searchsorted(end_datetime)
 
-	data_selected = data.ix[start:end+1]
+    data_selected = data.ix[start:end+1]
 
-	return data_selected
+    return data_selected
 
 #==============================================================
 #==============================================================
@@ -509,25 +509,25 @@ def add_info_text_to_plot(fig, ax, model_info, stats, fontsize=14, bottom=0.3, t
 #==============================================================
 
 def read_Lohmann_route_daily_output(path):
-	''' This function reads Lohmann routing model daily output
+    ''' This function reads Lohmann routing model daily output
 
-	Input: daily output file path
-	Return: a pd.Series object with datetime as index and flow[cfs] as data
+    Input: daily output file path
+    Return: a pd.Series object with datetime as index and flow[cfs] as data
 
-	'''
+    '''
 
-	import pandas as pd
-	import datetime as dt
+    import pandas as pd
+    import datetime as dt
 
-	parse = lambda x: dt.datetime.strptime(x, '%Y %m %d')
+    parse = lambda x: dt.datetime.strptime(x, '%Y %m %d')
 
-	# load data
-	df = pd.read_csv(path, delim_whitespace=True, parse_dates=[[0,1,2]], index_col=0, date_parser=parse, header=None)
-	df = df.rename(columns={3:'flow'})
-	# convert data to pd.Series
-	s = df.ix[:,0]
+    # load data
+    df = pd.read_csv(path, delim_whitespace=True, parse_dates=[[0,1,2]], index_col=0, date_parser=parse, header=None)
+    df = df.rename(columns={3:'flow'})
+    # convert data to pd.Series
+    s = df.ix[:,0]
 
-	return s
+    return s
 
 #==============================================================
 #==============================================================
@@ -1197,6 +1197,25 @@ def mesh_xyz(lat, lon, data, dlat, dlon):
 
     return lat_mesh, lon_mesh, data_mesh_masked
 
+#========================================================================
+#========================================================================
 
+def kge_component(sim, obs):
+    ''' Calculate Kling-Gupta Efficiency (function from Oriana) 
+        This function returns each of the three components of KGE
+        (bias, variance, covariance, all normalized to around zero)'''
+
+    import numpy as np
+
+    std_sim = np.std(sim)
+    std_obs = np.std(obs)
+    mean_sim = sim.mean(axis=0)
+    mean_obs = obs.mean(axis=0)
+    r_array = np.corrcoef(sim.values, obs.values)
+    r = r_array[0,1]
+    relvar = std_sim/std_obs
+    bias = mean_sim/mean_obs
+    kge = 1-np.sqrt(np.square(r-1) + np.square(relvar-1) + np.square(bias-1))
+    return bias-1, relvar-1, r-1
 
 

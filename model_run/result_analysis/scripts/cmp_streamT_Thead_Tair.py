@@ -25,6 +25,8 @@ else:
 	usgs_streamT_col = int(usgs_streamT_col)
 
 output_plot_basename = '../output/Tennessee_' + usgs_site_code # output plot path basename (suffix will be added to different plots)
+fontsize = 20  # Fontsize of texts/labels on figures
+dpi = 200  # Output figure dpi
 
 if_plot_Thead_Tair = False  # True for plotting Thead and Tair; False for not 
 
@@ -37,7 +39,7 @@ if_plot_Thead_Tair = False  # True for plotting Thead and Tair; False for not
 
 #-------------------------------------------------
 
-model_info = 'VIC: 1/8 deg, Maurer forcing, Andy Wood setup\n        Route: Lohmann, Wu flowdir, Andy Wood setup\n        RBM: default params'
+model_info = 'VIC: 1/8 deg, Maurer forcing; calibrated over 1961-1970\n        Route: RVIC, Wu flowdir, consistent with inverse route\n        RBM: default params'
 
 #========================================================
 # Load data
@@ -73,7 +75,7 @@ if s_usgs.notnull().sum()==0:  # if all missing
 # Determine plot starting and ending date (always plot full water years)
 #========================================================
 # determine the common range of available data of both data sets
-data_avai_start_date, data_avai_end_date = my_functions.find_data_common_range(s_rbm, s_usgs)
+data_avai_start_date, data_avai_end_date = my_functions.find_data_common_range([s_rbm, s_usgs])
 if (data_avai_start_date-data_avai_end_date).days>=0: # if no common time range
 	print "No common range data available!"
 	exit()
@@ -102,12 +104,16 @@ if if_plot_Thead_Tair==True:
 	plt.plot_date(df_rbm_to_plot.index, df_rbm_to_plot['Thead'], 'k', label='RBM, headwater')
 	plt.plot_date(df_rbm_to_plot.index, df_rbm_to_plot['Tair'], 'y', label='RBM, air')
 plt.plot_date(df_rbm_to_plot.index, df_rbm_to_plot['Tstream'], 'r--', label='RBM, stream')
-plt.ylabel('T (degC)', fontsize=16)
-plt.title('Daily stream temperature, %s, %s' %(usgs_site_name, usgs_site_code), fontsize=16)
+plt.ylabel('T (degC)', fontsize=fontsize)
+plt.title('Daily stream temperature, %s, %s' %(usgs_site_name, usgs_site_code), fontsize=fontsize)
 # format plots
 leg = plt.legend(loc='lower right', frameon=True)
 leg.get_frame().set_alpha(0)
 my_functions.plot_date_format(ax, time_range=(plot_start_date, plot_end_date), locator=time_locator, time_format='%Y/%m')
+for tick in ax.xaxis.get_major_ticks():
+    tick.label.set_fontsize(fontsize)
+for tick in ax.yaxis.get_major_ticks():
+    tick.label.set_fontsize(fontsize)
 # add info text
 stats = 'daily, no stats'
 my_functions.add_info_text_to_plot(fig, ax, model_info, stats)
@@ -115,7 +121,7 @@ my_functions.add_info_text_to_plot(fig, ax, model_info, stats)
 if if_plot_Thead_Tair==True:
 	fig = plt.savefig('%s.streamT.daily.with_Thead_Tair.png' %output_plot_basename, format='png', dpi=200)
 else:
-	fig = plt.savefig('%s.streamT.daily.png' %output_plot_basename, format='png', dpi=200)
+	fig = plt.savefig('%s.streamT.daily.png' %output_plot_basename, format='png', dpi=dpi)
 
 #============== plot monthly data ===============#
 # calculate
@@ -129,41 +135,59 @@ if if_plot_Thead_Tair==True:
 	plt.plot_date(df_rbm_mon.index, df_rbm_mon['Thead'], 'k', label='RBM, headwater')
 	plt.plot_date(df_rbm_mon.index, df_rbm_mon['Tair'], 'y', label='RBM, air')
 plt.plot_date(df_rbm_mon.index, df_rbm_mon['Tstream'], 'r--', label='RBM, stream')
-plt.ylabel('T (degC)', fontsize=16)
-plt.title('Monthly stream temperature, %s, %s' %(usgs_site_name, usgs_site_code), fontsize=16)
+plt.ylabel('T (degC)', fontsize=fontsize)
+plt.title('Monthly stream temperature, %s, %s' %(usgs_site_name, usgs_site_code), fontsize=fontsize)
 # format plot
 leg = plt.legend(loc='lower right')
 leg.get_frame().set_alpha(0)
 my_functions.plot_date_format(ax, time_range=(plot_start_date, plot_end_date), locator=time_locator, time_format='%Y/%m')
+for tick in ax.xaxis.get_major_ticks():
+    tick.label.set_fontsize(fontsize)
+for tick in ax.yaxis.get_major_ticks():
+    tick.label.set_fontsize(fontsize)
 # add info text
 stats = 'Monthly mean'
 my_functions.add_info_text_to_plot(fig, ax, model_info, stats)
 
 if if_plot_Thead_Tair==True:
-	fig = plt.savefig('%s.streamT.monthly.with_Thead_Tair.png' %output_plot_basename, format='png')
+	fig = plt.savefig('%s.streamT.monthly.with_Thead_Tair.png' %output_plot_basename, format='png', dpi=dpi)
 else:
-	fig = plt.savefig('%s.streamT.monthly.png' %output_plot_basename, format='png')
+	fig = plt.savefig('%s.streamT.monthly.png' %output_plot_basename, format='png', dpi=dpi)
 
-##============== plot seasonal data ===============#
-## calculate
-#s_usgs_seas = my_functions.calc_ts_stats_by_group(s_usgs_to_plot, 'month', 'mean') # index is 1-12 (month)
-#s_rbm_seas = my_functions.calc_ts_stats_by_group(s_rbm_to_plot, 'month', 'mean') # index is 1-12 (month)
-## plot
-#fig = plt.figure()
-#ax = plt.axes()
-#plt.plot_date(s_usgs_seas.index, s_usgs_seas, 'b-', label='USGS gauge')
-#plt.plot_date(s_rbm_seas.index, s_rbm_seas, 'r--', label='Lohmann route')
-#plt.ylabel('Stream T (degC)', fontsize=16)
-#plt.title('%s, %s\nMonthly mean seasonality, water years %d - %d' %(usgs_site_name, usgs_site_code, plot_start_date.year+1, plot_end_date.year), fontsize=16)
-#plt.legend()
-## formatting
-#plt.xlim([1, 12])
-#tick_labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Nov','Oct','Nov','Dec']
-#my_functions.plot_format(ax, xtick_location=range(1,13), xtick_labels=tick_labels)
-#
-#fig = plt.savefig('%s.streamT.season.png' %output_plot_basename, format='png')
-#
-#
-#
-#
-#
+#============== plot seasonal data ===============#
+# calculate
+s_usgs_seas = my_functions.calc_ts_stats_by_group(s_usgs_to_plot, 'month', 'mean') # index is 1-12 (month)
+df_rbm_seas = my_functions.calc_ts_stats_by_group(df_rbm_to_plot, 'month', 'mean') # index is 1-12 (month)
+# plot
+fig = plt.figure()
+ax = plt.axes()
+plt.plot_date(s_usgs_seas.index, s_usgs_seas, 'b-', label='USGS gauge')
+if if_plot_Thead_Tair==True:
+    plt.plot_date(df_rbm_seas.index, df_rbm_seas['Thead'], 'k-', label='RBM, headwater')
+    plt.plot_date(df_rbm_seas.index, df_rbm_seas['Tair'], 'y-', label='RBM, air')
+plt.plot_date(df_rbm_seas.index, df_rbm_seas['Tstream'], 'r--', label='RBM, stream')
+plt.ylabel('Stream T (degC)', fontsize=16)
+plt.title('%s, %s\nMonthly mean seasonality, water years %d - %d' %(usgs_site_name, usgs_site_code, plot_start_date.year+1, plot_end_date.year), fontsize=16)
+leg = plt.legend(loc='lower right')
+leg.get_frame().set_alpha(0)
+# formatting
+plt.xlim([1, 12])
+tick_labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Nov','Oct','Nov','Dec']
+my_functions.plot_format(ax, xtick_location=range(1,13), xtick_labels=tick_labels)
+for tick in ax.xaxis.get_major_ticks():
+    tick.label.set_fontsize(16)
+for tick in ax.yaxis.get_major_ticks():
+    tick.label.set_fontsize(16)
+# add info text
+stats = 'Seasonality (monthly climatology)'
+my_functions.add_info_text_to_plot(fig, ax, model_info, stats)
+
+if if_plot_Thead_Tair==True:
+	fig = plt.savefig('%s.streamT.season.with_Thead_Tair.png' %output_plot_basename, format='png', dpi=dpi)
+else:
+	fig = plt.savefig('%s.streamT.season.png' %output_plot_basename, format='png', dpi=dpi)
+
+
+
+
+

@@ -337,15 +337,15 @@ def find_full_water_years_within_a_range(dt1, dt2):
 #==============================================================
 
 def calc_monthly_data(data):
-	'''This function calculates monthly mean values
+    '''This function calculates monthly mean values
 
-	Input: [DataFrame/Series] with index of time
-	Return: a [DataFrame/Series] object, with monthly mean values (the same units as input data)
-	'''
+    Input: [DataFrame/Series] with index of time
+    Return: a [DataFrame/Series] object, with monthly mean values (the same units as input data)
+    '''
 
-	import pandas as pd
-	data_mon = data.resample("M", how='mean')
-	return data_mon
+    import pandas as pd
+    data_mon = data.resample("M", how='mean')
+    return data_mon
 
 #==============================================================
 #==============================================================

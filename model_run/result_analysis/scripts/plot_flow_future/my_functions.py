@@ -570,7 +570,7 @@ def plot_time_series(fig, ax, plot_date, df_data, list_style, list_color, list_l
                           ls=list_style[i], color=list_color[i], \
                           lw=list_lw[i], label=list_label[i])
         else:  # if regular time series
-            df_to_ploti[key].plot(\
+            df_to_plot[key].plot(\
                     ax=ax, style=list_style[i], color=list_color[i], \
                     lw=list_lw[i], label=list_label[i])
     # Format xy label

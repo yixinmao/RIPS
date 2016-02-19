@@ -2,11 +2,14 @@
 calc_streamT_avgGCM_and_plot_control.py
     - Calculate multi-GCM-average stream T data, and plot historical vs. control period of each GCM boxplot
 
-plot_streamT_future_GCMavg.py
+plot_streamT_future_GCMavg_1period.py
     - Plot future change plots based on multi-GCM-average data
+
+plot_streamT_future_GCMavg.py
+    - Currently not working!!
 
 #=================== Usage ======================#
 1. run 'calc_streamT_avgGCM_and_plot_control.py' to calculate GCM-average data;
-2. run 'plot_streamT_future_GCMavg.py' to plot'
-NOTE: 'calc_streamT_avgGCM_and_plot_control.py' and 'plot_streamT_future_GCMavg.py' to plot' share the same config file
+2. run 'plot_streamT_future_GCMavg_1period.py' to plot'
+NOTE: 'calc_streamT_avgGCM_and_plot_control.py' and 'plot_streamT_future_GCMavg_1period.py' to plot' share the same config file
 

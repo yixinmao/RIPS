@@ -44,8 +44,12 @@ cdo ifthen $output_route_param_file $output_route_param_file.temp_1.nc $output_r
 ncrename -v Flow_Direction,Basin_ID $output_route_param_file.temp_1_masked.nc
 ncks -A $output_route_param_file.temp_1_masked.nc $output_route_param_file
 # add Flow_Distance variable
-gdal_translate -of netcdf $xmask_file $output_route_param_file.temp_fdist_masked.nc
-ncrename -v Band1,Flow_Distance $output_route_param_file.temp_fdist_masked.nc  # rename flow distance variable
+#gdal_translate -of netcdf $xmask_file $output_route_param_file.temp_fdist_masked.nc
+#ncrename -v Band1,Flow_Distance $output_route_param_file.temp_fdist_masked.nc  # rename flow distance variable
+#ncks -A $output_route_param_file.temp_fdist_masked.nc $output_route_param_file
+cp $output_route_param_file.temp_1_masked.nc $output_route_param_file.temp_fdist_masked_1.nc
+ncrename -v Basin_ID,Flow_Distance $output_route_param_file.temp_fdist_masked_1.nc
+cdo mulc,$xmask_file $output_route_param_file.temp_fdist_masked_1.nc $output_route_param_file.temp_fdist_masked.nc
 ncks -A $output_route_param_file.temp_fdist_masked.nc $output_route_param_file
 
 #====================================================#
@@ -70,4 +74,4 @@ rm $output_route_param_file.temp_0.nc
 rm $output_route_param_file.temp_1.nc
 rm $output_route_param_file.temp_1_masked.nc
 rm $output_route_param_file.temp_fdist_masked.nc
-
+rm $output_route_param_file.temp_fdist_masked_1.nc

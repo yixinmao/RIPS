@@ -120,7 +120,7 @@ else:  # if time series is short
     plot_end_date_ts = plot_end_date
 
 #============== plot original data (daily) ===============#
-fig = plt.figure(figsize=(12,8))
+fig = plt.figure(figsize=(12,6))
 ax = plt.subplot()
 fig, ax = my_functions.plot_time_series(fig, ax, plot_date=True, \
             df_data=df_to_plot, \

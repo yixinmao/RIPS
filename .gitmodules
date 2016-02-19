@@ -1,9 +1,6 @@
 [submodule "model_run/source/RVIC"]
 	path = model_run/source/RVIC
 	url = https://github.com/UW-Hydro/RVIC.git
-[submodule "model_run/process/tonic"]
-	path = model_run/process/tonic
-	url = https://github.com/yixinmao/tonic.git
 [submodule "model_run/source/VIC_RBM"]
 	path = model_run/source/VIC_RBM
 	url = https://github.com/yixinmao/VIC_RBM.git

@@ -161,18 +161,18 @@ df[['year', 'month', 'day', 'data']].\
 #========================================================
 #============== plot period-average annual mean flow ===============#
 # calculate annual mean flow data (WY)
-hist_s_WY_mean = my_functions.calc_WY_mean(hist_s_to_plot)  # only plot one control result
-control_df_WY_mean = my_functions.calc_WY_mean(control_df_to_plot)  # only plot one control result
-control_s_avg_WY_mean = my_functions.calc_WY_mean(control_s_avg)
+hist_s_WY_mean = my_functions.calc_WY_mean(hist_s_to_plot) / 1000  # only plot one control result
+control_df_WY_mean = my_functions.calc_WY_mean(control_df_to_plot) / 1000  # only plot one control result
+control_s_avg_WY_mean = my_functions.calc_WY_mean(control_s_avg) / 1000
 
 list_s_control_WY_mean = [[control_df_WY_mean.iloc[:,i]] \
                           for i in range(len(control_df_WY_mean.columns))]
                          # convert df to list of s
 
 #------- plot historical vs. control (control is for individual models) -------#
-fig = my_functions.plot_boxplot(list_data = [[hist_s_WY_mean/1000]]+\
-                                            [[control_s_avg_WY_mean/1000]]+\
-                                            [i/1000 for i in list_s_control_WY_mean], \
+fig = my_functions.plot_boxplot(list_data = [[hist_s_WY_mean]]+\
+                                            [[control_s_avg_WY_mean]]+\
+                                            list_s_control_WY_mean, \
             list_xlabels = ['Historical\n1980s', \
                             'Control, 1980s\n {:d}GCM avg.'.format(nGCM)] \
                            + list_GCM, \

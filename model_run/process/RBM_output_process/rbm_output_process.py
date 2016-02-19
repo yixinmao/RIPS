@@ -121,17 +121,17 @@ line_count = 0
 cell_info = {}  # a dictionary; keys are line numbers of the target grid cell (int); element isa list with 2 elements: [reach_ind, seg_ind]
 
 while 1:  # loop over each line in the .Spat file
-	line = f.readline().rstrip("\n")
-	line_count = line_count + 1  # current line number
-	if line=="":
-		break
-	lat = float(line.split()[4])
-	lon = float(line.split()[5])
-	if lat==lat_to_extract and lon==lon_to_extract:  # if this line corresponds to the target grid cell
-		reach_ind = int(line.split()[0])  # reach index, defined by RBM
-		seg_ind = int(line.split()[6])  # seg index within a node, 1 or 2
-		dict = {}  # create a new element in the dictionary
-		cell_info[line_count] = [reach_ind, seg_ind]
+    line = f.readline().rstrip("\n")
+    line_count = line_count + 1  # current line number
+    if line=="":
+        break
+    lat = float(line.split()[4])
+    lon = float(line.split()[5])
+    if lat==lat_to_extract and lon==lon_to_extract:  # if this line corresponds to the target grid cell
+        reach_ind = int(line.split()[0])  # reach index, defined by RBM
+        seg_ind = int(line.split()[6])  # seg index within a node, 1 or 2
+        dict = {}  # create a new element in the dictionary
+        cell_info[line_count] = [reach_ind, seg_ind]
 f.close()
 
 #=== read .Temp file and extract target grid cells ===#
@@ -139,44 +139,48 @@ f = open(temp, 'r')
 line_count = 0
 data = {}   # final data to write; this is a dictionary whose keys are line numbers in the .Spat file (each key is one stream seg), and dicrionary content is corresponding data (np array, [year] [month] [day] [flow(cfs) [T_stream(degC)]]);
 for i in cell_info:
-	data[i] = []
+    data[i] = []
 while 1:  # loop over each line in the .Temp file
-	line = f.readline().rstrip("\n")
-	line_count = line_count + 1
-	if line=="":
-		break
-	line_num_in_spat = line_count%nseg  # corresponding line number in the .Spat file
+    line = f.readline().rstrip("\n")
+    line_count = line_count + 1
+    if line=="":
+        break
+    line_num_in_spat = line_count%nseg  # corresponding line number in the .Spat file
 
-	if line_num_in_spat in cell_info:  # if the current line in the .Temp file is corresponding to the target grid cell, save this line
-		decimal_year = line.split()[0]
-		year = int(decimal_year.split('.')[0])
-		day_of_year = int(line.split()[1])
-		if day_of_year > 360 and float('0.'+decimal_year.split('.')[1]) <= 0.005:  # correct bad decimal year integer part
-			year = year - 1
-		date = dt.datetime(year, 1, 1) + dt.timedelta(days=day_of_year-1)  # convert day of year to date
-		flow = float(line.split()[8])
-		T_stream = float(line.split()[5])
-		T_headwater = float(line.split()[6])
-		T_air = float(line.split()[7])
-		data[line_num_in_spat].append([year, date.month, date.day, flow, T_stream, T_headwater, T_air])
-		print 'Processing', year, date.month, date.day, '...'
+    if line_num_in_spat in cell_info:  # if the current line in the .Temp file is corresponding to the target grid cell, save this line
+        decimal_year = line.split()[0]
+        year = int(decimal_year.split('.')[0])
+        day_of_year = int(line.split()[1])
+        if day_of_year > 360 and float('0.'+decimal_year.split('.')[1]) <= 0.005:  # correct bad decimal year integer part
+            year = year - 1
+        date = dt.datetime(year, 1, 1) + dt.timedelta(days=day_of_year-1)  # convert day of year to date
+        flow = float(line.split()[8])
+        T_stream = float(line.split()[5])
+        T_headwater = float(line.split()[6])
+        T_air = float(line.split()[7])
+        data[line_num_in_spat].append([year, date.month, date.day, flow, T_stream, T_headwater, T_air])
+#        print 'Processing', year, date.month, date.day, '...'
+
+        if line_num_in_spat==1928:
+            print line_num_in_spat, data[line_num_in_spat]
+            exit()
 
 for i in data:  # convert to np.array
-	data[i] = np.asarray(data[i])
+    data[i] = np.asarray(data[i])
 
 #=========================================================
 # Save data to files
 #=========================================================
 #=== make directory ===%
 if not os.path.exists(output_dir):
-	os.makedirs(output_dir)
+    os.makedirs(output_dir)
 
 #=== write data ===#
 for line_num in cell_info:
-	f = open('%s/%.*f_%.*f_reach%d_seg%d' %(output_dir, precision, lat_to_extract, precision, lon_to_extract, cell_info[line_num][0], cell_info[line_num][1]), 'w')
-	data_current = data[line_num]
-	for i in range(nday):
-		f.write('%d %d %d %.1f %.2f %.2f %.2f\n' %(data_current[i,0], data_current[i,1], data_current[i,2], data_current[i,3], data_current[i,4], data_current[i,5], data_current[i,6]))
-	f.close()
+    f = open('%s/%.*f_%.*f_reach%d_seg%d' %(output_dir, precision, lat_to_extract, precision, lon_to_extract, cell_info[line_num][0], cell_info[line_num][1]), 'w')
+    data_current = data[line_num]
+    for i in range(nday):
+        f.write('%d %d %d %.1f %.2f %.2f %.2f\n' %(data_current[i,0], data_current[i,1], data_current[i,2], data_current[i,3], data_current[i,4], data_current[i,5], data_current[i,6]))
+    f.close()
 
 

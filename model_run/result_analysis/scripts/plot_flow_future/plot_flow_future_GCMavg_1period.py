@@ -131,7 +131,7 @@ ax = plt.subplot()
 fig, ax = my_functions.plot_time_series(fig, ax, plot_date=False, \
         df_data=df_season_to_plot/1000.0, \
         list_style=[control_ls]+[rcp45_ls]+[rcp85_ls], \
-        list_colors=[control_color]+[rcp45_color]+[rcp85_color], \
+        list_color=[control_color]+[rcp45_color]+[rcp85_color], \
         list_lw=[2,2,2], \
         list_label=[control_label]+['RCP4.5', 'RCP8.5'], \
         plot_start=1, plot_end=12, \
@@ -162,7 +162,7 @@ ax = plt.subplot()
 fig, ax = my_functions.plot_duration_curve(fig, ax, \
         df_data=df_to_plot/1000, \
         list_style=[control_ls]+[rcp45_ls]+[rcp85_ls], \
-        list_colors=[control_color]+[rcp45_color]+[rcp85_color], \
+        list_color=[control_color]+[rcp45_color]+[rcp85_color], \
         list_lw=[1.5, 1.5, 1.5], \
         list_label=[control_label]+['RCP4.5', 'RCP8.5'], \
         ylog=True, xlim=None, ylim=None, \

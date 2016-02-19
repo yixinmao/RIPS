@@ -2,8 +2,9 @@ Steps for preparing and running RVIC:
 
 #========================================================#
 # Run parameter part
+# (This part only need to be run once if setup is not changed)
 #========================================================#
-Step 1. Prepare parameter fun input files
+Step 1. Prepare parameter run input files
    ## If converting from Lohmann routing: 
    #    run: './process/RVIC/convert_params_Lohmann2RVIC.scr'
    #        (need to prepare a config file)
@@ -13,6 +14,17 @@ Step 2. Prepare RVIC parameter run config file
 Step 3. Run RVIC parameter:
     $source activate rvic
     $rvic parameters $rvic_parameter.cfg
+
+#========================================================#
+# Run convolution part
+#========================================================#
+Step 4. Prepare RVIC convolution run config file
+    (VIC output should be converted to netCDF format; see README_run_vic_steps)
+
+Step 5. Run RVIC convolution:
+    $source activate rvic
+    $rvic parameters $rvic_convolution.cfg
+ 
 
 
 

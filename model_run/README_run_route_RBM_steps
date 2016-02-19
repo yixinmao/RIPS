@@ -51,7 +51,7 @@ NOTE: now step 1 - 6 can be directly run by a control file
 		<rbm_output_file>: output directory and file name ('.Spat' and '.Temp' will be appended to the file name)
 
 #=================================================
-# (3) Process RBM output
+# (4) Process RBM output
 #=================================================
 10. Prepare a file under the RBM output directory
 		first line: total number of all stream segments

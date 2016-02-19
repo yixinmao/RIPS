@@ -246,7 +246,7 @@ fig, ax = my_functions.plot_time_series(fig, ax, plot_date=False, \
             list_label=list_plot_label_new, \
             plot_start=1, plot_end=12, \
             xlabel=None, ylabel='Flow (thousand cfs)', \
-            title='Monthly climatology, {}, WY{}-{}\n{}'\
+            title='Mean monthly flow, {}, WY{}-{}\n{}'\
                   .format(cfg['PLOT_OPTIONS']['plot_title'], 
                           plot_start_date.year+1, plot_end_date.year, \
                           title_new_line), \
@@ -281,7 +281,7 @@ fig, ax = my_functions.plot_duration_curve(fig, ax, \
                                         plot_start_date.year+1, \
                                         plot_end_date.year, \
                                         title_new_line), \
-            fontsize=18, legend_loc='lower left', \
+            fontsize=24, legend_loc='lower left', \
             add_info_text=True, model_info=model_info, \
             stats='Flow duration curve based on weekly data', show=False)
 

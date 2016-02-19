@@ -1,5 +1,0 @@
-USGS_gauge_info/location_intested.csv
-	USGS gauges in Tennessee selected based on:
-		available flow and stream T data;
-		close to power plants
-	corresponding grid cell locations are based on Wu_8th flow direction

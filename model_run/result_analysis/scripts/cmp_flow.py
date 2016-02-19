@@ -220,7 +220,7 @@ fig = my_functions.plot_seasonality_data(\
             fontsize=18, legend_loc='upper right', \
             xtick_location=range(1,13), \
             xtick_labels=['Jan','Feb','Mar','Apr','May','Jun', \
-                          'Jul','Aug','Nov','Oct','Nov','Dec'], \
+                          'Jul','Aug','Sep','Oct','Nov','Dec'], \
             add_info_text=True, model_info=model_info, \
             stats='Seasonality for each month', show=False)
 
