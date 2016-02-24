@@ -143,3 +143,10 @@ RBM version: https://github.com/yixinmao/VIC_RBM/releases/tag/VIC_RBM_1.0)
 
 
 
+#==============================================================#
+# Other useful scripts
+#==============================================================#
+1. Scripts under './model_run/process/RVIC' are helpful if you are converting Lohmann routing parameter files to RVIC input.
+
+2. Scripts under './result_analysis/scripts' are helpful for plotting flow and stream temperature results
+

@@ -1,0 +1,149 @@
+Here are input/parameter/output files for running the VIC-RVIC-RBM system for the Tennessee River basin (last modified: Feb 2016 by Yixin Mao). Most parameter/output file paths are not directly pointed here because you can find them through global/config files.
+
+#==============================================================#
+# Historical run - after VIC calibration
+#==============================================================#
+#=================== VIC ===================#
+#--- Input ---#
+1. Global file:
+    /raid2/ymao/VIC_RBM_east_RIPS/RIPS/model_run/control/vic/Tennessee.calibrated/Tennessee.calibrated_1961_1970.21dams.adjust_negative.bug_fixed.global/run_all_cells.global
+
+2. Climate forcing data:
+    - See global file for paths
+    - These are Maurer et al. 2002 data at 1/8th resolution
+
+3. Parameter files (soil, veg, snowband):
+    See global file for paths
+
+4. Initial state file:
+    - See global file for path
+    - This initial state is obtained by model spinup:
+        - First, run VIC for 1949-2010 without initial state (global file: '/raid2/ymao/VIC_RBM_east_RIPS/RIPS/model_run/control/vic/andy_wood_setup/Tennessee/Tennessee_spinup_1949_2010.global')
+        - Second, use the last day of the run as initial state, run VIC for ten years, each year is a duplicate of climate in 1949 ('/raid2/ymao/VIC_RBM_east_RIPS/RIPS/model_run/control/vic/andy_wood_setup/Tennessee/Tennessee_spinup_ten.years.1949.global')
+        - The state of the last day of the second run is used as the initial state for the real historical run
+
+#--- Output ---#
+1. VIC direct output:
+    - See global file for paths and variables
+    - Two output files for each grid cell: 'flow_*' for runoff and 'energy_' for energy fluxes
+
+2. Converted netCDF format output:
+    - Runoff and energy variables are converted into two netCDF files, both under directory:
+
+        /raid2/ymao/VIC_RBM_east_RIPS/RIPS/model_run/output/vic/Tennessee.calibrated_1961_1970/run_1949_2010.Tennessee.21dams.adjust_negative.bug_fixed/nc
+    - File names: 'flow.19490101-20101231.nc' and 'energy.19490101-20101231.nc'
+    - Config file as input to './process/vic/vic2nc/vic2netcdf.py' to do the conversion:
+        /raid2/ymao/VIC_RBM_east_RIPS/RIPS/model_run/process/vic/vic2nc/cfg/vic2nc.Tennessee.calibrated_1961_1970.21dams.adjust_negative.bug_fixed.cfg
+        /raid2/ymao/VIC_RBM_east_RIPS/RIPS/model_run/process/vic/vic2nc/cfg/vic2nc.energy.Tennessee.calibrated_1961_1970.21dams.adjust_negative.bug_fixed.cfg
+
+#=================== RVIC ===================#
+#--- Input ---#
+1. Parameter run config file:
+    /raid2/ymao/VIC_RBM_east_RIPS/RIPS/model_run/control/RVIC/Tennessee_8th/outlet_grid/Tennessee.UH_1.parameters.cfg
+
+2. Parameter files required by parameter run (outlet points, UH_box, domain file, routing info file):
+    See parameter run config file for paths
+
+3. Convolution run config file:
+    /raid2/ymao/VIC_RBM_east_RIPS/RIPS/model_run/control/RVIC/Tennessee_8th/outlet_grid/Tennessee.hist_1949_2010.calibrated_1961_1970.convolve.cfg
+    - The convolution config file specifies input to the convolution run including output from the parameter run, VIC runoff, etc.
+
+#--- Output ---#
+1. Parameter run output:
+    - See parameter run config file for paths
+
+2. Convolution run output:
+    - See convolution run config file for paths
+
+#=================== Simple reservoir model ===================#
+# (Files listed here are based on storage guide curves inferred from historical median storage for each day of year; simulation run by Yifan Cheng)
+#--- Input ---#
+1. Config file for the reservoir model python script:
+    /raid/yifan/Reservoir_modeling/Run_reservoir/reservoir_network.Tennessee.max_flow_fromRVIC_exceed0.2.cfg
+    - The config file takes RVIC output as its input
+
+2. Paramter files (guide curves, reservoir info (capacity, min and max allowed release, etc.), river network):
+    - See config file for paths
+
+#--- Output ---#
+1. Simple reservoir model output files (including regulated flow and storage):
+    - See config file for paths
+
+#=================== RBM - naturalized condition ===================#
+#--- Input ---#
+1. Config file (i.e., _Network file):
+    /raid2/ymao/VIC_RBM_east_RIPS/RIPS/model_run/control/RBM/Maurer_8th/Tennessee/hist_1949_2010.calibrated_1961_1970.fromRVIC.Mohs_v1.Leop_v1.natual_Network
+
+#--- Output ---#
+1. Direct and post-processed RBM output (at certain grid cells) are under directory:
+    /raid2/ymao/VIC_RBM_east_RIPS/RIPS/model_run/output/RBM/Maurer_8th/Tennessee/hist_1949_2010.from_RVIC.calibrated_1961_1970/Mohs_v1.Leop_v1/
+
+#=================== RBM - with reservoir ===================#
+# Note: here the regulated flow is simulated using original rule curves, but not the latest version from Yifan where historical median storage is used as guide curves!
+
+#--- Input ---#
+1. Config file (i.e., _Network file):
+    /raid2/ymao/VIC_RBM_east_RIPS/RIPS/model_run/control/RBM/Maurer_8th/Tennessee/hist_1949_2010.calibrated_1961_1970.fromRVIC.Mohs_v1.Leop_v1.reservoir_Network
+
+#--- Output ---#
+1. Direct and post-processed RBM output are under directory:
+    /raid2/ymao/VIC_RBM_east_RIPS/RIPS/model_run/output/RBM/Maurer_8th/Tennessee/hist_1949_2010.from_RVIC.calibrated_1961_1970.Mohs_v1.Leop_v1.reservoir/
+
+#==============================================================#
+# Future runs - using calibrated VIC parameters
+# (We have run our models using climate forcing from 5 GCMs and 2 RCP scenarios, so 10 different runs in total. Each run is for 1950-2099.)
+# In this section, <SCENARIO> should be replaced by the name of scenario (e.g., access1-0_rcp45_r1i1p1)
+#==============================================================#
+#=================== VIC ===================#
+#--- Input ---#
+1. Global file:
+    /raid2/ymao/VIC_RBM_east_RIPS/RIPS/model_run/control/vic/reclamation_CMIP5/Tennessee.calibrated_1961_1970.21dams/<SCENARIO>.global
+
+2. Climate forcing data:
+    - See global files for paths
+    - These are downscaled CMIP5 climate projection (at 1/8th resolution). Forcing directly downloaded from 'http://gdo-dcp.ucllnl.org/downscaled_cmip_projections/dcpInterface.html' in netCDF format, then converted to ascii format as VIC needs
+
+3. Parameter files (soil, veg, snowband):
+    See global file for paths (should be the same as historical run)
+
+4. Initial state file:
+    - See global files for path
+    - We use the same initial state file as historical run
+
+#--- Output ---#
+1. VIC direct output:
+    - See global files for paths and variables
+
+2. Converted netCDF format output:
+    - Runoff and energy variables are converted into two netCDF files, both under directory:
+
+    /raid2/ymao/VIC_RBM_east_RIPS/RIPS/model_run/output/vic/reclamation_CMIP5/Tennessee.calibrated_1961_1970.21dams/<SCENARIO>/nc
+    - Config file as input to './process/vic/vic2nc/vic2netcdf.py' to do the conversion are all under directory:
+        /raid2/ymao/VIC_RBM_east_RIPS/RIPS/model_run/process/vic/vic2nc/cfg/vic2nc.reclamation_CMIP5.Tennessee.calibrated_1961_1970.21dams
+
+#=================== RVIC ===================#
+#--- Input ---#
+1. Parameter run config file:
+    - The same as historical run
+    - Do not need to run parameter run for future scenarios, since the river network and routing parameters are the same as historical scenario
+
+3. Convolution run config file:
+    /raid2/ymao/VIC_RBM_east_RIPS/RIPS/model_run/control/RVIC/Tennessee_8th/outlet_grid/reclamation_CMIP5.calibrated_1961_1970.21dams/convolve.<SCENARIO>.cfg
+
+#--- Output ---#
+1. Convolution run output:
+    - See convolution run config files for paths
+
+#=================== RBM - naturalized condition ===================#
+#--- Input ---#
+1. Config file (i.e., _Network file):
+    /raid2/ymao/VIC_RBM_east_RIPS/RIPS/model_run/control/RBM/reclamation_CMIP5/Tennessee.calibrated_1961_1970.Mohs_v1.Leop_v1.natural/<SCENARIO>_Network
+
+#--- Output ---#
+1. Direct and post-processed RBM output are under directory:
+    /raid2/ymao/VIC_RBM_east_RIPS/RIPS/model_run/output/RBM/reclamation_CMIP5/Tennessee_1950_2099.calibrated_1961_1970.Mohs_v1.Leop_v1.natural
+
+# Note: We have not run RBM under regulated condition
+
+
+
