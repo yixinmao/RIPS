@@ -1,8 +1,0 @@
-[ohio]
-	Downloaded from website (for each hydrologic region):
-		http://www.engr.scu.edu/~emaurer/gridded_obs/index_gridded_obs.html
-	(Direct downloading file for Ohio: http://hydro.engr.scu.edu/files/gridded_obs/daily/ascii/ohio_daily_met.tgz)
-
-[Tennessee_ten.years.1949]
-	Copy the forcing of 1949 for Tennessee for 10 times
-

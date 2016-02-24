@@ -1,0 +1,145 @@
+Steps for running VIC-RVIC-RBM system:
+(VIC version: https://github.com/UW-Hydro/VIC/releases/tag/VIC.4.2.b
+RVIC version: https://github.com/UW-Hydro/RVIC/releases/tag/rvic.1.1.0
+RBM version: https://github.com/yixinmao/VIC_RBM/releases/tag/VIC_RBM_1.0)
+
+#==============================================================#
+# Step 1: Run VIC
+#==============================================================#
+#===== (1) Prepare VIC input files =====#
+1. Prepare VIC parameter files
+    - Prepare VIC soil, vegetation and snowband parameter files (see VIC online documentation for detailed description of these files)
+        Note: the first column in the soil parameter file controls which cells to be run in VIC. Thus, typically if you want to run a subdomain of all grid cells, you only need to prepare a smaller soil parameter file (but leave vegation and snowband files unchanged). To extract a smaller soil param file including grid cells that need to be run, run script './process/vic/select_vic_soil_param.scr' (need to change the parameter section hardcoded in the code)
+    - Put parameter files under directory './param/vic'
+
+2. Prepare VIC forcing files
+#--- If using downscaled CMIP5 forcing from Reclamation in netCDF format ---#
+    run './process/vic/convert_reclamation_nc_to_vic_forcing.py' (need to change the parameters section in the code)
+        - This script converts downscaled CMIP5 netCDF forcing to VIC ascii forcing format
+
+3. Prepare VIC global file
+    - Prepare VIC global file (see VIC online documentation for details)
+    - This step needs to be manually done
+    - Put global file under directory './control/vic'
+
+#===== (2) Run VIC =====#
+4. Compile VIC source code (this step only needs to be done once)
+    Go to VIC source code directory './source/vic/VIC-VIC.4.2.b/src/', type command 'make' - should result in an executable file 'vicNl'
+
+5. Run VIC
+   Run './source/vic/VIC-VIC.4.2.b/src/vicNl -g <global_file>'
+        where <global_file> is the VIC global file
+
+#===== (3) Post-process VIC output =====# 6. Convert VIC output to netCDF format
+    Run './process/vic/vic2nc/vic2netcdf.py <cfg_file>'
+        - See './process/vic/vic2nc/cfg/example.vic2nc.cfg' for example template of <cfg_file>
+        - This script converts direct VIC ascii output to netCDF format (script from Joe)
+
+#==============================================================#
+# Step 2: Run RVIC
+#==============================================================#
+#===== (1) Install RVIC =====#
+# This step only needs to be done once
+1. Install RVIC
+    Please follow the instruction in the RVIC online documentation. On hydra, this is typically down under a virtual environment. After installation, 'rvic' will be a command that you can directly call and run from any directory.
+
+#===== (2) Run parameter part =====#
+# This part calculates the travel time from each grid cell to each outlet station
+# This part only needs to be run once if setup (including basin domain, flow direction and distance, velocity and diffusivity, outlet stations, etc.) is not changed =====#
+
+2. Prepare parameter part input parameter files
+    - Including domain netCDF file, route netCDF file, UH file and outlet file
+    - Put parameter files under './param/RVIC'
+    - See RVIC online documentation for more details
+
+3. Prepare RVIC parameter run config file
+    - Put config file under './control/RVIC' (see example config file './control/RVIC/Tennessee_8th/outlet_grid/example.parameters.cfg')
+    - See RVIC online documentation for more details
+    
+4. Run RVIC parameter
+    Run 'rvic parameters <rvic_parameter_cfg>' (need to first activate the virtual environment where the RVIC is installed)
+        where <rvic_parameter_cfg> is the config file prepared in step 3.
+    Note:
+        - This step will output parameter files that is required in the next part (run convolution part)
+
+#===== (3) Run convolution part =====#
+# This part routes grid-cell runoff to outlet stations
+5. Prepare RVIC convolution run config file
+    - Put config file under './control/RVIC' (see example config file './control/RVIC/Tennessee_8th/outlet_grid/example.convolve.cfg)
+    - In the config file, need to specify VIC output netCDF file and RVIC parameter file (output from last part, the nc file under 'params' subdirectory)
+    - See RVIC online documentation for more details
+
+6. Run RVIC convolution
+    Run 'rvic convolution <rvic_convolution_cfg>' (need to first activate the virtual environment where the RVIC is installed)
+        where <rvic_convolution_cfg> is the config file prepared in step 5.
+    Note:
+        - Output streamflow at outlet stations will be under 'hist' subdirectory
+
+#==============================================================#
+# Step 3: Run simple reservoir model
+#==============================================================#
+1. Run './source/simple_reservoir_model/scr/reservoir_network.py <config_file>'
+    - This simple reserovir model simulates regulated streamflow in a grid-based river network, given naturalized flow (RVIC routed flow)
+    - See files under './source/simple_reservoir_model/input_example' for example of <config_file> and other input files for reservoir modeling
+    - See './source/simple_reservoir_model/README' for more details in usage
+    - If you need to determine maximum allowed release for each dam, you might find script './source/simple_reservoir_model/tools/determine_max_flow_dams_fromUSGS_TVA.py' (see './process/reservoir_input/cfg/determine_max_flow_dams_fromRVICflow.exceed0.2.cfg' as an example of config file to this script)
+
+#==============================================================#
+# Step 4: Convert flow and energy data to RBM-required format
+#==============================================================#
+1. Generate routing station file and RBM control file
+    Run './source/VIC_RBM/tools/prepare_RBM_param.py <config_file>'
+    - See example config file: './source/VIC_RBM/tools/cfg/prepare_RBM_param.Salmon.cfg)'
+    - Currently, the script must be run under the script directory
+    - Purpose of this step:
+        - Generate a routing station file (for the next step to generate flow and energy file)
+        - Generate RBM control file (with running period and flow and energy file missing and to be subsitute)
+
+2. Generate flow and energy file as input to RBM
+    Run './source/VIC_RBM/tools/generate_RBM_flow_energy.py <config_file>'
+    - See example config file: './source/VIC_RBM/tools/cfg/generate_RBM_flow_energy.Salmon.cfg' (note that you are able to choose either RVIC output or simple reservoir output as flow input to RBM)
+    - Currently, the script must be run under the script directory
+    - Purpose of this step:
+        - Generate a flow and an energy file (in the format of RBM input)
+
+3. Complete RBM control file
+    Mannually fill in the following parameters in the RBM control file ('***_Network'):
+    - <OUTPUT_FLOW_FILE>
+    - <OUTPUT_ENERGY_FILE>
+    - <START_DATE>  (format: YYYYMMDD)
+    - <END_DATE>  (format: YYYYMMDD)
+
+#==============================================================#
+# Step 5: Run RBM
+#==============================================================#
+#===== (1) Run RBM =====#
+1. Compile RBM source code (this step only needs to be done once)
+    Go to RBM source code directory './source/RBM', type command 'make' - should result in an executable file 'rbm10_VIC'
+
+2. Run RBM
+    Run './source/RBM/rbm10_VIC <rmb_config_file> <rbm_output_file>'
+    where:
+        <rbm_config_file>: RBM config file (the file ended with '_Network'; but here, '_Network' is ommited (will be appended by the model))
+        <rbm_output_file>: output directory and file name ('.Spat' and '.Temp' will be appended to the file name)
+    
+#===== (2) Post-process RBM output =====#
+3. Prepare a file under the RBM output directory
+    The file should contain two lines:
+        - first line: total number of all stream segments
+        - second line: total number of days of the run
+
+4. Run './process/RBM_output_process/rbm_output_process.py <config_file> <lat> <lon>'
+    where:
+        <config_file>: a config file, see example './process/RBM_output_process/config/example.rbm_output_process.cfg'
+        <lat> and <lon>: lat and lon of the grid cell you want to extract
+    - This step extracts flow and stream T data at a certain grid cell
+    - Output from the script will be put under subdirectory '<basin>/<lat>_<lon>' under the direct RBM output directory. The data of each segment will be in a separate file under this subdirectory, with file name '<lat>_<lon>_reach<reach_number>_seg<segment_number>', where <reach_number> is the reach number set in RBM, with bigger number indicating nodes on bigger stream stem; <segment_number> is 1 or 2 (because currently RBM divides each grid cell into 2 segments), with 1 being the upstream segment in the grid cell and 2 being the downstream segment.
+    - Columns in each output file: <year> <month> <day> <flow> <stream T> <headwater T> <air T>
+        where:
+            <flow>: input flow value [cfs]
+            <stream T>: simulated stream temperature [degC]
+            <headwater T>: headwater temperature of the corresponding reach [degC]
+            <air T>: air temperature of the corresponding grid cell [degC]
+
+
+

@@ -1,8 +1,0 @@
-Tennessee_spinup_1949_2010.global
-	This is a model spinup run
-	Run VIC for 1949-2010, without initial state
-
-Tennessee_spinup_ten.years.1949.global
-	This is a model spinup run
-	Run VIC under the forcing of 1949 for 10 times (i.e., fake forcing is made), using the state file saved at 20101231 from the 'Tennessee_spinup_1949_2010.global' run
-
