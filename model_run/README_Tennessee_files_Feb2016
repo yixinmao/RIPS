@@ -145,5 +145,23 @@ Here are input/parameter/output files for running the VIC-RVIC-RBM system for th
 
 # Note: We have not run RBM under regulated condition
 
+#==============================================================#
+# Other useful data
+#==============================================================#
+TVA pass-through flow data (which we treat as naturalized flow) and some USGS data are under directory:
+
+    /raid2/ymao/VIC_RBM_east_RIPS/data/
+
+Under this direcotry:
+    [TVA_data] sub-directory:
+        - Contains original and processed pass-through flow data from TVA
+        - Look at the README file in the sub-directory for explanation of all files
+        - The final data we use for plotting and comparison is under '/raid2/ymao/VIC_RBM_east_RIPS/data/TVA_data/naturalized_flow/downscaled_daily_flow/latlon'
+
+    [USGS] sub-directory:
+        - USGS streamflow and stream temperature data at selected sites
+
+    [scripts]:
+        - Contains scripts to downscale original weekly TVA pass-through data to daily
 
 
