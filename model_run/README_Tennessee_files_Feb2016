@@ -69,6 +69,17 @@ Here are input/parameter/output files for running the VIC-RVIC-RBM system for th
 1. Simple reservoir model output files (including regulated flow and storage):
     - See config file for paths
 
+#=================== Prepare for RBM inputs ===================#
+1. Config file for 'prepare_RBM_param.py':
+    /raid2/ymao/VIC_RBM_east_RIPS/RIPS/model_run/param/RBM_input_prep/cfg/prepare_RBM_param.Tennessee_8th.Mohseni_v1.cfg
+
+2. Config file for 'generate_RBM_flow_energy.py':
+    - Naturalized condition:
+        /raid2/ymao/VIC_RBM_east_RIPS/RIPS/model_run/param/RBM_input_prep/cfg/generate_RBM_flow_energy.Tennessee_hist.calibrated_1961_1970.Mohs_v1.Leop_v1.natural.cfg
+    - With reservoirs:
+        /raid2/ymao/VIC_RBM_east_RIPS/RIPS/model_run/param/RBM_input_prep/cfg/generate_RBM_flow_energy.Tennessee_hist.calibrated_1961_1970.Mohs_v1.Leop_v1.reservoir.cfg
+        # NOTE: here the regulated flow is simulated using original rule curves, but not the latest version from Yifan where historical median storage is used as guide curves! Reservoir is also considered in RBM here simply by modifying the river channel geometry of the corresponding grid cells where reservoirs are located in
+
 #=================== RBM - naturalized condition ===================#
 #--- Input ---#
 1. Config file (i.e., _Network file):
@@ -133,6 +144,13 @@ Here are input/parameter/output files for running the VIC-RVIC-RBM system for th
 #--- Output ---#
 1. Convolution run output:
     - See convolution run config files for paths
+
+#=================== Prepare for RBM inputs ===================#
+1. Config file for 'prepare_RBM_param.py':
+    This step does not need to be done for future scenarios, because it is the same as historical period.
+
+2. Config files for 'generate_RBM_flow_energy.py' are under directory:
+    /raid2/ymao/VIC_RBM_east_RIPS/RIPS/model_run/param/RBM_input_prep/cfg/generate_RBM_flow_energy.reclamation_CMIP5.calibrated_1961_1970.Mohs_v1.Leop_v1.natural
 
 #=================== RBM - naturalized condition ===================#
 #--- Input ---#
